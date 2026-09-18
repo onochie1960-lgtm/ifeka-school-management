@@ -14,7 +14,20 @@ function init(){
   const nav=$("nav");
   nav.innerHTML='<button class="active" data-page="dashboard">🏠 Dashboard</button>'+
     TABLES.map(([t,l])=>`<button data-table="${esc(t)}">▦ ${esc(l)}</button>`).join("");
-  nav.querySelectorAll("button").forEach(b=>b.onclick=()=>b.dataset.table?openTable(b.dataset.table,b):showDashboard(b));
+  nav.querySelectorAll("button").forEach(b=>{
+  b.onclick=()=>{
+    nav.querySelectorAll("button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+
+    if(b.dataset.page==="dashboard"){
+      showDashboard(b);
+    }else{
+      openTable(b.dataset.table,b);
+    }
+
+    document.querySelector(".sidebar")?.classList.remove("open");
+  };
+});
   $("refreshBtn").onclick=()=>currentTable?loadTable(currentTable):loadDashboard();
   $("search").oninput=renderRows;
   $("addBtn").onclick=()=>openForm();

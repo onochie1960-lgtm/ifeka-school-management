@@ -902,4 +902,4 @@ if (error) { alert("Delete failed:\n\n" + error.message); return; }
 if (!data || !data.length) { alert( "The record was not deleted.\n\n" + "Please check the DELETE RLS policy for the " + currentTable + " table." ); return; }
 await loadTable(currentTable); }
 window.editRow = editRow; window.deleteRow = deleteRow;
-init(); 
+init();.

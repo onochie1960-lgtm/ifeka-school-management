@@ -386,3 +386,105 @@ dialog::backdrop {
     padding: 14px;
   }
 }
+
+
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 0;
+  flex-wrap: wrap;
+}
+
+.toolbar-left {
+  flex: 1;
+  min-width: 220px;
+}
+
+.toolbar-left input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 18px;
+  border: 1px solid #d8dee6;
+  border-radius: 14px;
+  background: #fff;
+  color: #172033;
+  font-size: 16px;
+  outline: none;
+}
+
+.toolbar-left input:focus {
+  border-color: #168b5a;
+  box-shadow: 0 0 0 3px rgba(22, 139, 90, 0.12);
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.primary-btn,
+.refresh-btn,
+.small-btn {
+  border: 0;
+  border-radius: 12px;
+  padding: 13px 18px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primary-btn {
+  background: #168b5a;
+  color: white;
+}
+
+.primary-btn:hover {
+  background: #117249;
+}
+
+.refresh-btn {
+  background: white;
+  color: #172033;
+  border: 1px solid #d8dee6;
+}
+
+.small-btn {
+  background: #eef3f1;
+  color: #126b49;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Never allow the Add Record button to disappear because
+   of the HTML hidden attribute */
+#addBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+/* Mobile */
+@media (max-width: 650px) {
+  .table-toolbar {
+    align-items: stretch;
+  }
+
+  .toolbar-left {
+    width: 100%;
+  }
+
+  .toolbar-actions {
+    width: 100%;
+  }
+
+  #addBtn,
+  #refreshBtn {
+    flex: 1;
+  }
+}

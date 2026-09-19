@@ -1,39 +1,632 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>IFEKA — We Find It For You</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{font-family:Arial,sans-serif;color:#172a3a;background:linear-gradient(180deg,#eef9f5,#fff,#f4f7fb);line-height:1.6}header{position:sticky;top:0;z-index:1000;background:#fff;box-shadow:0 2px 15px #0001}.nav{max-width:1200px;margin:auto;padding:15px 5%;display:flex;align-items:center;justify-content:space-between;gap:15px}.logo{font-size:30px;font-weight:900;color:#123b30}.logo span{color:#07946c}nav{display:flex;flex-wrap:wrap;gap:12px}nav a{color:#233;text-decoration:none;font-weight:bold;font-size:14px;padding:6px 4px}nav a:hover{color:#07946c}.hero{padding:80px 6%;background:linear-gradient(135deg,#063d2e,#07946c,#dff7ed);color:#fff}.hero-container,.request-grid{max-width:1200px;margin:auto;display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:center}.hero h1{font-size:60px;line-height:1;margin:15px 0}.hero h1 span{color:#d6fff1}.hero p{font-size:19px}.badge{color:#b9ffe7;font-weight:bold;letter-spacing:2px;font-size:13px}.btn{display:inline-block;border:0;border-radius:8px;padding:13px 20px;font-weight:bold;cursor:pointer;text-decoration:none}.green{background:#07946c;color:#fff}.white{background:#fff;color:#063d2e}.red{background:#c62828;color:#fff}.buttons{margin-top:25px;display:flex;gap:12px;flex-wrap:wrap}.search-box,.card,.price,.admin-panel,form{background:#fff;border-radius:15px;padding:22px;box-shadow:0 8px 25px #14283c12}.search-box{color:#172a3a}.search-box input,form input,form textarea,form select{width:100%;padding:13px;border:1px solid #ccd7df;border-radius:8px;margin:7px 0 15px;font:inherit}.search-box input{margin:12px 0}.search-box{padding:25px}section{padding:65px 6%}.container{max-width:1200px;margin:auto}.section-title{text-align:center;margin-bottom:35px}.section-title small{color:#07946c;font-weight:bold;letter-spacing:2px}.section-title h2{font-size:36px;margin:8px 0}.cards,.listings,.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.cards.four{grid-template-columns:repeat(4,1fr)}.card p{color:#52616d;margin-bottom:15px}.card a{color:#07946c;font-weight:bold;text-decoration:none}.card .btn{color:#fff!important}.photo{height:150px;border-radius:12px;background:#e9f1f4;display:grid;place-items:center;font-size:25px;font-weight:bold;margin-bottom:15px;overflow:hidden}.photo img{width:100%;height:100%;object-fit:cover}.alt{background:linear-gradient(135deg,#edf8f4,#f5f8fb)}.property{background:linear-gradient(135deg,#fff8e9,#fff)}.survey{background:linear-gradient(135deg,#edf5ff,#fff)}.services{background:linear-gradient(135deg,#f7f1ff,#fff)}.blog{background:linear-gradient(135deg,#fff8f0,#fff)}.tags{text-align:center}.tag{display:inline-block;padding:12px 18px;background:#fff;border-radius:30px;margin:6px;box-shadow:0 5px 15px #0001}.request{background:#092f45;color:#fff}.request-grid{grid-template-columns:1fr 1fr}.request form{color:#172a3a}.price{text-align:center}.price h2{color:#07946c}.featured{border:3px solid #07946c}.notice{padding:13px;border-radius:9px;background:#eef8f4;color:#075c45;margin:12px 0}.error{background:#fdecec;color:#9b1c1c}.hidden{display:none!important}.admin-panel{margin-top:20px}.admin-header{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}.admin-post{display:flex;justify-content:space-between;align-items:center;gap:15px;border:1px solid #ddd;padding:12px;border-radius:10px;margin-top:10px}.admin-post button{border:0;border-radius:7px;padding:8px 12px;cursor:pointer;background:#fdeaea;color:#9b1c1c}footer{background:#092f45;color:#fff;padding:45px 6%}footer a{color:#fff}.whatsapp{position:fixed;right:20px;bottom:20px;background:#25D366;color:#fff;padding:15px 18px;border-radius:50px;text-decoration:none;font-weight:bold;z-index:999}@media(max-width:900px){.hero-container,.request-grid{grid-template-columns:1fr}.cards,.cards.four,.listings,.price-grid{grid-template-columns:1fr 1fr}.nav{flex-direction:column}.hero h1{font-size:50px}}@media(max-width:600px){.cards,.cards.four,.listings,.price-grid{grid-template-columns:1fr}.hero h1{font-size:42px}nav{justify-content:center}}
+/* =========================================================
+   Ifeka School Management - app.js
+   Clean replacement version
+   ========================================================= */
 
-.article-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:2000;overflow:auto;padding:25px 15px}
-.article-modal{max-width:900px;margin:20px auto;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-.article-close{float:right;margin:12px 15px;border:none;background:#092f45;color:#fff;border-radius:50%;width:38px;height:38px;font-size:22px;cursor:pointer}
-.article-body{padding:25px}
-.article-media img,.article-media video{width:100%;max-height:520px;object-fit:cover;border-radius:12px;margin-bottom:18px}
-.article-title{font-size:40px;line-height:1.15;margin:10px 0 12px;color:#123b30}
-.article-meta{color:#07946c;font-weight:bold;font-size:14px;margin-bottom:18px}
-.article-content{font-size:18px;line-height:1.8;white-space:pre-wrap;color:#263746}
-.share-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:25px}
-@media(max-width:600px){.article-title{font-size:30px}.article-body{padding:18px}}
+const TABLES = [
+  ["Students", "Students"],
+  ["teachers", "Teachers"],
+  ["parents", "Parents"],
+  ["school_classes", "Classes"],
+  ["subjects", "Subjects"],
+  ["attendance", "Attendance"],
+  ["results", "Results"],
+  ["fee_payments", "Fee Payments"],
+  ["student_parents", "Student Parents"]
+];
 
+/* Fields used when a table is empty and therefore has no rows
+   from which the application can automatically discover columns. */
+const FORM_FIELDS = {
+  Students: [
+    "student_id","first_name","last_name","gender","date_of_birth",
+    "phone","email","address","class_id","photo_url"
+  ],
+  teachers: [
+    "teacher_id","first_name","last_name","gender","phone","email",
+    "address","qualification","subject","date_of_birth"
+  ],
+  parents: [
+    "parent_id","first_name","last_name","relationship","phone",
+    "email","address","occupation"
+  ],
+  school_classes: [
+    "class_name","section","session","teacher_id"
+  ],
+  subjects: [
+    "subject_code","subject_name","class_id"
+  ],
+  attendance: [
+    "student_id","date","status","remark"
+  ],
+  results: [
+    "student_id","subject_id","session","term",
+    "ca_score","exam_score","total","grade","remark"
+  ],
+  fee_payments: [
+    "student_id","amount","payment_date","payment_method",
+    "term","session","reference","remark"
+  ],
+  student_parents: [
+    "student_id","parent_id","relationship"
+  ]
+};
 
-/* IFEKA PROFESSIONAL NEWS UPGRADE */
-.news-tools{background:#fff;border:1px solid #e0e7eb;border-radius:18px;padding:20px;margin-bottom:28px;box-shadow:0 8px 25px rgba(20,40,60,.06)}
-.news-tools-row{display:grid;grid-template-columns:1.5fr .8fr;gap:12px}
-.news-tools input,.news-tools select{width:100%;padding:14px;border:1px solid #ccd7df;border-radius:9px;font:inherit}
-.breaking{background:#092f45;color:#fff;padding:10px 0;overflow:hidden}
-.breaking-inner{max-width:1200px;margin:auto;padding:0 6%;display:flex;gap:15px;align-items:center}
-.breaking-label{background:#d7263d;padding:5px 10px;border-radius:5px;font-weight:800;font-size:12px;white-space:nowrap}
-.breaking-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.featured-news{display:grid;grid-template-columns:1.35fr .65fr;gap:22px;margin-bottom:30px}
-.featured-card{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 12px 35px rgba(20,40,60,.1);border:1px solid #e1e8ec}
-.featured-media{height:360px;background:#071b22;display:grid;place-items:center;overflow:hidden}
-.featured-media img,.featured-media video{width:100%;height:100%;object-fit:cover}
-.featured-body{padding:25px}
-.featured-body h3{font-size:32px;line-height:1.15;margin:8px 0 12px}
-.featured-side{display:grid;gap:18px}
+let client = null;
+let currentTable = null;
+let rows = [];
+let columns = [];
+let editingId = null;
+
+function $(id) {
+  return document.getElementById(id);
+}
+
+function esc(value) {
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  }[c]));
+}
+
+function pretty(value) {
+  return String(value)
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function tableLabel(table) {
+  const found = TABLES.find(x => x[0] === table);
+  return found ? found[1] : pretty(table);
+}
+
+function init() {
+  const nav = $("nav");
+
+  nav.innerHTML =
+    `<button class="active" data-page="dashboard">🏠 Dashboard</button>` +
+    TABLES.map(([table, label]) =>
+      `<button data-table="${esc(table)}">▦ ${esc(label)}</button>`
+    ).join("");
+
+  nav.querySelectorAll("button").forEach(button => {
+    button.onclick = () => {
+      nav.querySelectorAll("button")
+        .forEach(x => x.classList.remove("active"));
+
+      button.classList.add("active");
+
+      if (button.dataset.page === "dashboard") {
+        showDashboard(button);
+      } else {
+        openTable(button.dataset.table, button);
+      }
+
+      document.querySelector(".sidebar")?.classList.remove("open");
+    };
+  });
+
+  $("refreshBtn").onclick = () => {
+    currentTable ? loadTable(currentTable) : loadDashboard();
+  };
+
+  $("search").oninput = renderRows;
+
+  $("addBtn").onclick = () => openForm();
+
+  $("menuBtn").onclick = () => {
+    document.querySelector(".sidebar")?.classList.toggle("open");
+  };
+
+  $("recordForm").onsubmit = saveRecord;
+
+  const config = window.IFEKA_CONFIG || {};
+
+  if (
+    !config.SUPABASE_URL ||
+    config.SUPABASE_URL.includes("PASTE_") ||
+    !config.SUPABASE_ANON_KEY ||
+    config.SUPABASE_ANON_KEY.includes("PASTE_")
+  ) {
+    $("status").textContent = "Supabase connection not configured yet.";
+    loadCardsLocal();
+    return;
+  }
+
+  client = supabase.createClient(
+    config.SUPABASE_URL,
+    config.SUPABASE_ANON_KEY
+  );
+
+  loadDashboard();
+}
+
+async function loadDashboard() {
+  if (!client) {
+    loadCardsLocal();
+    return;
+  }
+
+  $("status").textContent = "Connected. Loading school records…";
+
+  const counts = await Promise.all(
+    TABLES.map(async ([table]) => {
+      try {
+        const { count, error } = await client
+          .from(table)
+          .select("*", { count: "exact", head: true });
+
+        return error ? 0 : (count || 0);
+      } catch {
+        return 0;
+      }
+    })
+  );
+
+  $("cards").innerHTML = TABLES.map(([table, label], i) =>
+    `<div class="card">
+       <div class="label">${esc(label)}</div>
+       <div class="num">${counts[i]}</div>
+     </div>`
+  ).join("") +
+  `<div class="card">
+     <div class="label">Total Modules</div>
+     <div class="num">${TABLES.length}</div>
+   </div>`;
+
+  $("status").textContent = "Supabase connected.";
+}
+
+function loadCardsLocal() {
+  $("cards").innerHTML =
+    TABLES.map(([table, label]) =>
+      `<div class="card">
+         <div class="label">${esc(label)}</div>
+         <div class="num">—</div>
+       </div>`
+    ).join("") +
+    `<div class="card">
+       <div class="label">Database</div>
+       <div class="num">Ready</div>
+     </div>`;
+}
+
+function showDashboard(button) {
+  currentTable = null;
+
+  $("dashboard").classList.remove("hidden");
+  $("tableView").classList.add("hidden");
+  $("pageTitle").textContent = "Dashboard";
+
+  document.querySelectorAll("nav button")
+    .forEach(x => x.classList.remove("active"));
+
+  button.classList.add("active");
+  loadDashboard();
+}
+
+async function openTable(table, button) {
+  currentTable = table;
+
+  $("dashboard").classList.add("hidden");
+  $("tableView").classList.remove("hidden");
+  $("pageTitle").textContent = tableLabel(table);
+
+  // Always show the module's Add Record button.
+  const addBtn = $("addBtn");
+  if (addBtn) {
+    addBtn.hidden = false;
+    addBtn.style.display = "inline-flex";
+    addBtn.textContent = "+ Add Record";
+    addBtn.setAttribute("aria-label", "Add " + tableLabel(table) + " record");
+  }
+
+  document.querySelectorAll("nav button")
+    .forEach(x => x.classList.remove("active"));
+
+  button.classList.add("active");
+
+  if (!client) {
+    $("status").textContent =
+      "Add your Supabase URL and public anon key in config.js first.";
+    return;
+  }
+
+  await loadTable(table);
+}
+
+async function loadTable(table) {
+  const addBtn = $("addBtn");
+  if (addBtn) {
+    addBtn.hidden = false;
+    addBtn.style.display = "inline-flex";
+    addBtn.textContent = "+ Add Record";
+  }
+
+  $("status").textContent = "Loading " + tableLabel(table) + "…";
+
+  const { data, error } = await client
+    .from(table)
+    .select("*")
+    .limit(200);
+
+  if (error) {
+    $("status").textContent = "Database error: " + error.message;
+    $("thead").innerHTML = "";
+    $("tbody").innerHTML = "";
+    $("empty").classList.remove("hidden");
+    return;
+  }
+
+  rows = data || [];
+
+  if (rows.length) {
+    columns = Object.keys(rows[0]);
+    $("empty").classList.add("hidden");
+    $("status").textContent = `${rows.length} record(s) loaded.`;
+    renderRows();
+    return;
+  }
+
+  /* Empty table: use the known application schema so Add Record
+     can still open. */
+  columns = FORM_FIELDS[table] || [];
+
+  $("thead").innerHTML = "";
+  $("tbody").innerHTML = "";
+  $("empty").classList.remove("hidden");
+
+  $("status").textContent =
+    `Table is empty. ${tableLabel(table)} is ready for a new record.`;
+}
+
+function renderRows() {
+  const search = ($("search").value || "").toLowerCase();
+
+  const filtered = rows.filter(row =>
+    columns.some(column =>
+      String(row[column] ?? "")
+        .toLowerCase()
+        .includes(search)
+    )
+  );
+
+  $("empty").classList.toggle("hidden", filtered.length > 0);
+
+  $("thead").innerHTML =
+    "<tr>" +
+    columns.map(column =>
+      `<th>${esc(pretty(column))}</th>`
+    ).join("") +
+    "<th>Actions</th></tr>";
+
+  $("tbody").innerHTML = filtered.map(row =>
+    `<tr>
+      ${columns.map(column =>
+        `<td>${formatCell(row[column])}</td>`
+      ).join("")}
+      <td class="actions">
+        <button class="small-btn"
+          onclick="viewRow(${rows.indexOf(row)})">View</button>
+        <button class="small-btn"
+          onclick="editRow(${rows.indexOf(row)})">Edit</button>
+        <button class="small-btn danger"
+          onclick="deleteRow(${rows.indexOf(row)})">Delete</button>
+      </td>
+    </tr>`
+  ).join("");
+}
+
+function formatCell(value) {
+  if (value == null) return "";
+
+  const text = String(value);
+
+  if (
+    /^https?:\/\//i.test(text) &&
+    /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(text)
+  ) {
+    return `<img src="${esc(text)}"
+      alt="Photo"
+      style="width:42px;height:42px;object-fit:cover;border-radius:8px">`;
+  }
+
+  return esc(text);
+}
+
+function getFieldType(field) {
+  if (field === "date" ||
+      field === "dob" ||
+      field === "date_of_birth" ||
+      field === "payment_date") return "date";
+
+  if (field.includes("email")) return "email";
+  if (field.includes("phone")) return "tel";
+  if (
+    field.includes("score") ||
+    field === "amount" ||
+    field === "total"
+  ) return "number";
+
+  return "text";
+}
+
+function getFieldControl(field, value) {
+  const v = value ?? "";
+
+  if (field === "gender") {
+    return `<select name="${esc(field)}">
+      <option value="">Select gender</option>
+      <option value="Male" ${v === "Male" ? "selected" : ""}>Male</option>
+      <option value="Female" ${v === "Female" ? "selected" : ""}>Female</option>
+    </select>`;
+  }
+
+  if (field === "relationship") {
+    return `<select name="${esc(field)}">
+      <option value="">Select relationship</option>
+      <option value="Father" ${v === "Father" ? "selected" : ""}>Father</option>
+      <option value="Mother" ${v === "Mother" ? "selected" : ""}>Mother</option>
+      <option value="Guardian" ${v === "Guardian" ? "selected" : ""}>Guardian</option>
+    </select>`;
+  }
+
+  if (field === "status") {
+    return `<select name="${esc(field)}">
+      <option value="">Select status</option>
+      <option value="Present" ${v === "Present" ? "selected" : ""}>Present</option>
+      <option value="Absent" ${v === "Absent" ? "selected" : ""}>Absent</option>
+      <option value="Late" ${v === "Late" ? "selected" : ""}>Late</option>
+    </select>`;
+  }
+
+  if (field === "term") {
+    return `<select name="${esc(field)}">
+      <option value="">Select term</option>
+      <option value="First Term" ${v === "First Term" ? "selected" : ""}>First Term</option>
+      <option value="Second Term" ${v === "Second Term" ? "selected" : ""}>Second Term</option>
+      <option value="Third Term" ${v === "Third Term" ? "selected" : ""}>Third Term</option>
+    </select>`;
+  }
+
+  if (field === "payment_method") {
+    return `<select name="${esc(field)}">
+      <option value="">Select method</option>
+      <option value="Cash" ${v === "Cash" ? "selected" : ""}>Cash</option>
+      <option value="Transfer" ${v === "Transfer" ? "selected" : ""}>Transfer</option>
+      <option value="POS" ${v === "POS" ? "selected" : ""}>POS</option>
+      <option value="Online" ${v === "Online" ? "selected" : ""}>Online</option>
+    </select>`;
+  }
+
+  return `<input
+    name="${esc(field)}"
+    type="${getFieldType(field)}"
+    value="${esc(v)}"
+    ${field === "id" ? 'readonly' : ''}
+  >`;
+}
+
+function openForm(row = null) {
+  const fields = columns.length
+    ? columns
+    : (FORM_FIELDS[currentTable] || []);
+
+  if (!fields.length) {
+    alert("No fields are available for this table yet.");
+    return;
+  }
+
+  editingId = row?.id ?? null;
+
+  $("dialogTitle").textContent =
+    row ? `Edit ${tableLabel(currentTable)}` :
+          `Add ${tableLabel(currentTable)}`;
+
+  $("formFields").innerHTML = fields
+    .filter(field => field !== "created_at")
+    .map(field => {
+      const value = row?.[field] ?? "";
+
+      return `<div class="field">
+        <label>${esc(pretty(field))}</label>
+        ${getFieldControl(field, value)}
+      </div>`;
+    }).join("");
+
+  /* Student photo upload if the existing table has photo_url. */
+  if (currentTable === "Students" &&
+      fields.includes("photo_url")) {
+    $("formFields").insertAdjacentHTML("beforeend", `
+      <div class="field">
+        <label>Student Photo</label>
+        <input id="studentPhoto"
+          type="file"
+          accept="image/*">
+        ${row?.photo_url
+          ? `<small>Existing photo is saved. Select another photo to replace it.</small>`
+          : ""}
+      </div>
+    `);
+  }
+
+  $("recordDialog").showModal();
+}
+
+async function saveRecord(event) {
+  event.preventDefault();
+
+  if (!client || !currentTable) return;
+
+  const formData = new FormData(event.target);
+  const data = Object.fromEntries(formData.entries());
+
+  /* Remove empty strings. */
+  Object.keys(data).forEach(key => {
+    if (data[key] === "") data[key] = null;
+  });
+
+  /* Never manually insert an auto-generated numeric id. */
+  if (editingId === null) delete data.id;
+
+  const photoInput = $("studentPhoto");
+  const photoFile = photoInput?.files?.[0];
+
+  $("saveBtn").disabled = true;
+
+  try {
+    if (
+      currentTable === "Students" &&
+      photoFile &&
+      photoFile.size > 0
+    ) {
+      const extension =
+        (photoFile.name.split(".").pop() || "jpg").toLowerCase();
+
+      const filePath =
+        `${data.student_id || editingId || Date.now()}-${Date.now()}.${extension}`;
+
+      const upload = await client.storage
+        .from("student-photos")
+        .upload(filePath, photoFile, {
+          upsert: true,
+          contentType: photoFile.type || "image/jpeg"
+        });
+
+      if (upload.error) throw upload.error;
+
+      data.photo_url = filePath;
+    }
+
+    let result;
+
+    if (editingId !== null) {
+      result = await client
+        .from(currentTable)
+        .update(data)
+        .eq("id", editingId);
+    } else {
+      result = await client
+        .from(currentTable)
+        .insert(data);
+    }
+
+    if (result.error) throw result.error;
+
+    $("recordDialog").close();
+    await loadTable(currentTable);
+
+  } catch (error) {
+    alert("Save failed:\n\n" + (error.message || error));
+  } finally {
+    $("saveBtn").disabled = false;
+  }
+}
+
+function ensureViewDialog() {
+  if ($("viewDialog")) return;
+
+  const dialog = document.createElement("dialog");
+  dialog.id = "viewDialog";
+  dialog.innerHTML = `
+    <div class="dialog-head">
+      <h2 id="viewDialogTitle">Record Details</h2>
+      <button type="button" class="small-btn" id="closeViewBtn">Close</button>
+    </div>
+    <div id="viewFields" class="view-grid"></div>
+  `;
+  document.body.appendChild(dialog);
+
+  $("closeViewBtn").onclick = () => dialog.close();
+  dialog.addEventListener("click", event => {
+    if (event.target === dialog) dialog.close();
+  });
+}
+
+function viewRow(index) {
+  const row = rows[index];
+  if (!row) return;
+
+  ensureViewDialog();
+
+  $("viewDialogTitle").textContent =
+    `${tableLabel(currentTable)} — View Record`;
+
+  $("viewFields").innerHTML = columns
+    .filter(field => field !== "created_at")
+    .map(field => {
+      const value = row[field];
+
+      let display = value == null || value === "" ? "—" : esc(value);
+
+      if (
+        typeof value === "string" &&
+        /^https?:\/\//i.test(value) &&
+        /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(value)
+      ) {
+        display = `<img src="${esc(value)}" alt="Photo"
+          style="max-width:180px;max-height:180px;object-fit:cover;border-radius:12px">`;
+      }
+
+      return `
+        <div class="field">
+          <label>${esc(pretty(field))}</label>
+          <div class="view-value">${display}</div>
+        </div>
+      `;
+    }).join("");
+
+  $("viewDialog").showModal();
+}
+
+async function editRow(index) {
+  openForm(rows[index]);
+}
+
+async function deleteRow(index) {
+  const row = rows[index];
+
+  if (!row?.id) {
+    alert("This record does not have an id that can be deleted by the generic action.");
+    return;
+  }
+
+  if (!confirm(
+    `Delete this ${tableLabel(currentTable)} record?\n\nThis cannot be undone.`
+  )) return;
+
+  const { data, error } = await client
+    .from(currentTable)
+    .delete()
+    .eq("id", row.id)
+    .select()
+    .limit(1);
+
+  if (error) {
+    alert("Delete failed:\n\n" + error.message);
+    return;
+  }
+
+  if (!data || !data.length) {
+    alert(
+      "The record was not deleted.\n\n" +
+      "Please check the DELETE RLS policy for the " +
+      currentTable + " table."
+    );
+    return;
+  }
+
+  await loadTable(currentTable);
+}
+
+window.viewRow = viewRow;
+window.editRow = editRow;
+window.deleteRow = deleteRow;
+
+init();
 .mini-news{background:#fff;border:1px solid #e0e6ea;border-radius:15px;padding:18px;box-shadow:0 7px 20px rgba(20,40,60,.06)}
 .mini-news h4{font-size:18px;line-height:1.3;margin:7px 0}
 .video-news{margin-top:35px}

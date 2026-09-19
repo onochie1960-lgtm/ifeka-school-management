@@ -79,11 +79,16 @@ function init(){
     openForm();
   };
 
-  $("menuBtn").onclick=()=>{
-    document
-      .querySelector(".sidebar")
-      .classList.toggle("open");
-  };
+  $("menuBtn").onclick = () => {
+    const sidebar = document.querySelector(".sidebar");
+
+    if (!sidebar) {
+        alert("Sidebar not found.");
+        return;
+    }
+
+    sidebar.classList.toggle("open");
+};
 
   const c=window.IFEKA_CONFIG||{};
 

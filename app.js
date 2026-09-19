@@ -309,136 +309,140 @@ function editRow(i){
 
 function openForm(row=null){
   if(!columns.length){
-    alert(
-      "This table has no existing records, so its columns are not available to this generic form yet. We will configure the empty table form next."
-    );
+    alert("This table has no existing records yet.");
     return;
   }
 
   editingId=row?.id??null;
+  $("dialogTitle").textContent=editingId!==null?"Edit Record":"Add Record";
 
-  $("dialogTitle").textContent=
-    row ? "Edit Record" : "Add Record";
+  $("formFields").innerHTML=columns
+    .filter(c=>c!=="created_at")
+    .map(c=>{
+      const v=row?.[c]??"";
+      let type="text";
 
-  $("formFields").innerHTML=
-    columns
-      .filter(c=>c!=="created_at")
-      .map(c=>{
-        const v=row?.[c]??"";
-        let type="text";
+      if(c.includes("date")||c==="dob") type="date";
+      else if(c.includes("phone")) type="tel";
+      else if(c.includes("email")) type="email";
 
-        if(c.includes("date")||c==="dob")
-          type="date";
-        else if(c.includes("email"))
-          type="email";
-        else if(c.includes("phone"))
-          type="tel";
+      return `
+        <div class="field">
+          <label>${esc(pretty(c))}</label>
+          <input
+            name="${esc(c)}"
+            type="${type}"
+            value="${esc(v)}"
+            ${c==="id"&&row?"readonly":""}
+          >
+        </div>
+      `;
+    }).join("");
 
-        return `
-          <div class="field">
-            <label>${esc(pretty(c))}</label>
-            <input
-              name="${esc(c)}"
-              type="${type}"
-              value="${esc(v)}"
-              ${c==="id"&&row?"readonly":""}>
-          </div>`;
-      })
-      .join("");
+  /* Student photo upload */
+  if(currentTable==="Students"){
+    $("formFields").insertAdjacentHTML("beforeend",`
+      <div class="field">
+        <label>Student Photo</label>
+        <input
+          id="studentPhoto"
+          name="studentPhoto"
+          type="file"
+          accept="image/*"
+        >
+        ${
+          row?.photo_url
+          ? `<small style="display:block;margin-top:6px">
+               Existing photo is saved. Choose a new photo only if you want to replace it.
+             </small>`
+          : ""
+        }
+      </div>
+    `);
+  }
 
   $("recordDialog").showModal();
 }
 
 $("recordForm").onsubmit=async e=>{
+$("recordForm").onsubmit=async e=>{
   e.preventDefault();
 
-  if(!client||!currentTable)
-    return;
+  if(!client||!currentTable) return;
 
-  const data=Object.fromEntries(
-    new FormData(e.target).entries()
-  );
+  const formData=new FormData(e.target);
+  const data=Object.fromEntries(formData.entries());
+
+  /* Remove the file from the database data */
+  const photoFile=formData.get("studentPhoto");
+  delete data.studentPhoto;
 
   Object.keys(data).forEach(k=>{
-    if(data[k]==="")
-      data[k]=null;
+    if(data[k]==="") data[k]=null;
   });
 
   $("saveBtn").disabled=true;
 
-  let result;
+  try{
+    /* Upload student photo */
+    if(
+      currentTable==="Students" &&
+      photoFile &&
+      photoFile instanceof File &&
+      photoFile.size>0
+    ){
+      const ext=(photoFile.name.split(".").pop()||"jpg").toLowerCase();
 
-  /* =========================
-     EDIT / UPDATE
-     ========================= */
+      const fileName=
+        `${data.id||editingId||Date.now()}-${Date.now()}.${ext}`;
 
-  if(editingId!=null){
+      const filePath=fileName;
 
-    result=await client
-      .from(currentTable)
-      .update(data)
-      .eq("id",editingId)
-      .select()
-      .limit(1);
+      const upload=await client
+        .storage
+        .from("student-photos")
+        .upload(filePath,photoFile,{
+          upsert:true,
+          contentType:photoFile.type||"image/jpeg"
+        });
+
+      if(upload.error){
+        throw upload.error;
+      }
+
+      /*
+       * Store the file path in photo_url.
+       * The photo can later be displayed from Storage.
+       */
+      data.photo_url=filePath;
+    }
+
+    let result;
+
+    if(editingId!==null){
+      result=await client
+        .from(currentTable)
+        .update(data)
+        .eq("id",editingId);
+    }else{
+      result=await client
+        .from(currentTable)
+        .insert(data);
+    }
 
     if(result.error){
-      $("saveBtn").disabled=false;
-
-      alert(
-        "Update failed:\n\n"+
-        result.error.message
-      );
-
-      return;
+      throw result.error;
     }
 
-    /*
-      If Supabase returns zero rows,
-      the UPDATE policy may be blocking
-      the operation or the ID may not match.
-    */
+    $("recordDialog").close();
 
-    if(!result.data || result.data.length===0){
-      $("saveBtn").disabled=false;
+    await loadTable(currentTable);
 
-      alert(
-        "The record was not updated.\n\n"+
-        "Please check the UPDATE RLS policy "+
-        "for the "+currentTable+" table."
-      );
-
-      return;
-    }
-
-  }else{
-
-    /* =========================
-       ADD / INSERT
-       ========================= */
-
-    delete data.id;
-
-    result=await client
-      .from(currentTable)
-      .insert(data);
-
-    if(result.error){
-      $("saveBtn").disabled=false;
-
-      alert(
-        "Save failed:\n\n"+
-        result.error.message
-      );
-
-      return;
-    }
+  }catch(error){
+    alert("Save failed: "+(error.message||error));
+  }finally{
+    $("saveBtn").disabled=false;
   }
-
-  $("saveBtn").disabled=false;
-
-  $("recordDialog").close();
-
-  await loadTable(currentTable);
 };
 
 /* =========================

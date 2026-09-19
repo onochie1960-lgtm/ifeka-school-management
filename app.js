@@ -902,5 +902,4 @@ if (error) { alert("Delete failed:\n\n" + error.message); return; }
 if (!data || !data.length) { alert( "The record was not deleted.\n\n" + "Please check the DELETE RLS policy for the " + currentTable + " table." ); return; }
 await loadTable(currentTable); }
 window.editRow = editRow; window.deleteRow = deleteRow;
-init(); '''
-out = Path("/mnt/data/ifeka-school-management-app.js") out.write_text(code, encoding="utf-8") print(f"Created: {out}") print(f"Lines: {len(code.splitlines())}")
+init(); 

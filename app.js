@@ -113,8 +113,7 @@ function init() {
     currentTable ? loadTable(currentTable) : loadDashboard();
   };
 
-  $("search").oninput = renderRows;
-
+$("searchInput").oninput = renderRows;
   $("addBtn").onclick = () => openForm();
 
   $("menuBtn").onclick = () => {

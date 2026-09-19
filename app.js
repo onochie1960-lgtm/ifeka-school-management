@@ -1,590 +1,148 @@
-const TABLES = [
-  ["Students","Students"],
-  ["attendance","Attendance"],
-  ["fee_payments","Fee Payments"],
-  ["parents","Parents"],
-  ["results","Results"],
-  ["school_classes","School Classes"],
-  ["student_parents","Student Parents"],
-  ["subjects","Subjects"],
-  ["teachers","Teachers"]
-];
+from pathlib import Path
+code = r'''/* ========================================================= Ifeka School Management - app.js Clean replacement version ========================================================= */
+const TABLES = [ ["Students", "Students"], ["teachers", "Teachers"], ["parents", "Parents"], ["school_classes", "Classes"], ["subjects", "Subjects"], ["attendance", "Attendance"], ["results", "Results"], ["fee_payments", "Fee Payments"], ["student_parents", "Student Parents"] ];
+/* Fields used when a table is empty and therefore has no rows from which the application can automatically discover columns. */ const FORM_FIELDS = { Students: [ "student_id","first_name","last_name","gender","date_of_birth", "phone","email","address","class_id","photo_url" ], teachers: [ "teacher_id","first_name","last_name","gender","phone","email", "address","qualification","subject","date_of_birth" ], parents: [ "parent_id","first_name","last_name","relationship","phone", "email","address","occupation" ], school_classes: [ "class_name","section","session","teacher_id" ], subjects: [ "subject_code","subject_name","class_id" ], attendance: [ "student_id","date","status","remark" ], results: [ "student_id","subject_id","session","term", "ca_score","exam_score","total","grade","remark" ], fee_payments: [ "student_id","amount","payment_date","payment_method", "term","session","reference","remark" ], student_parents: [ "student_id","parent_id","relationship" ] };
+let client = null; let currentTable = null; let rows = []; let columns = []; let editingId = null;
+function $(id) { return document.getElementById(id); }
+function esc(value) { return String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&", "<": "<", ">": ">", '"': """, "'": "'" }[c])); }
+function pretty(value) { return String(value) .replaceAll("_", " ") .replace(/\b\w/g, c => c.toUpperCase()); }
+function tableLabel(table) { const found = TABLES.find(x => x[0] === table); return found ? found[1] : pretty(table); }
+function init() { const nav = $("nav");
+nav.innerHTML = <button class="active" data-page="dashboard">🏠 Dashboard</button> + TABLES.map(([table, label]) => <button data-table="${esc(table)}">▦ ${esc(label)}</button> ).join("");
+nav.querySelectorAll("button").forEach(button => { button.onclick = () => { nav.querySelectorAll("button") .forEach(x => x.classList.remove("active"));
+button.classList.add("active");
 
-let client=null,
-    currentTable=null,
-    rows=[],
-    columns=[],
-    editingId=null;
+  if (button.dataset.page === "dashboard") {
+    showDashboard(button);
+  } else {
+    openTable(button.dataset.table, button);
+  }
 
-function $(id){
-  return document.getElementById(id);
-}
-
-function esc(v){
-  return String(v??"").replace(
-    /[&<>"']/g,
-    c=>({
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      '"':"&quot;",
-      "'":"&#039;"
-    }[c])
-  );
-}
-
-function pretty(s){
-  return s
-    .replaceAll("_"," ")
-    .replace(/\b\w/g,c=>c.toUpperCase());
-}
-
-function init(){
-  const nav=$("nav");
-
-  nav.innerHTML=
-    '<button class="active" data-page="dashboard">🏠 Dashboard</button>'+
-    TABLES.map(([t,l])=>
-      `<button data-table="${esc(t)}">▦ ${esc(l)}</button>`
-    ).join("");
-
-  nav.querySelectorAll("button").forEach(b=>{
-    b.onclick=()=>{
-      nav.querySelectorAll("button")
-        .forEach(x=>x.classList.remove("active"));
-
-      b.classList.add("active");
-
-      if(b.dataset.page==="dashboard"){
-        showDashboard(b);
-      }else{
-        openTable(b.dataset.table,b);
-      }
-
-      document
-        .querySelector(".sidebar")
-        ?.classList.remove("open");
-    };
-  });
-
-  $("refreshBtn").onclick=()=>{
-    currentTable
-      ? loadTable(currentTable)
-      : loadDashboard();
-  };
-
-  $("search").oninput=renderRows;
-
-  $("addBtn").onclick=()=>{
-    openForm();
-  };
-
-  $("menuBtn").onclick = () => {
-    const sidebar = document.querySelector(".sidebar");
-
-    if (!sidebar) {
-        alert("Sidebar not found.");
-        return;
-    }
-
-    sidebar.classList.toggle("open");
+  document.querySelector(".sidebar")?.classList.remove("open");
 };
-
-  const c=window.IFEKA_CONFIG||{};
-
-  if(
-    !c.SUPABASE_URL ||
-    c.SUPABASE_URL.includes("PASTE_") ||
-    !c.SUPABASE_ANON_KEY ||
-    c.SUPABASE_ANON_KEY.includes("PASTE_")
-  ){
-    $("status").textContent=
-      "Supabase connection not configured yet.";
-
-    loadCardsLocal();
-    return;
+});
+$("refreshBtn").onclick = () => { currentTable ? loadTable(currentTable) : loadDashboard(); };
+$("search").oninput = renderRows;
+$("addBtn").onclick = () => openForm();
+$("menuBtn").onclick = () => { document.querySelector(".sidebar")?.classList.toggle("open"); };
+$("recordForm").onsubmit = saveRecord;
+const config = window.IFEKA_CONFIG || {};
+if ( !config.SUPABASE_URL || config.SUPABASE_URL.includes("PASTE_") || !config.SUPABASE_ANON_KEY || config.SUPABASE_ANON_KEY.includes("PASTE_") ) { $("status").textContent = "Supabase connection not configured yet."; loadCardsLocal(); return; }
+client = supabase.createClient( config.SUPABASE_URL, config.SUPABASE_ANON_KEY );
+loadDashboard(); }
+async function loadDashboard() { if (!client) { loadCardsLocal(); return; }
+$("status").textContent = "Connected. Loading school records…";
+const counts = await Promise.all( TABLES.map(async ([table]) => { try { const { count, error } = await client .from(table) .select("*", { count: "exact", head: true });
+return error ? 0 : (count || 0);
+  } catch {
+    return 0;
   }
+})
+);
+$("cards").innerHTML = TABLES.map(([table, label], i) => <div class="card"> <div class="label">${esc(label)}</div> <div class="num">${counts[i]}</div> </div> ).join("") + ` Total Modules ${TABLES.length}
+�
+`;
+$("status").textContent = "Supabase connected."; }
+function loadCardsLocal() { $("cards").innerHTML = TABLES.map(([table, label]) => <div class="card"> <div class="label">${esc(label)}</div> <div class="num">—</div> </div> ).join("") + <div class="card"> <div class="label">Database</div> <div class="num">Ready</div> </div>; }
+function showDashboard(button) { currentTable = null;
+$("dashboard").classList.remove("hidden"); $("tableView").classList.add("hidden"); $("pageTitle").textContent = "Dashboard";
+document.querySelectorAll("nav button") .forEach(x => x.classList.remove("active"));
+button.classList.add("active"); loadDashboard(); }
+async function openTable(table, button) { currentTable = table;
+$("dashboard").classList.add("hidden"); $("tableView").classList.remove("hidden"); $("pageTitle").textContent = tableLabel(table);
+document.querySelectorAll("nav button") .forEach(x => x.classList.remove("active"));
+button.classList.add("active");
+if (!client) { $("status").textContent = "Add your Supabase URL and public anon key in config.js first."; return; }
+await loadTable(table); }
+async function loadTable(table) { $("status").textContent = "Loading " + tableLabel(table) + "…";
+const { data, error } = await client .from(table) .select("*") .limit(200);
+if (error) { $("status").textContent = "Database error: " + error.message; $("thead").innerHTML = ""; $("tbody").innerHTML = ""; $("empty").classList.remove("hidden"); return; }
+rows = data || [];
+if (rows.length) { columns = Object.keys(rows[0]); $("empty").classList.add("hidden"); $("status").textContent = ${rows.length} record(s) loaded.; renderRows(); return; }
+/* Empty table: use the known application schema so Add Record can still open. */ columns = FORM_FIELDS[table] || [];
+$("thead").innerHTML = ""; $("tbody").innerHTML = ""; $("empty").classList.remove("hidden");
+$("status").textContent = Table is empty. ${tableLabel(table)} is ready for a new record.; }
+function renderRows() { const search = ($("search").value || "").toLowerCase();
+const filtered = rows.filter(row => columns.some(column => String(row[column] ?? "") .toLowerCase() .includes(search) ) );
+$("empty").classList.toggle("hidden", filtered.length > 0);
+$("thead").innerHTML = "" + columns.map(column => <th>${esc(pretty(column))}</th> ).join("") + "Actions";
+$("tbody").innerHTML = filtered.map(row => <tr> ${columns.map(column => ${formatCell(row[column])} ).join("")} <td class="actions"> <button class="small-btn" onclick="editRow(${rows.indexOf(row)})">Edit</button> <button class="small-btn danger" onclick="deleteRow(${rows.indexOf(row)})">Delete</button> </td> </tr> ).join(""); }
+function formatCell(value) { if (value == null) return "";
+const text = String(value);
+if ( /^https?:///i.test(text) && /.(jpg|jpeg|png|gif|webp)(?.*)?$/i.test(text) ) { return <img src="${esc(text)}" alt="Photo" style="width:42px;height:42px;object-fit:cover;border-radius:8px">; }
+return esc(text); }
+function getFieldType(field) { if (field === "date" || field === "dob" || field === "date_of_birth" || field === "payment_date") return "date";
+if (field.includes("email")) return "email"; if (field.includes("phone")) return "tel"; if ( field.includes("score") || field === "amount" || field === "total" ) return "number";
+return "text"; }
+function getFieldControl(field, value) { const v = value ?? "";
+if (field === "gender") { return <select name="${esc(field)}"> <option value="">Select gender</option> <option value="Male" ${v === "Male" ? "selected" : ""}>Male</option> <option value="Female" ${v === "Female" ? "selected" : ""}>Female</option> </select>; }
+if (field === "relationship") { return <select name="${esc(field)}"> <option value="">Select relationship</option> <option value="Father" ${v === "Father" ? "selected" : ""}>Father</option> <option value="Mother" ${v === "Mother" ? "selected" : ""}>Mother</option> <option value="Guardian" ${v === "Guardian" ? "selected" : ""}>Guardian</option> </select>; }
+if (field === "status") { return <select name="${esc(field)}"> <option value="">Select status</option> <option value="Present" ${v === "Present" ? "selected" : ""}>Present</option> <option value="Absent" ${v === "Absent" ? "selected" : ""}>Absent</option> <option value="Late" ${v === "Late" ? "selected" : ""}>Late</option> </select>; }
+if (field === "term") { return <select name="${esc(field)}"> <option value="">Select term</option> <option value="First Term" ${v === "First Term" ? "selected" : ""}>First Term</option> <option value="Second Term" ${v === "Second Term" ? "selected" : ""}>Second Term</option> <option value="Third Term" ${v === "Third Term" ? "selected" : ""}>Third Term</option> </select>; }
+if (field === "payment_method") { return <select name="${esc(field)}"> <option value="">Select method</option> <option value="Cash" ${v === "Cash" ? "selected" : ""}>Cash</option> <option value="Transfer" ${v === "Transfer" ? "selected" : ""}>Transfer</option> <option value="POS" ${v === "POS" ? "selected" : ""}>POS</option> <option value="Online" ${v === "Online" ? "selected" : ""}>Online</option> </select>; }
+return `<input name="${esc(field)}" type="${getFieldType(field)}" value="${esc(v)}" ${field === "id" ? 'readonly' : ''}
+`; }
+function openForm(row = null) { const fields = columns.length ? columns : (FORM_FIELDS[currentTable] || []);
+if (!fields.length) { alert("No fields are available for this table yet."); return; }
+editingId = row?.id ?? null;
+$("dialogTitle").textContent = row ? Edit ${tableLabel(currentTable)} : Add ${tableLabel(currentTable)};
+$("formFields").innerHTML = fields .filter(field => field !== "created_at") .map(field => { const value = row?.[field] ?? "";
+return `<div class="field">
+    <label>${esc(pretty(field))}</label>
+    ${getFieldControl(field, value)}
+  </div>`;
+}).join("");
+/* Student photo upload if the existing table has photo_url. */ if (currentTable === "Students" && fields.includes("photo_url")) { $("formFields").insertAdjacentHTML("beforeend", <div class="field"> <label>Student Photo</label> <input id="studentPhoto" type="file" accept="image/*"> ${row?.photo_url ?Existing photo is saved. Select another photo to replace it.: ""} </div>); }
+$("recordDialog").showModal(); }
+async function saveRecord(event) { event.preventDefault();
+if (!client || !currentTable) return;
+const formData = new FormData(event.target); const data = Object.fromEntries(formData.entries());
+/* Remove empty strings. */ Object.keys(data).forEach(key => { if (data[key] === "") data[key] = null; });
+/* Never manually insert an auto-generated numeric id. */ if (editingId === null) delete data.id;
+const photoInput = $("studentPhoto"); const photoFile = photoInput?.files?.[0];
+$("saveBtn").disabled = true;
+try { if ( currentTable === "Students" && photoFile && photoFile.size > 0 ) { const extension = (photoFile.name.split(".").pop() || "jpg").toLowerCase();
+const filePath =
+    `${data.student_id || editingId || Date.now()}-${Date.now()}.${extension}`;
 
-  client=supabase.createClient(
-    c.SUPABASE_URL,
-    c.SUPABASE_ANON_KEY
-  );
+  const upload = await client.storage
+    .from("student-photos")
+    .upload(filePath, photoFile, {
+      upsert: true,
+      contentType: photoFile.type || "image/jpeg"
+    });
 
-  loadDashboard();
+  if (upload.error) throw upload.error;
+
+  data.photo_url = filePath;
 }
 
-async function loadDashboard(){
-  $("status").textContent=
-    "Connected. Loading school records…";
+let result;
 
-  const counts=await Promise.all(
-    TABLES.map(async ([t])=>{
-      try{
-        const {count,error}=await client
-          .from(t)
-          .select("*",{count:"exact",head:true});
-
-        return error ? 0 : (count||0);
-      }catch(e){
-        return 0;
-      }
-    })
-  );
-
-  $("cards").innerHTML=
-    TABLES.slice(0,4)
-      .map(([t,l],i)=>
-        `<div class="card">
-          <div class="label">${l}</div>
-          <div class="num">${counts[i]}</div>
-        </div>`
-      )
-      .join("")+
-    `<div class="card">
-      <div class="label">Total Modules</div>
-      <div class="num">${TABLES.length}</div>
-    </div>`;
-
-  $("status").textContent=
-    "Supabase connected.";
-}
-
-function loadCardsLocal(){
-  $("cards").innerHTML=
-    TABLES.slice(0,4)
-      .map(([t,l])=>
-        `<div class="card">
-          <div class="label">${l}</div>
-          <div class="num">—</div>
-        </div>`
-      )
-      .join("")+
-    `<div class="card">
-      <div class="label">Database</div>
-      <div class="num">Ready</div>
-    </div>`;
-}
-
-function showDashboard(btn){
-  currentTable=null;
-
-  $("dashboard")
-    .classList
-    .remove("hidden");
-
-  $("tableView")
-    .classList
-    .add("hidden");
-
-  $("pageTitle").textContent="Dashboard";
-
-  document
-    .querySelectorAll("nav button")
-    .forEach(x=>x.classList.remove("active"));
-
-  btn.classList.add("active");
-
-  loadDashboard();
-}
-
-async function openTable(t,btn){
-  currentTable=t;
-
-  $("dashboard")
-    .classList
-    .add("hidden");
-
-  $("tableView")
-    .classList
-    .remove("hidden");
-
-  $("pageTitle").textContent=pretty(t);
-
-  document
-    .querySelectorAll("nav button")
-    .forEach(x=>x.classList.remove("active"));
-
-  btn.classList.add("active");
-
-  if(!client){
-    $("status").textContent=
-      "Add your Supabase URL and public anon key in config.js first.";
-    return;
-  }
-
-  await loadTable(t);
-}
-
-async function loadTable(t){
-  $("status").textContent=
-    "Loading "+pretty(t)+"…";
-
-  const {data,error}=await client
-    .from(t)
-    .select("*")
-    .limit(200);
-
-  if(error){
-    $("status").textContent=
-      "Database error: "+error.message;
-
-    $("thead").innerHTML="";
-    $("tbody").innerHTML="";
-
-    return;
-  }
-
-  rows=data||[];
-
-  columns=rows.length
-    ? Object.keys(rows[0])
-    : [];
-
-  if(!columns.length){
-    $("status").textContent=
-      "Table is empty. Add a record using the database schema, or we can configure its form next.";
-
-    $("thead").innerHTML="";
-    $("tbody").innerHTML="";
-
-    $("empty")
-      .classList
-      .remove("hidden");
-
-    return;
-  }
-
-  $("empty")
-    .classList
-    .add("hidden");
-
-  $("status").textContent=
-    `${rows.length} record(s) loaded.`;
-
-  renderRows();
-}
-
-function renderRows(){
-  const q=($("search").value||"")
-    .toLowerCase();
-
-  const filtered=rows.filter(r=>
-    columns.some(c=>
-      String(r[c]??"")
-        .toLowerCase()
-        .includes(q)
-    )
-  );
-
-  $("thead").innerHTML=
-    "<tr>"+
-    columns
-      .map(c=>`<th>${esc(pretty(c))}</th>`)
-      .join("")+
-    "<th>Actions</th></tr>";
-
-  $("tbody").innerHTML=
-    filtered
-      .map(r=>
-        `<tr>
-          ${columns
-            .map(c=>`<td>${esc(r[c])}</td>`)
-            .join("")}
-          <td class="actions">
-            <button
-              class="small-btn"
-              onclick="editRow(${rows.indexOf(r)})">
-              Edit
-            </button>
-
-            <button
-              class="small-btn danger"
-              onclick="deleteRow(${rows.indexOf(r)})">
-              Delete
-            </button>
-          </td>
-        </tr>`
-      )
-      .join("");
-}
-
-function editRow(i){
-  openForm(rows[i]);
-}
-
-function openForm(row=null){
-  if(!columns.length){
-    alert("This table has no existing records yet.");
-    return;
-  }
-
-  editingId=row?.id??null;
-  $("dialogTitle").textContent=editingId!==null?"Edit Record":"Add Record";
-
-  $("formFields").innerHTML=columns
-    .filter(c=>c!=="created_at")
-    .map(c=>{
-      const v=row?.[c]??"";
-      let type="text";
-
-      if(c.includes("date")||c==="dob") type="date";
-      else if(c.includes("phone")) type="tel";
-      else if(c.includes("email")) type="email";
-
-      return `
-        <div class="field">
-          <label>${esc(pretty(c))}</label>
-          <input
-            name="${esc(c)}"
-            type="${type}"
-            value="${esc(v)}"
-            ${c==="id"&&row?"readonly":""}
-          >
-        </div>
-      `;
-    }).join("");
-
-  /* Student photo upload */
-  if(currentTable==="Students"){
-    $("formFields").insertAdjacentHTML("beforeend",`
-      <div class="field">
-        <label>Student Photo</label>
-        <input
-          id="studentPhoto"
-          name="studentPhoto"
-          type="file"
-          accept="image/*"
-        >
-        ${
-          row?.photo_url
-          ? `<small style="display:block;margin-top:6px">
-               Existing photo is saved. Choose a new photo only if you want to replace it.
-             </small>`
-          : ""
-        }
-      </div>
-    `);
-  }
-
-  $("recordDialog").showModal();
-}
-
-$("recordForm").onsubmit=async e=>{
-$("recordForm").onsubmit=async e=>{
-  e.preventDefault();
-
-  if(!client||!currentTable) return;
-
-  const formData=new FormData(e.target);
-  const data=Object.fromEntries(formData.entries());
-
-  /* Remove the file from the database data */
-  const photoFile=formData.get("studentPhoto");
-  delete data.studentPhoto;
-
-  Object.keys(data).forEach(k=>{
-    if(data[k]==="") data[k]=null;
-  });
-
-  $("saveBtn").disabled=true;
-
-  try{
-    /* Upload student photo */
-    if(
-      currentTable==="Students" &&
-      photoFile &&
-      photoFile instanceof File &&
-      photoFile.size>0
-    ){
-      const ext=(photoFile.name.split(".").pop()||"jpg").toLowerCase();
-
-      const fileName=
-        `${data.id||editingId||Date.now()}-${Date.now()}.${ext}`;
-
-      const filePath=fileName;
-
-      const upload=await client
-        .storage
-        .from("student-photos")
-        .upload(filePath,photoFile,{
-          upsert:true,
-          contentType:photoFile.type||"image/jpeg"
-        });
-
-      if(upload.error){
-        throw upload.error;
-      }
-
-      /*
-       * Store the file path in photo_url.
-       * The photo can later be displayed from Storage.
-       */
-      data.photo_url=filePath;
-    }
-
-    let result;
-
-    if(editingId!==null){
-      result=await client
-        .from(currentTable)
-        .update(data)
-        .eq("id",editingId);
-    }else{
-      result=await client
-        .from(currentTable)
-        .insert(data);
-    }
-
-    if(result.error){
-      throw result.error;
-    }
-
-    $("recordDialog").close();
-
-    await loadTable(currentTable);
-
-  }catch(error){
-    alert("Save failed: "+(error.message||error));
-  }finally{
-    $("saveBtn").disabled=false;
-  }
-};
-
-/* =========================
-   DELETE
-   ========================= */
-
-async function deleteRow(i){
-
-  const r=rows[i];
-
-  if(r?.id==null){
-    alert(
-      "This record has no numeric id available for the generic delete action."
-    );
-    return;
-  }
-
-  if(!confirm(
-    "Delete this record? This cannot be undone."
-  )){
-    return;
-  }
-
-  const {data,error}=await client
+if (editingId !== null) {
+  result = await client
     .from(currentTable)
-    .delete()
-    .eq("id",r.id)
-    .select()
-    .limit(1);
-
-  if(error){
-    alert(
-      "Delete failed:\n\n"+
-      error.message
-    );
-
-    return;
-  }
-
-  if(!data || data.length===0){
-    alert(
-      "The record was not deleted.\n\n"+
-      "Please check the DELETE RLS policy "+
-      "for the "+currentTable+" table."
-    );
-
-    return;
-  }
-
-  await loadTable(currentTable);
+    .update(data)
+    .eq("id", editingId);
+} else {
+  result = await client
+    .from(currentTable)
+    .insert(data);
 }
 
-window.editRow=editRow;
-window.deleteRow=deleteRow;
+if (result.error) throw result.error;
 
-init();  if(!c.SUPABASE_URL||c.SUPABASE_URL.includes("PASTE_")||!c.SUPABASE_ANON_KEY||c.SUPABASE_ANON_KEY.includes("PASTE_")){
-    $("status").textContent="Supabase connection not configured yet.";
-    loadCardsLocal();
-    return;
-  }
-  client=supabase.createClient(c.SUPABASE_URL,c.SUPABASE_ANON_KEY);
-  loadDashboard();
-}
-async function loadDashboard(){
-  $("status").textContent="Connected. Loading school records…";
-  const counts=await Promise.all(TABLES.map(async ([t])=>{
-    try{const {count,error}=await client.from(t).select("*",{count:"exact",head:true});return error?0:(count||0)}
-    catch(e){return 0}
-  }));
-  $("cards").innerHTML=TABLES.slice(0,4).map(([t,l],i)=>`<div class="card"><div class="label">${l}</div><div class="num">${counts[i]}</div></div>`).join("")+
-    `<div class="card"><div class="label">Total Modules</div><div class="num">${TABLES.length}</div></div>`;
-  $("status").textContent="Supabase connected.";
-}
-function loadCardsLocal(){
-  $("cards").innerHTML=TABLES.slice(0,4).map(([t,l])=>`<div class="card"><div class="label">${l}</div><div class="num">—</div></div>`).join("")+
-  `<div class="card"><div class="label">Database</div><div class="num">Ready</div></div>`;
-}
-function showDashboard(btn){
-  currentTable=null;$("dashboard").classList.remove("hidden");$("tableView").classList.add("hidden");
-  $("pageTitle").textContent="Dashboard";document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));btn.classList.add("active");
-  loadDashboard();
-}
-async function openTable(t,btn){
-  currentTable=t;$("dashboard").classList.add("hidden");$("tableView").classList.remove("hidden");
-  $("pageTitle").textContent=pretty(t);document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));btn.classList.add("active");
-  if(!client){$("status").textContent="Add your Supabase URL and public anon key in config.js first.";return}
-  await loadTable(t);
-}
-async function loadTable(t){
-  $("status").textContent="Loading "+pretty(t)+"…";
-  const {data,error}=await client.from(t).select("*").limit(200);
-  if(error){$("status").textContent="Database error: "+error.message;$("thead").innerHTML="";$("tbody").innerHTML="";return}
-  rows=data||[];columns=rows.length?Object.keys(rows[0]):[];
-  if(!columns.length){
-    // Try to infer columns from a harmless select result; empty tables need explicit schema.
-    $("status").textContent="Table is empty. Add a record using the database schema, or we can configure its form next.";
-    $("thead").innerHTML="";$("tbody").innerHTML="";$("empty").classList.remove("hidden");return;
-  }
-  $("empty").classList.add("hidden");$("status").textContent=`${rows.length} record(s) loaded.`;renderRows();
-}
-function renderRows(){
-  const q=($("search").value||"").toLowerCase();
-  const filtered=rows.filter(r=>columns.some(c=>String(r[c]??"").toLowerCase().includes(q)));
-  $("thead").innerHTML="<tr>"+columns.map(c=>`<th>${esc(pretty(c))}</th>`).join("")+"<th>Actions</th></tr>";
-  $("tbody").innerHTML=filtered.map((r,i)=>`<tr>${columns.map(c=>`<td>${esc(r[c])}</td>`).join("")}<td class="actions"><button class="small-btn" onclick="editRow(${rows.indexOf(r)})">Edit</button><button class="small-btn danger" onclick="deleteRow(${rows.indexOf(r)})">Delete</button></td></tr>`).join("");
-}
-function editRow(i){openForm(rows[i])}
-function openForm(row=null){
-  if(!columns.length){alert("This table has no existing records, so its columns are not available to this generic form yet. We will configure the empty table form next.");return}
-  editingId=row?.id??null;$("dialogTitle").textContent=row?"Edit Record":"Add Record";
-  $("formFields").innerHTML=columns.filter(c=>c!=="created_at").map(c=>{
-    const v=row?.[c]??"";let type="text";
-    if(c.includes("date")||c==="dob")type="date";
-    else if(c.includes("email"))type="email";
-    else if(c.includes("phone"))type="tel";
-    return `<div class="field"><label>${esc(pretty(c))}</label><input name="${esc(c)}" type="${type}" value="${esc(v)}" ${c==="id"&&row?"readonly":""}></div>`
-  }).join("");
-  $("recordDialog").showModal();
-}
-$("recordForm").onsubmit=async e=>{
-  e.preventDefault();
-  if(!client||!currentTable)return;
-  const data=Object.fromEntries(new FormData(e.target).entries());
-  Object.keys(data).forEach(k=>{if(data[k]==="")data[k]=null});
-  $("saveBtn").disabled=true;
-  let result;
-  if(editingId!=null) result=await client.from(currentTable).update(data).eq("id",editingId);
-  else {delete data.id;result=await client.from(currentTable).insert(data)}
-  $("saveBtn").disabled=false;
-  if(result.error){alert(result.error.message);return}
-  $("recordDialog").close();await loadTable(currentTable);
-};
-async function deleteRow(i){
-  const r=rows[i];if(r?.id==null){alert("This record has no numeric id available for the generic delete action.");return}
-  if(!confirm("Delete this record? This cannot be undone."))return;
-  const {error}=await client.from(currentTable).delete().eq("id",r.id);
-  if(error)alert(error.message);else await loadTable(currentTable);
-}
-window.editRow=editRow;window.deleteRow=deleteRow;
-init();
+$("recordDialog").close();
+await loadTable(currentTable);
+} catch (error) { alert("Save failed:\n\n" + (error.message || error)); } finally { $("saveBtn").disabled = false; } }
+async function editRow(index) { openForm(rows[index]); }
+async function deleteRow(index) { const row = rows[index];
+if (!row?.id) { alert("This record does not have an id that can be deleted by the generic action."); return; }
+if (!confirm( Delete this ${tableLabel(currentTable)} record?\n\nThis cannot be undone. )) return;
+const { data, error } = await client .from(currentTable) .delete() .eq("id", row.id) .select() .limit(1);
+if (error) { alert("Delete failed:\n\n" + error.message); return; }
+if (!data || !data.length) { alert( "The record was not deleted.\n\n" + "Please check the DELETE RLS policy for the " + currentTable + " table." ); return; }
+await loadTable(currentTable); }
+window.editRow = editRow; window.deleteRow = deleteRow;
+init(); '''
+out = Path("/mnt/data/ifeka-school-management-app.js") out.write_text(code, encoding="utf-8") print(f"Created: {out}") print(f"Lines: {len(code.splitlines())}")

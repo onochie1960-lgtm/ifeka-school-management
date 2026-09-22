@@ -625,6 +625,38 @@ window.viewRow = viewRow;
 window.editRow = editRow;
 window.deleteRow = deleteRow;
 
+window.viewRow = viewRow;
+window.editRow = editRow;
+window.deleteRow = deleteRow;
+
+/* Mobile hamburger menu */
+const menuButton = document.querySelector(".hub-menu");
+const mobileNav = document.querySelector(".hub-nav");
+
+if (menuButton && mobileNav) {
+  menuButton.addEventListener("click", function (event) {
+    event.preventDefault();
+    event.stopPropagation();
+    mobileNav.classList.toggle("show");
+  });
+
+  mobileNav.querySelectorAll("a").forEach(function (link) {
+    link.addEventListener("click", function () {
+      mobileNav.classList.remove("show");
+    });
+  });
+
+  document.addEventListener("click", function (event) {
+    if (
+      mobileNav.classList.contains("show") &&
+      !mobileNav.contains(event.target) &&
+      !menuButton.contains(event.target)
+    ) {
+      mobileNav.classList.remove("show");
+    }
+  });
+}
+
 init();
 
 

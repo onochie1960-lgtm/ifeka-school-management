@@ -100,11 +100,21 @@
     id="menuBtn"
     class="icon-btn"
     type="button"
-    onclick="document.querySelector('.sidebar').classList.toggle('open')"
+    onclick="
+        const sidebar = document.querySelector('.sidebar');
+        const isOpen = sidebar.dataset.menuOpen === '1';
+
+        if (isOpen) {
+            sidebar.style.setProperty('transform', 'translateX(-100%)', 'important');
+            sidebar.dataset.menuOpen = '0';
+        } else {
+            sidebar.style.setProperty('transform', 'translateX(0)', 'important');
+            sidebar.dataset.menuOpen = '1';
+        }
+    "
 >
     ☰
 </button>
-
       <div>
         <h1 id="pageTitle">Dashboard</h1>
         <p id="status">Ifeka School Management System</p>

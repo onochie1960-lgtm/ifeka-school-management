@@ -289,32 +289,34 @@
 
   <!-- MOBILE MENU -->
 
-  <script>
+  <!-- MOBILE MENU -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
 
     const menuBtn = document.getElementById("menuBtn");
     const sidebar = document.querySelector(".sidebar");
 
-    if (menuBtn && sidebar) {
-
-      menuBtn.addEventListener("click", function () {
-        sidebar.classList.toggle("open");
-      });
-
+    if (!menuBtn || !sidebar) {
+        console.error("Mobile menu elements not found.");
+        return;
     }
 
-    document.querySelectorAll("#nav button").forEach(button => {
+    menuBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
 
-      button.addEventListener("click", function () {
-
-        if (window.innerWidth <= 800) {
-          sidebar.classList.remove("open");
-        }
-
-      });
-
+        sidebar.classList.toggle("open");
     });
 
-  </script>
+    document.querySelectorAll("#nav button").forEach(function (button) {
+        button.addEventListener("click", function () {
+            if (window.innerWidth <= 800) {
+                sidebar.classList.remove("open");
+            }
+        });
+    });
 
+});
+</script>
 </body>
 </html>

@@ -488,3 +488,30 @@ dialog::backdrop {
     flex: 1;
   }
 }
+/* MOBILE SIDEBAR FIX */
+@media (max-width: 800px) {
+    .sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 280px !important;
+        height: 100vh !important;
+        transform: translateX(-100%) !important;
+        transition: transform 0.25s ease !important;
+        z-index: 9999 !important;
+        overflow-y: auto !important;
+    }
+
+    .sidebar.open {
+        transform: translateX(0) !important;
+    }
+
+    #menuBtn {
+        position: relative !important;
+        z-index: 10000 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+    }
+}

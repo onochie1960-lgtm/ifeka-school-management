@@ -658,6 +658,4 @@ if (menuButton && mobileNav) {
 }
 
 init();
-
-
   

@@ -96,9 +96,13 @@
     <!-- TOP BAR -->
     <header class="topbar">
 
-      <button id="menuBtn" class="icon-btn">
-        ☰
-      </button>
+      <button
+    id="menuBtn"
+    class="icon-btn"
+    type="button"
+    onclick="document.querySelector('.sidebar').classList.toggle('open')">
+    ☰
+</button>
 
       <div>
         <h1 id="pageTitle">Dashboard</h1>

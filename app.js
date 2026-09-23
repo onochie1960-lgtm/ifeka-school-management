@@ -1,6 +1,6 @@
 /* =========================================================
    Ifeka School Management - app.js
-   Clean replacement version
+   Stable CRUD version
    ========================================================= */
 
 const TABLES = [
@@ -15,48 +15,117 @@ const TABLES = [
   ["student_parents", "Student Parents"]
 ];
 
-/* Fields used when a table is empty and therefore has no rows
-   from which the application can automatically discover columns. */
 const FORM_FIELDS = {
-  Students: [
-    "student_id","first_name","last_name","gender","date_of_birth",
-    "phone","email","address","class_id","photo_url"
+  students: [
+    "student_id",
+    "first_name",
+    "last_name",
+    "gender",
+    "date_of_birth",
+    "phone",
+    "email",
+    "address",
+    "class_id",
+    "photo_url"
   ],
+
   teachers: [
-    "teacher_id","first_name","last_name","gender","phone","email",
-    "address","qualification","subject","date_of_birth"
+    "teacher_id",
+    "first_name",
+    "last_name",
+    "gender",
+    "phone",
+    "email",
+    "address",
+    "qualification",
+    "subject",
+    "date_of_birth"
   ],
+
   parents: [
-    "parent_id","first_name","last_name","relationship","phone",
-    "email","address","occupation"
+    "parent_id",
+    "first_name",
+    "last_name",
+    "relationship",
+    "phone",
+    "email",
+    "address",
+    "occupation"
   ],
+
   school_classes: [
-    "class_name","section","session","teacher_id"
+    "class_name",
+    "section",
+    "session",
+    "teacher_id"
   ],
+
   subjects: [
-    "subject_code","subject_name","class_id"
+    "subject_code",
+    "subject_name",
+    "class_id"
   ],
+
   attendance: [
-    "student_id","date","status","remark"
+    "student_id",
+    "date",
+    "status",
+    "remark"
   ],
+
   results: [
-    "student_id","subject_id","session","term",
-    "ca_score","exam_score","total","grade","remark"
+    "student_id",
+    "subject_id",
+    "session",
+    "term",
+    "ca_score",
+    "exam_score",
+    "total",
+    "grade",
+    "remark"
   ],
+
   fee_payments: [
-    "student_id","amount","payment_date","payment_method",
-    "term","session","reference","remark"
+    "student_id",
+    "amount",
+    "payment_date",
+    "payment_method",
+    "term",
+    "session",
+    "reference",
+    "remark"
   ],
+
   student_parents: [
-    "student_id","parent_id","relationship"
+    "student_id",
+    "parent_id",
+    "relationship"
   ]
+};
+
+/* Primary key for each table */
+const PRIMARY_KEYS = {
+  students: "student_id",
+  teachers: "teacher_id",
+  parents: "parent_id",
+  school_classes: "id",
+  subjects: "id",
+  attendance: "id",
+  results: "id",
+  fee_payments: "id",
+  student_parents: "id"
 };
 
 let client = null;
 let currentTable = null;
 let rows = [];
 let columns = [];
-let editingId = null;
+let editingKey = null;
+
+
+/* =========================================================
+   Helpers
+   ========================================================= */
 
 function $(id) {
   return document.getElementById(id);
@@ -83,8 +152,22 @@ function tableLabel(table) {
   return found ? found[1] : pretty(table);
 }
 
+function primaryKey(table) {
+  return PRIMARY_KEYS[table] || "id";
+}
+
+
+/* =========================================================
+   Application startup
+   ========================================================= */
+
 function init() {
   const nav = $("nav");
+
+  if (!nav) {
+    console.error("Navigation element #nav was not found.");
+    return;
+  }
 
   nav.innerHTML =
     `<button class="active" data-page="dashboard">🏠 Dashboard</button>` +
@@ -93,7 +176,9 @@ function init() {
     ).join("");
 
   nav.querySelectorAll("button").forEach(button => {
+
     button.onclick = () => {
+
       nav.querySelectorAll("button")
         .forEach(x => x.classList.remove("active"));
 
@@ -107,20 +192,57 @@ function init() {
 
       document.querySelector(".sidebar")?.classList.remove("open");
     };
+
   });
 
-  $("refreshBtn").onclick = () => {
-    currentTable ? loadTable(currentTable) : loadDashboard();
-  };
 
-$("searchInput").oninput = renderRows;
-  $("addBtn").onclick = () => openForm();
+  const refreshBtn = $("refreshBtn");
 
-  $("menuBtn").onclick = () => {
-    document.querySelector(".sidebar")?.classList.toggle("open");
-  };
+  if (refreshBtn) {
+    refreshBtn.onclick = () => {
+      currentTable ? loadTable(currentTable) : loadDashboard();
+    };
+  }
 
-  $("recordForm").onsubmit = saveRecord;
+
+  const searchInput = $("searchInput");
+
+  if (searchInput) {
+    searchInput.oninput = renderRows;
+  }
+
+
+  const addBtn = $("addBtn");
+
+  if (addBtn) {
+    addBtn.onclick = () => openForm();
+  }
+
+
+  const menuBtn = $("menuBtn");
+
+  if (menuBtn) {
+
+    menuBtn.onclick = event => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const sidebar = document.querySelector(".sidebar");
+
+      if (sidebar) {
+        sidebar.classList.toggle("open");
+      }
+    };
+
+  }
+
+
+  const recordForm = $("recordForm");
+
+  if (recordForm) {
+    recordForm.onsubmit = saveRecord;
+  }
+
 
   const config = window.IFEKA_CONFIG || {};
 
@@ -130,160 +252,329 @@ $("searchInput").oninput = renderRows;
     !config.SUPABASE_ANON_KEY ||
     config.SUPABASE_ANON_KEY.includes("PASTE_")
   ) {
-    $("status").textContent = "Supabase connection not configured yet.";
+
+    if ($("status")) {
+      $("status").textContent =
+        "Supabase connection is not configured.";
+    }
+
     loadCardsLocal();
     return;
   }
 
-  client = supabase.createClient(
-    config.SUPABASE_URL,
-    config.SUPABASE_ANON_KEY
-  );
+
+  try {
+
+    client = supabase.createClient(
+      config.SUPABASE_URL,
+      config.SUPABASE_ANON_KEY
+    );
+
+  } catch (error) {
+
+    console.error(error);
+
+    if ($("status")) {
+      $("status").textContent =
+        "Supabase initialization failed: " + error.message;
+    }
+
+    return;
+  }
+
 
   loadDashboard();
 }
 
+
+/* =========================================================
+   Dashboard
+   ========================================================= */
+
 async function loadDashboard() {
+
   if (!client) {
     loadCardsLocal();
     return;
   }
 
-  $("status").textContent = "Connected. Loading school records…";
+  if ($("status")) {
+    $("status").textContent =
+      "Connected. Loading school records…";
+  }
 
-  const counts = await Promise.all(
-    TABLES.map(async ([table]) => {
-      try {
-        const { count, error } = await client
-          .from(table)
-          .select("*", { count: "exact", head: true });
 
-        return error ? 0 : (count || 0);
-      } catch {
-        return 0;
+  const counts = [];
+
+  for (const [table] of TABLES) {
+
+    try {
+
+      const { count, error } = await client
+        .from(table)
+        .select("*", {
+          count: "exact",
+          head: true
+        });
+
+      if (error) {
+
+        console.error(
+          "Dashboard error:",
+          table,
+          error
+        );
+
+        counts.push("!");
+
+      } else {
+
+        counts.push(count || 0);
+
       }
-    })
-  );
 
-  $("cards").innerHTML = TABLES.map(([table, label], i) =>
+    } catch (error) {
+
+      console.error(error);
+      counts.push("!");
+
+    }
+  }
+
+
+  if ($("cards")) {
+
+    $("cards").innerHTML = TABLES.map(
+      ([table, label], i) =>
+        `<div class="card">
+          <div class="label">${esc(label)}</div>
+          <div class="num">${counts[i]}</div>
+        </div>`
+    ).join("") +
+
     `<div class="card">
-       <div class="label">${esc(label)}</div>
-       <div class="num">${counts[i]}</div>
-     </div>`
-  ).join("") +
-  `<div class="card">
-     <div class="label">Total Modules</div>
-     <div class="num">${TABLES.length}</div>
-   </div>`;
+      <div class="label">Total Modules</div>
+      <div class="num">${TABLES.length}</div>
+    </div>`;
 
-  $("status").textContent = "Supabase connected.";
+  }
+
+
+  const hasError = counts.includes("!");
+
+  if ($("status")) {
+
+    $("status").textContent = hasError
+      ? "Connected, but some tables could not be read. Check Supabase RLS policies."
+      : "Supabase connected.";
+
+  }
 }
 
+
 function loadCardsLocal() {
+
+  if (!$("cards")) return;
+
   $("cards").innerHTML =
     TABLES.map(([table, label]) =>
       `<div class="card">
-         <div class="label">${esc(label)}</div>
-         <div class="num">—</div>
-       </div>`
+        <div class="label">${esc(label)}</div>
+        <div class="num">—</div>
+      </div>`
     ).join("") +
+
     `<div class="card">
-       <div class="label">Database</div>
-       <div class="num">Ready</div>
-     </div>`;
+      <div class="label">Database</div>
+      <div class="num">Ready</div>
+    </div>`;
 }
 
-function showDashboard(button) {
-  currentTable = null;
 
-  $("dashboard").classList.remove("hidden");
-  $("tableView").classList.add("hidden");
-  $("pageTitle").textContent = "Dashboard";
+/* =========================================================
+   Navigation
+   ========================================================= */
+
+function showDashboard(button) {
+
+  currentTable = null;
+  editingKey = null;
+
+  $("dashboard")?.classList.remove("hidden");
+  $("tableView")?.classList.add("hidden");
+
+  if ($("pageTitle")) {
+    $("pageTitle").textContent = "Dashboard";
+  }
 
   document.querySelectorAll("nav button")
     .forEach(x => x.classList.remove("active"));
 
-  button.classList.add("active");
+  button?.classList.add("active");
+
   loadDashboard();
 }
 
+
 async function openTable(table, button) {
+
   currentTable = table;
+  editingKey = null;
 
-  $("dashboard").classList.add("hidden");
-  $("tableView").classList.remove("hidden");
-  $("pageTitle").textContent = tableLabel(table);
+  $("dashboard")?.classList.add("hidden");
+  $("tableView")?.classList.remove("hidden");
 
-  // Always show the module's Add Record button.
+  if ($("pageTitle")) {
+    $("pageTitle").textContent = tableLabel(table);
+  }
+
+
   const addBtn = $("addBtn");
+
   if (addBtn) {
+
     addBtn.hidden = false;
     addBtn.style.display = "inline-flex";
-    addBtn.textContent = "+ Add Record";
-    addBtn.setAttribute("aria-label", "Add " + tableLabel(table) + " record");
+    addBtn.textContent =
+      "+ Add " + tableLabel(table);
+
   }
+
 
   document.querySelectorAll("nav button")
     .forEach(x => x.classList.remove("active"));
 
-  button.classList.add("active");
+  button?.classList.add("active");
+
 
   if (!client) {
-    $("status").textContent =
-      "Add your Supabase URL and public anon key in config.js first.";
+
+    if ($("status")) {
+      $("status").textContent =
+        "Supabase is not connected.";
+    }
+
     return;
   }
+
 
   await loadTable(table);
 }
 
+
+/* =========================================================
+   Load table
+   ========================================================= */
+
 async function loadTable(table) {
+
   const addBtn = $("addBtn");
+
   if (addBtn) {
     addBtn.hidden = false;
     addBtn.style.display = "inline-flex";
-    addBtn.textContent = "+ Add Record";
+    addBtn.textContent =
+      "+ Add " + tableLabel(table);
   }
 
-  $("status").textContent = "Loading " + tableLabel(table) + "…";
+
+  if ($("status")) {
+    $("status").textContent =
+      "Loading " + tableLabel(table) + "…";
+  }
+
 
   const { data, error } = await client
     .from(table)
     .select("*")
     .limit(200);
 
+
   if (error) {
-    $("status").textContent = "Database error: " + error.message;
-    $("thead").innerHTML = "";
-    $("tbody").innerHTML = "";
-    $("empty").classList.remove("hidden");
+
+    console.error(
+      "Supabase table error:",
+      table,
+      error
+    );
+
+    rows = [];
+    columns = FORM_FIELDS[table] || [];
+
+    if ($("status")) {
+      $("status").textContent =
+        "Database error: " + error.message;
+    }
+
+    renderEmptyTable();
     return;
   }
 
+
   rows = data || [];
 
-  if (rows.length) {
+
+  if (rows.length > 0) {
+
     columns = Object.keys(rows[0]);
-    $("empty").classList.add("hidden");
-    $("status").textContent = `${rows.length} record(s) loaded.`;
+
+    $("empty")?.classList.add("hidden");
+
+    if ($("status")) {
+      $("status").textContent =
+        `${rows.length} record(s) loaded.`;
+    }
+
     renderRows();
     return;
   }
 
-  /* Empty table: use the known application schema so Add Record
-     can still open. */
+
   columns = FORM_FIELDS[table] || [];
 
-  $("thead").innerHTML = "";
-  $("tbody").innerHTML = "";
-  $("empty").classList.remove("hidden");
+  renderEmptyTable();
 
-  $("status").textContent =
-    `Table is empty. ${tableLabel(table)} is ready for a new record.`;
+
+  if ($("status")) {
+    $("status").textContent =
+      `No records yet. ${tableLabel(table)} is ready for a new record.`;
+  }
 }
 
+
+function renderEmptyTable() {
+
+  if ($("thead")) {
+    $("thead").innerHTML =
+      `<tr>
+        ${columns.map(column =>
+          `<th>${esc(pretty(column))}</th>`
+        ).join("")}
+        <th>Actions</th>
+      </tr>`;
+  }
+
+  if ($("tbody")) {
+    $("tbody").innerHTML = "";
+  }
+
+  $("empty")?.classList.remove("hidden");
+}
+
+
+/* =========================================================
+   Render rows
+   ========================================================= */
+
 function renderRows() {
-  const search = ($("search").value || "").toLowerCase();
+
+  const searchInput = $("searchInput");
+
+  const search =
+    (searchInput?.value || "")
+      .toLowerCase()
+      .trim();
+
 
   const filtered = rows.filter(row =>
     columns.some(column =>
@@ -293,105 +584,191 @@ function renderRows() {
     )
   );
 
-  $("empty").classList.toggle("hidden", filtered.length > 0);
 
-  $("thead").innerHTML =
-    "<tr>" +
-    columns.map(column =>
-      `<th>${esc(pretty(column))}</th>`
-    ).join("") +
-    "<th>Actions</th></tr>";
+  $("empty")?.classList.toggle(
+    "hidden",
+    filtered.length > 0
+  );
 
-  $("tbody").innerHTML = filtered.map(row =>
-    `<tr>
-      ${columns.map(column =>
-        `<td>${formatCell(row[column])}</td>`
-      ).join("")}
-      <td class="actions">
-        <button class="small-btn"
-          onclick="viewRow(${rows.indexOf(row)})">View</button>
-        <button class="small-btn"
-          onclick="editRow(${rows.indexOf(row)})">Edit</button>
-        <button class="small-btn danger"
-          onclick="deleteRow(${rows.indexOf(row)})">Delete</button>
-      </td>
-    </tr>`
-  ).join("");
+
+  if ($("thead")) {
+
+    $("thead").innerHTML =
+      "<tr>" +
+      columns.map(column =>
+        `<th>${esc(pretty(column))}</th>`
+      ).join("") +
+      "<th>Actions</th></tr>";
+
+  }
+
+
+  if ($("tbody")) {
+
+    $("tbody").innerHTML = filtered.map(row => {
+
+      const index = rows.indexOf(row);
+
+      return `<tr>
+        ${columns.map(column =>
+          `<td>${formatCell(row[column])}</td>`
+        ).join("")}
+
+        <td class="actions">
+
+          <button
+            class="small-btn"
+            onclick="viewRow(${index})">
+            View
+          </button>
+
+          <button
+            class="small-btn"
+            onclick="editRow(${index})">
+            Edit
+          </button>
+
+          <button
+            class="small-btn danger"
+            onclick="deleteRow(${index})">
+            Delete
+          </button>
+
+        </td>
+      </tr>`;
+
+    }).join("");
+
+  }
 }
 
+
+/* =========================================================
+   Cell formatting
+   ========================================================= */
+
 function formatCell(value) {
+
   if (value == null) return "";
 
   const text = String(value);
+
 
   if (
     /^https?:\/\//i.test(text) &&
     /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(text)
   ) {
-    return `<img src="${esc(text)}"
+
+    return `<img
+      src="${esc(text)}"
       alt="Photo"
-      style="width:42px;height:42px;object-fit:cover;border-radius:8px">`;
+      style="
+        width:42px;
+        height:42px;
+        object-fit:cover;
+        border-radius:8px;
+      ">`;
+
   }
+
 
   return esc(text);
 }
 
-function getFieldType(field) {
-  if (field === "date" ||
-      field === "dob" ||
-      field === "date_of_birth" ||
-      field === "payment_date") return "date";
 
-  if (field.includes("email")) return "email";
-  if (field.includes("phone")) return "tel";
+/* =========================================================
+   Form controls
+   ========================================================= */
+
+function getFieldType(field) {
+
+  if (
+    field === "date" ||
+    field === "dob" ||
+    field === "date_of_birth" ||
+    field === "payment_date"
+  ) {
+    return "date";
+  }
+
+
+  if (field.includes("email")) {
+    return "email";
+  }
+
+
+  if (field.includes("phone")) {
+    return "tel";
+  }
+
+
   if (
     field.includes("score") ||
     field === "amount" ||
     field === "total"
-  ) return "number";
+  ) {
+    return "number";
+  }
+
 
   return "text";
 }
 
+
 function getFieldControl(field, value) {
+
   const v = value ?? "";
 
+
   if (field === "gender") {
+
     return `<select name="${esc(field)}">
       <option value="">Select gender</option>
       <option value="Male" ${v === "Male" ? "selected" : ""}>Male</option>
       <option value="Female" ${v === "Female" ? "selected" : ""}>Female</option>
     </select>`;
+
   }
 
+
   if (field === "relationship") {
+
     return `<select name="${esc(field)}">
       <option value="">Select relationship</option>
       <option value="Father" ${v === "Father" ? "selected" : ""}>Father</option>
       <option value="Mother" ${v === "Mother" ? "selected" : ""}>Mother</option>
       <option value="Guardian" ${v === "Guardian" ? "selected" : ""}>Guardian</option>
     </select>`;
+
   }
 
+
   if (field === "status") {
+
     return `<select name="${esc(field)}">
       <option value="">Select status</option>
       <option value="Present" ${v === "Present" ? "selected" : ""}>Present</option>
       <option value="Absent" ${v === "Absent" ? "selected" : ""}>Absent</option>
       <option value="Late" ${v === "Late" ? "selected" : ""}>Late</option>
     </select>`;
+
   }
 
+
   if (field === "term") {
+
     return `<select name="${esc(field)}">
       <option value="">Select term</option>
       <option value="First Term" ${v === "First Term" ? "selected" : ""}>First Term</option>
       <option value="Second Term" ${v === "Second Term" ? "selected" : ""}>Second Term</option>
       <option value="Third Term" ${v === "Third Term" ? "selected" : ""}>Third Term</option>
     </select>`;
+
   }
 
+
   if (field === "payment_method") {
+
     return `<select name="${esc(field)}">
       <option value="">Select method</option>
       <option value="Cash" ${v === "Cash" ? "selected" : ""}>Cash</option>
@@ -399,263 +776,544 @@ function getFieldControl(field, value) {
       <option value="POS" ${v === "POS" ? "selected" : ""}>POS</option>
       <option value="Online" ${v === "Online" ? "selected" : ""}>Online</option>
     </select>`;
+
   }
+
 
   return `<input
     name="${esc(field)}"
     type="${getFieldType(field)}"
     value="${esc(v)}"
-    ${field === "id" ? 'readonly' : ''}
   >`;
 }
 
-function openForm(row = null) {
-  const fields = columns.length
-    ? columns
-    : (FORM_FIELDS[currentTable] || []);
 
-  if (!fields.length) {
-    alert("No fields are available for this table yet.");
+/* =========================================================
+   Open Add/Edit form
+   ========================================================= */
+
+function openForm(row = null) {
+
+  if (!currentTable) {
+    alert("Please select a module first.");
     return;
   }
 
-  editingId = row?.id ?? null;
 
-  $("dialogTitle").textContent =
-    row ? `Edit ${tableLabel(currentTable)}` :
-          `Add ${tableLabel(currentTable)}`;
+  const fields =
+    columns.length
+      ? columns
+      : (FORM_FIELDS[currentTable] || []);
 
-  $("formFields").innerHTML = fields
-    .filter(field => field !== "created_at")
-    .map(field => {
-      const value = row?.[field] ?? "";
 
-      return `<div class="field">
-        <label>${esc(pretty(field))}</label>
-        ${getFieldControl(field, value)}
-      </div>`;
-    }).join("");
-
-  /* Student photo upload if the existing table has photo_url. */
-  if (currentTable === "Students" &&
-      fields.includes("photo_url")) {
-    $("formFields").insertAdjacentHTML("beforeend", `
-      <div class="field">
-        <label>Student Photo</label>
-        <input id="studentPhoto"
-          type="file"
-          accept="image/*">
-        ${row?.photo_url
-          ? `<small>Existing photo is saved. Select another photo to replace it.</small>`
-          : ""}
-      </div>
-    `);
+  if (!fields.length) {
+    alert("No fields are available for this table.");
+    return;
   }
 
-  $("recordDialog").showModal();
+
+  const key = primaryKey(currentTable);
+
+  editingKey =
+    row?.[key] ??
+    null;
+
+
+  if ($("dialogTitle")) {
+
+    $("dialogTitle").textContent =
+      row
+        ? `Edit ${tableLabel(currentTable)}`
+        : `Add ${tableLabel(currentTable)}`;
+
+  }
+
+
+  if ($("formFields")) {
+
+    $("formFields").innerHTML =
+      fields
+        .filter(field =>
+          field !== "created_at" &&
+          field !== "updated_at"
+        )
+        .map(field => {
+
+          const value =
+            row?.[field] ?? "";
+
+          return `
+            <div class="field">
+
+              <label>
+                ${esc(pretty(field))}
+              </label>
+
+              ${getFieldControl(field, value)}
+
+            </div>
+          `;
+
+        })
+        .join("");
+
+  }
+
+
+  /* Student photo */
+  if (
+    currentTable === "students" &&
+    fields.includes("photo_url")
+  ) {
+
+    $("formFields")?.insertAdjacentHTML(
+      "beforeend",
+
+      `
+      <div class="field">
+
+        <label>Student Photo</label>
+
+        <input
+          id="studentPhoto"
+          type="file"
+          accept="image/*"
+        >
+
+        ${
+          row?.photo_url
+            ? `<small>
+                Existing photo is saved.
+                Select another photo to replace it.
+              </small>`
+            : ""
+        }
+
+      </div>
+      `
+    );
+
+  }
+
+
+  const dialog = $("recordDialog");
+
+  if (dialog) {
+    dialog.showModal();
+  }
 }
 
+
+/* =========================================================
+   Save record
+   ========================================================= */
+
 async function saveRecord(event) {
+
   event.preventDefault();
 
-  if (!client || !currentTable) return;
 
-  const formData = new FormData(event.target);
-  const data = Object.fromEntries(formData.entries());
+  if (!client || !currentTable) {
+    alert("Database is not connected.");
+    return;
+  }
 
-  /* Remove empty strings. */
+
+  const formData =
+    new FormData(event.target);
+
+
+  const data =
+    Object.fromEntries(formData.entries());
+
+
+  /* Convert empty strings to null */
   Object.keys(data).forEach(key => {
-    if (data[key] === "") data[key] = null;
+
+    if (data[key] === "") {
+      data[key] = null;
+    }
+
   });
 
-  /* Never manually insert an auto-generated numeric id. */
-  if (editingId === null) delete data.id;
 
-  const photoInput = $("studentPhoto");
-  const photoFile = photoInput?.files?.[0];
+  const key =
+    primaryKey(currentTable);
 
-  $("saveBtn").disabled = true;
+
+  /* Do not overwrite primary key during edit */
+  if (editingKey !== null) {
+    delete data[key];
+  }
+
+
+  const photoInput =
+    $("studentPhoto");
+
+
+  const photoFile =
+    photoInput?.files?.[0];
+
+
+  const saveBtn =
+    $("saveBtn");
+
+
+  if (saveBtn) {
+    saveBtn.disabled = true;
+  }
+
 
   try {
+
+    /* Student photo upload */
     if (
-      currentTable === "Students" &&
+      currentTable === "students" &&
       photoFile &&
       photoFile.size > 0
     ) {
+
       const extension =
-        (photoFile.name.split(".").pop() || "jpg").toLowerCase();
+        (photoFile.name.split(".").pop() || "jpg")
+          .toLowerCase();
+
+
+      const studentIdentifier =
+        data.student_id ||
+        editingKey ||
+        Date.now();
+
 
       const filePath =
-        `${data.student_id || editingId || Date.now()}-${Date.now()}.${extension}`;
+        `${studentIdentifier}-${Date.now()}.${extension}`;
 
-      const upload = await client.storage
-        .from("student-photos")
-        .upload(filePath, photoFile, {
-          upsert: true,
-          contentType: photoFile.type || "image/jpeg"
-        });
 
-      if (upload.error) throw upload.error;
+      const upload =
+        await client.storage
+          .from("student-photos")
+          .upload(
+            filePath,
+            photoFile,
+            {
+              upsert: true,
+              contentType:
+                photoFile.type || "image/jpeg"
+            }
+          );
 
-      data.photo_url = filePath;
+
+      if (upload.error) {
+        throw upload.error;
+      }
+
+
+      const publicUrl =
+        client.storage
+          .from("student-photos")
+          .getPublicUrl(filePath);
+
+
+      data.photo_url =
+        publicUrl.data.publicUrl;
+
     }
+
 
     let result;
 
-    if (editingId !== null) {
-      result = await client
-        .from(currentTable)
-        .update(data)
-        .eq("id", editingId);
+
+    if (editingKey !== null) {
+
+      result =
+        await client
+          .from(currentTable)
+          .update(data)
+          .eq(key, editingKey);
+
     } else {
-      result = await client
-        .from(currentTable)
-        .insert(data);
+
+      result =
+        await client
+          .from(currentTable)
+          .insert(data);
+
     }
 
-    if (result.error) throw result.error;
 
-    $("recordDialog").close();
+    if (result.error) {
+      throw result.error;
+    }
+
+
+    $("recordDialog")?.close();
+
+    editingKey = null;
+
     await loadTable(currentTable);
 
+
   } catch (error) {
-    alert("Save failed:\n\n" + (error.message || error));
+
+    console.error(error);
+
+    alert(
+      "Save failed:\n\n" +
+      (error.message || error)
+    );
+
   } finally {
-    $("saveBtn").disabled = false;
+
+    if (saveBtn) {
+      saveBtn.disabled = false;
+    }
+
   }
 }
 
+
+/* =========================================================
+   View record
+   ========================================================= */
+
 function ensureViewDialog() {
+
   if ($("viewDialog")) return;
 
-  const dialog = document.createElement("dialog");
-  dialog.id = "viewDialog";
+
+  const dialog =
+    document.createElement("dialog");
+
+
+  dialog.id =
+    "viewDialog";
+
+
   dialog.innerHTML = `
     <div class="dialog-head">
-      <h2 id="viewDialogTitle">Record Details</h2>
-      <button type="button" class="small-btn" id="closeViewBtn">Close</button>
+
+      <h2 id="viewDialogTitle">
+        Record Details
+      </h2>
+
+      <button
+        type="button"
+        class="small-btn"
+        id="closeViewBtn">
+        Close
+      </button>
+
     </div>
-    <div id="viewFields" class="view-grid"></div>
+
+    <div
+      id="viewFields"
+      class="view-grid">
+    </div>
   `;
+
+
   document.body.appendChild(dialog);
 
-  $("closeViewBtn").onclick = () => dialog.close();
-  dialog.addEventListener("click", event => {
-    if (event.target === dialog) dialog.close();
-  });
+
+  $("closeViewBtn").onclick =
+    () => dialog.close();
+
+
+  dialog.addEventListener(
+    "click",
+    event => {
+
+      if (event.target === dialog) {
+        dialog.close();
+      }
+
+    }
+  );
 }
 
+
 function viewRow(index) {
-  const row = rows[index];
+
+  const row =
+    rows[index];
+
+
   if (!row) return;
 
+
   ensureViewDialog();
+
 
   $("viewDialogTitle").textContent =
     `${tableLabel(currentTable)} — View Record`;
 
-  $("viewFields").innerHTML = columns
-    .filter(field => field !== "created_at")
-    .map(field => {
-      const value = row[field];
 
-      let display = value == null || value === "" ? "—" : esc(value);
+  $("viewFields").innerHTML =
+    columns
+      .filter(field =>
+        field !== "created_at" &&
+        field !== "updated_at"
+      )
+      .map(field => {
 
-      if (
-        typeof value === "string" &&
-        /^https?:\/\//i.test(value) &&
-        /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(value)
-      ) {
-        display = `<img src="${esc(value)}" alt="Photo"
-          style="max-width:180px;max-height:180px;object-fit:cover;border-radius:12px">`;
-      }
+        const value =
+          row[field];
 
-      return `
-        <div class="field">
-          <label>${esc(pretty(field))}</label>
-          <div class="view-value">${display}</div>
-        </div>
-      `;
-    }).join("");
 
-  $("viewDialog").showModal();
+        let display =
+          value == null || value === ""
+            ? "—"
+            : esc(value);
+
+
+        if (
+          typeof value === "string" &&
+          /^https?:\/\//i.test(value) &&
+          /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(value)
+        ) {
+
+          display =
+            `<img
+              src="${esc(value)}"
+              alt="Photo"
+              style="
+                max-width:180px;
+                max-height:180px;
+                object-fit:cover;
+                border-radius:12px;
+              ">`;
+
+        }
+
+
+        return `
+          <div class="field">
+
+            <label>
+              ${esc(pretty(field))}
+            </label>
+
+            <div class="view-value">
+              ${display}
+            </div>
+
+          </div>
+        `;
+
+      })
+      .join("");
+
+
+  $("viewDialog")?.showModal();
 }
 
-async function editRow(index) {
-  openForm(rows[index]);
+
+/* =========================================================
+   Edit record
+   ========================================================= */
+
+function editRow(index) {
+
+  const row =
+    rows[index];
+
+
+  if (!row) return;
+
+
+  openForm(row);
 }
+
+
+/* =========================================================
+   Delete record
+   ========================================================= */
 
 async function deleteRow(index) {
-  const row = rows[index];
 
-  if (!row?.id) {
-    alert("This record does not have an id that can be deleted by the generic action.");
+  const row =
+    rows[index];
+
+
+  if (!row) return;
+
+
+  const key =
+    primaryKey(currentTable);
+
+
+  const keyValue =
+    row[key];
+
+
+  if (
+    keyValue === undefined ||
+    keyValue === null
+  ) {
+
+    alert(
+      `The ${tableLabel(currentTable)} record has no ${key} value.`
+    );
+
     return;
   }
 
-  if (!confirm(
-    `Delete this ${tableLabel(currentTable)} record?\n\nThis cannot be undone.`
-  )) return;
 
-  const { data, error } = await client
-    .from(currentTable)
-    .delete()
-    .eq("id", row.id)
-    .select()
-    .limit(1);
+  if (
+    !confirm(
+      `Delete this ${tableLabel(currentTable)} record?\n\nThis cannot be undone.`
+    )
+  ) {
+    return;
+  }
+
+
+  const { data, error } =
+    await client
+      .from(currentTable)
+      .delete()
+      .eq(key, keyValue)
+      .select();
+
 
   if (error) {
-    alert("Delete failed:\n\n" + error.message);
+
+    alert(
+      "Delete failed:\n\n" +
+      error.message
+    );
+
     return;
   }
 
-  if (!data || !data.length) {
+
+  if (!data || data.length === 0) {
+
     alert(
       "The record was not deleted.\n\n" +
       "Please check the DELETE RLS policy for the " +
-      currentTable + " table."
+      currentTable +
+      " table."
     );
+
     return;
   }
+
 
   await loadTable(currentTable);
 }
 
-window.viewRow = viewRow;
-window.editRow = editRow;
-window.deleteRow = deleteRow;
+
+/* =========================================================
+   Global functions used by table buttons
+   ========================================================= */
 
 window.viewRow = viewRow;
 window.editRow = editRow;
 window.deleteRow = deleteRow;
 
-/* Mobile hamburger menu */
-const menuButton = document.querySelector(".hub-menu");
-const mobileNav = document.querySelector(".hub-nav");
 
-if (menuButton && mobileNav) {
-  menuButton.addEventListener("click", function (event) {
-    event.preventDefault();
-    event.stopPropagation();
-    mobileNav.classList.toggle("show");
-  });
-
-  mobileNav.querySelectorAll("a").forEach(function (link) {
-    link.addEventListener("click", function () {
-      mobileNav.classList.remove("show");
-    });
-  });
-
-  document.addEventListener("click", function (event) {
-    if (
-      mobileNav.classList.contains("show") &&
-      !mobileNav.contains(event.target) &&
-      !menuButton.contains(event.target)
-    ) {
-      mobileNav.classList.remove("show");
-    }
-  });
-}
+/* =========================================================
+   Start application
+   ========================================================= */
 
 init();
-  

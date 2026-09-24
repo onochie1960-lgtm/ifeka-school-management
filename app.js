@@ -234,12 +234,59 @@ if (menuBtn && sidebar) {
   });
 }
 
+const recordForm = $("recordForm");
+const dialog = $("recordDialog");
+const closeDialogBtn = $("closeDialogBtn");
+const cancelBtn = $("cancelBtn");
+const saveBtn = $("saveBtn");
 
-  const recordForm = $("recordForm");
-
-  if (recordForm) {
-    recordForm.onsubmit = saveRecord;
+function closeRecordDialog() {
+  if (dialog) {
+    dialog.close();
   }
+
+  editingKey = null;
+}
+
+if (closeDialogBtn) {
+  closeDialogBtn.addEventListener("click", function (event) {
+    event.preventDefault();
+    closeRecordDialog();
+  });
+}
+
+if (cancelBtn) {
+  cancelBtn.addEventListener("click", function (event) {
+    event.preventDefault();
+    closeRecordDialog();
+  });
+}
+
+if (recordForm) {
+  recordForm.addEventListener("submit", saveRecord);
+}
+
+  editingKey = null;
+}
+
+if (closeDialogBtn) {
+  closeDialogBtn.addEventListener("click", function (event) {
+    event.preventDefault();
+    closeRecordDialog();
+  });
+}
+
+if (cancelBtn) {
+  cancelBtn.addEventListener("click", function (event) {
+    event.preventDefault();
+    closeRecordDialog();
+  });
+}
+
+if (recordForm) {
+  recordForm.addEventListener("submit", saveRecord);
+}
+  
 
 
   const config = window.IFEKA_CONFIG || {};

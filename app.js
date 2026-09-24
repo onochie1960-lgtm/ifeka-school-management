@@ -186,24 +186,30 @@ function init() {
     ).join("");
 
   nav.querySelectorAll("button").forEach(button => {
+    button.addEventListener("click", async function () {
 
-    button.onclick = () => {
+        nav.querySelectorAll("button")
+            .forEach(x => x.classList.remove("active"));
 
-      nav.querySelectorAll("button")
-        .forEach(x => x.classList.remove("active"));
+        this.classList.add("active");
 
-      button.classList.add("active");
+        const page = this.dataset.page;
+        const table = this.dataset.table;
 
-      if (button.dataset.page === "dashboard") {
-        showDashboard(button);
-      } else {
-        openTable(button.dataset.table, button);
-      }
+        console.log("Navigation clicked:", {
+            page: page,
+            table: table
+        });
 
-      document.querySelector(".sidebar")?.classList.remove("open");
-    };
+        if (page === "dashboard") {
+            showDashboard(this);
+        } else if (table) {
+            await openTable(table, this);
+        }
 
-  });
+        document.querySelector(".sidebar")?.classList.remove("open");
+    });
+});
 
 
   const refreshBtn = $("refreshBtn");

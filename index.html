@@ -97,22 +97,13 @@
     <header class="topbar">
 
       <button
-    id="menuBtn"
-    class="icon-btn"
-    type="button"
-    
-        const isOpen = sidebar.dataset.menuOpen === '1';
-
-        if (isOpen) {
-            sidebar.style.setProperty('transform', 'translateX(-100%)', 'important');
-            sidebar.dataset.menuOpen = '0';
-        } else {
-            sidebar.style.setProperty('transform', 'translateX(0)', 'important');
-            sidebar.dataset.menuOpen = '1';
-        }
-    "
+  id="menuBtn"
+  class="icon-btn"
+  type="button"
+  aria-label="Open menu"
+  aria-expanded="false"
 >
-    ☰
+  ☰
 </button>
       <div>
         <h1 id="pageTitle">Dashboard</h1>

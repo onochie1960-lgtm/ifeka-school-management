@@ -162,6 +162,24 @@ function primaryKey(table) {
    ========================================================= */
 
 function init() {
+  const menuBtn = $("#menuBtn");
+  const sidebar = document.querySelector(".sidebar");
+
+  if (menuBtn && sidebar) {
+    menuBtn.addEventListener("click", function () {
+      const isOpen = sidebar.classList.toggle("open");
+      menuBtn.setAttribute("aria-expanded", String(isOpen));
+    });
+  }
+
+  const nav = $("#nav");
+
+  if (!nav) {
+    console.error("Navigation element #nav was not found.");
+    return;
+  }
+
+  // existing code continues here...
   const nav = $("nav");
 
   if (!nav) {

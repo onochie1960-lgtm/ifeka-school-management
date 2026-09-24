@@ -269,7 +269,7 @@ if (recordForm) {
   editingKey = null;
 }
 
-if (closeDialogBtn) {
+
   closeDialogBtn.addEventListener("click", function (event) {
     event.preventDefault();
     closeRecordDialog();

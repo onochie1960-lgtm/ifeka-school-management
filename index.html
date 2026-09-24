@@ -295,34 +295,6 @@
   <!-- MOBILE MENU -->
 
   <!-- MOBILE MENU -->
-<script>
-document.addEventListener("DOMContentLoaded", function () {
 
-  const menuBtn = document.getElementById("menuBtn");
-  const sidebar = document.querySelector(".sidebar");
-
-  if (!menuBtn || !sidebar) {
-    console.error("Menu button or sidebar not found");
-    return;
-  }
-
-  menuBtn.addEventListener("click", function (event) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    sidebar.classList.toggle("open");
-  });
-
-  // Close menu when a navigation button is selected
-  document.querySelectorAll(".sidebar nav button").forEach(function (button) {
-    button.addEventListener("click", function () {
-      if (window.innerWidth <= 800) {
-        sidebar.classList.remove("open");
-      }
-    });
-  });
-
-});
-</script>
 </body>
 </html>

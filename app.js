@@ -179,14 +179,6 @@ function init() {
     return;
   }
 
-  // existing code continues here...
-  const nav = $("nav");
-
-  if (!nav) {
-    console.error("Navigation element #nav was not found.");
-    return;
-  }
-
   nav.innerHTML =
     `<button class="active" data-page="dashboard">🏠 Dashboard</button>` +
     TABLES.map(([table, label]) =>

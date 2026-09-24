@@ -289,19 +289,21 @@
 
 <!-- CONFIGURATION -->
 <script src="config.js"></script>
-
-<!-- APPLICATION -->
 <script src="app.js"></script>
-  <script src="config.js"></script>
 
-  <!-- APPLICATION -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const menuBtn = document.getElementById("menuBtn");
+  const sidebar = document.querySelector(".sidebar");
 
-  <script src="app.js"></script>
-
-
-  <!-- MOBILE MENU -->
-
-  <!-- MOBILE MENU -->
+  if (menuBtn && sidebar) {
+    menuBtn.addEventListener("click", function () {
+      const isOpen = sidebar.classList.toggle("open");
+      menuBtn.setAttribute("aria-expanded", String(isOpen));
+    });
+  }
+});
+</script>
 
 </body>
 </html>

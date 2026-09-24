@@ -223,15 +223,19 @@ function init() {
 const sidebar = document.querySelector(".sidebar");
 
 if (menuBtn && sidebar) {
-  menuBtn.addEventListener("click", function (event) {
-    event.preventDefault();
-    event.stopPropagation();
+    menuBtn.onclick = function (event) {
+        event.preventDefault();
+        event.stopPropagation();
 
-    sidebar.classList.toggle("open");
+        sidebar.classList.toggle("open");
 
-    const isOpen = sidebar.classList.contains("open");
-    menuBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
-  });
+        const isOpen = sidebar.classList.contains("open");
+
+        menuBtn.setAttribute(
+            "aria-expanded",
+            isOpen ? "true" : "false"
+        );
+    };
 }
 
 const recordForm = $("recordForm");

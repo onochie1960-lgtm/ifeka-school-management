@@ -219,22 +219,20 @@ function init() {
   }
 
 
-  const menuBtn = $("menuBtn");
+  const menuBtn = document.getElementById("menuBtn");
+const sidebar = document.querySelector(".sidebar");
 
-  if (menuBtn) {
+if (menuBtn && sidebar) {
+  menuBtn.addEventListener("click", function (event) {
+    event.preventDefault();
+    event.stopPropagation();
 
-    menuBtn.onclick = event => {
-      event.preventDefault();
-      event.stopPropagation();
+    sidebar.classList.toggle("open");
 
-      const sidebar = document.querySelector(".sidebar");
-
-      if (sidebar) {
-        sidebar.classList.toggle("open");
-      }
-    };
-
-  }
+    const isOpen = sidebar.classList.contains("open");
+    menuBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  });
+}
 
 
   const recordForm = $("recordForm");

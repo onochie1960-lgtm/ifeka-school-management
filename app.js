@@ -180,67 +180,6 @@ function init() {
   }
 
   nav.innerHTML =
-    `<button class="active" data-page="dashboard">🏠 Dashboard</button>` +
-    TABLES.map(([table, label]) =>
-      `<button data-table="${esc(table)}">▦ ${esc(label)}</button>`
-    ).join("");
-
-  nav.querySelectorAll("button").forEach(button => {
-    button.addEventListener("click", async function () {
-
-        nav.querySelectorAll("button")
-            .forEach(x => x.classList.remove("active"));
-
-        this.classList.add("active");
-
-        const page = this.dataset.page;
-        const table = this.dataset.table;
-
-        console.log("Navigation clicked:", {
-            page: page,
-            table: table
-        });
-
-        if (page === "dashboard") {
-            showDashboard(this);
-        } else if (table) {
-            await openTable(table, this);
-        }
-
-        nav.innerHTML =
-  `<button type="button" class="active" data-page="dashboard">🏠 Dashboard</button>` +
-  TABLES.map(([table, label]) =>
-    `<button type="button" data-table="${esc(table)}">${esc(label)}</button>`
-  ).join("");
-
-nav.addEventListener("click", async function (event) {
-  const button = event.target.closest("button");
-
-  if (!button || !nav.contains(button)) {
-    return;
-  }
-
-  event.preventDefault();
-
-  nav.querySelectorAll("button")
-    .forEach(x => x.classList.remove("active"));
-
-  button.classList.add("active");
-
-  const page = button.dataset.page;
-  const table = button.dataset.table;
-
-  console.log("MODULE CLICK:", {
-    page: page,
-    table: table
-  });
-
-  if (page === "dashboard") {
-    showDashboard(button);
-  } else if (table) {
-    await openTable(table, button);
-  }
-
   document.querySelector(".sidebar")?.classList.remove("open");
 });
     });

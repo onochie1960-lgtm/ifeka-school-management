@@ -167,7 +167,108 @@
 
   <!-- Configuration must load before app.js -->
   <script src="config.js"></script>
+
+  <!--
+    Independent mobile menu controller.
+    It is intentionally kept outside app.js so the ☰ button
+    can still open/close the sidebar if another application
+    module has a JavaScript error.
+  -->
+  <script>
+    (function () {
+      function setupMenu() {
+        const menuBtn = document.getElementById("menuBtn");
+        const sidebar = document.getElementById("sidebar");
+        const nav = document.getElementById("nav");
+
+        if (!menuBtn || !sidebar) return;
+
+        function setMenu(open) {
+          sidebar.classList.toggle("open", open);
+          document.body.classList.toggle("menu-open", open);
+          menuBtn.setAttribute("aria-expanded", String(open));
+          menuBtn.setAttribute(
+            "aria-label",
+            open ? "Close menu" : "Open menu"
+          );
+        }
+
+        menuBtn.addEventListener("click", function (event) {
+          event.preventDefault();
+          event.stopPropagation();
+          setMenu(!sidebar.classList.contains("open"));
+        });
+
+        if (nav) {
+          nav.addEventListener("click", function (event) {
+            const button = event.target.closest("button");
+            if (!button) return;
+            setMenu(false);
+          });
+        }
+
+        document.addEventListener("click", function (event) {
+          if (!sidebar.classList.contains("open")) return;
+          if (sidebar.contains(event.target) || menuBtn.contains(event.target)) return;
+          setMenu(false);
+        });
+
+        document.addEventListener("keydown", function (event) {
+          if (event.key === "Escape") setMenu(false);
+        });
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", setupMenu);
+      } else {
+        setupMenu();
+      }
+    })();
+  </script>
+
   <script src="app.js"></script>
+
+  <!-- Safety CSS for the mobile sidebar.
+       Existing desktop styling is left intact. -->
+  <style>
+    @media (max-width: 800px) {
+      .sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        bottom: 0 !important;
+        width: min(86vw, 340px) !important;
+        max-width: 340px !important;
+        z-index: 10000 !important;
+        transform: translateX(-105%) !important;
+        transition: transform .25s ease !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+
+      .sidebar.open {
+        transform: translateX(0) !important;
+      }
+
+      body.menu-open::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.35);
+        z-index: 9999;
+      }
+
+      .main {
+        width: 100% !important;
+        margin-left: 0 !important;
+      }
+
+      #menuBtn {
+        position: relative;
+        z-index: 10001;
+      }
+    }
+  </style>
 
 </body>
 </html>

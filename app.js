@@ -185,7 +185,7 @@ nav.addEventListener("click", function (event) {
     if (!button) return;
 
     const page = button.dataset.page;
-
+alert("Clicked: " + page);
     if (!page) return;
 
     document.querySelectorAll("#nav button").forEach(btn => {

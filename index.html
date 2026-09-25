@@ -1,291 +1,97 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ifeka School Management</title>
-
-  <link rel="stylesheet" href="style.css">
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0d2f25">
+<title>Ifeka School Management</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-
 <body>
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="logo">I</div>
+    <div><b>Ifeka</b><span>School Management</span></div>
+  </div>
 
-    <div class="brand">
-      <div class="logo">I</div>
-      <div>
-        <b>Ifeka</b>
-        <span>School Management</span>
-      </div>
+  <nav id="nav" aria-label="School modules">
+    <button type="button" class="active" data-page="dashboard">🏠 Dashboard</button>
+    <button type="button" data-page="students">👨‍🎓 Students</button>
+    <button type="button" data-page="teachers">👩‍🏫 Teachers</button>
+    <button type="button" data-page="classes">🏫 Classes</button>
+    <button type="button" data-page="subjects">📚 Subjects</button>
+    <button type="button" data-page="parents">👨‍👩‍👧 Parents / Guardians</button>
+    <button type="button" data-page="attendance">📋 Attendance</button>
+    <button type="button" data-page="results">📊 Results</button>
+    <button type="button" data-page="fees-payments">💰 Fees & Payments</button>
+    <button type="button" data-page="timetable">📅 Timetable</button>
+    <button type="button" data-page="announcements">📢 Announcements</button>
+    <button type="button" data-page="transport">🚌 Transport</button>
+    <button type="button" data-page="reports">📈 Reports</button>
+    <button type="button" data-page="settings">⚙️ Settings</button>
+  </nav>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <button id="menuBtn" class="icon-btn" type="button" aria-label="Open menu" aria-expanded="false">☰</button>
+    <div>
+      <h1 id="pageTitle">Dashboard</h1>
+      <p id="status">Ifeka School Management System</p>
     </div>
+    <button id="refreshBtn" class="btn" type="button">Refresh</button>
+  </header>
 
-    <nav id="nav">
+  <section id="dashboard" class="content">
+    <div id="cards" class="cards"></div>
+    <div class="panel">
+      <h2>Welcome to Ifeka School Management</h2>
+      <p>Manage students, teachers, classes, subjects, parents, attendance, examinations, results, fees and other school activities from one system.</p>
+      <p class="muted">Select a module from the menu to begin.</p>
+    </div>
+  </section>
 
-      <button class="active" data-page="dashboard">
-        🏠 Dashboard
-      </button>
-
-      <button data-page="students">
-        👨‍🎓 Students
-      </button>
-
-      <button data-page="teachers">
-        👨‍🏫 Teachers
-      </button>
-
-      <button data-page="classes">
-        🏫 Classes
-      </button>
-
-      <button data-page="subjects">
-        📚 Subjects
-      </button>
-
-      <button data-page="parents">
-        👨‍👩‍👧 Parents / Guardians
-      </button>
-
-      <button data-page="attendance">
-        📋 Attendance
-      </button>
-
-      <button data-page="exams">
-        📝 Examinations
-      </button>
-
-      <button data-page="results">
-        📊 Results
-      </button>
-
-      <button data-page="fees">
-        💰 Fees & Payments
-      </button>
-
-      <button data-page="timetable">
-        📅 Timetable
-      </button>
-
-      <button data-page="announcements">
-        📢 Announcements
-      </button>
-
-      <button data-page="transport">
-        🚌 Transport
-      </button>
-
-      <button data-page="reports">
-        📈 Reports
-      </button>
-
-      <button data-page="settings">
-        ⚙️ Settings
-      </button>
-
-    </nav>
-
-  </aside>
-
-
-  <!-- MAIN -->
-  <main class="main">
-
-    <!-- TOP BAR -->
-    <header class="topbar">
-
-      <button
-  id="menuBtn"
-  class="icon-btn"
-  type="button"
-  aria-label="Open menu"
-  aria-expanded="false"
->
-  ☰
-</button>
-      <div>
-        <h1 id="pageTitle">Dashboard</h1>
-        <p id="status">Ifeka School Management System</p>
+  <section id="tableView" class="content hidden">
+    <div class="panel">
+      <div class="toolbar">
+        <input id="searchInput" type="search" placeholder="Search records..." autocomplete="off">
+        <button id="addBtn" class="btn primary" type="button">+ Add Record</button>
       </div>
-
-      <button id="refreshBtn" class="btn">
-        Refresh
-      </button>
-
-    </header>
-
-
-    <!-- ================= DASHBOARD ================= -->
-
-    <section id="dashboard" class="content">
-
-      <div class="cards">
-
-        <div class="card">
-          <div class="label">Students</div>
-          <h3 id="studentCount">0</h3>
-        </div>
-
-        <div class="card">
-          <div class="label">Teachers</div>
-          <h3 id="teacherCount">0</h3>
-        </div>
-
-        <div class="card">
-          <div class="label">Classes</div>
-          <h3 id="classCount">0</h3>
-        </div>
-
-        <div class="card">
-          <div class="label">Subjects</div>
-          <h3 id="subjectCount">0</h3>
-        </div>
-
+      <div class="table-wrap">
+        <table>
+          <thead id="thead"></thead>
+          <tbody id="tbody"></tbody>
+        </table>
       </div>
+      <div id="empty" class="empty hidden">No records found.</div>
+    </div>
+  </section>
 
-
-      <div class="panel">
-
-        <h2>Welcome to Ifeka School Management</h2>
-
-        <p>
-          Manage students, teachers, classes, subjects,
-          attendance, examinations, results, fees and other
-          school activities from one system.
-        </p>
-
-        <p class="muted">
-          Select a module from the menu to begin.
-        </p>
-
+  <dialog id="recordDialog">
+    <form id="recordForm">
+      <div class="dialog-head">
+        <h2 id="dialogTitle">Add Record</h2>
+        <button type="button" id="closeDialogBtn" class="icon-btn" aria-label="Close">✕</button>
       </div>
-
-    </section>
-
-
-    <!-- ================= TABLE MODULE ================= -->
-
-    <section id="tableView" class="content hidden">
-
-      <div class="panel">
-
-        <div class="toolbar">
-
-          <input
-            id="searchInput"
-            type="search"
-            placeholder="Search records..."
-            autocomplete="off"
-          >
-
-          <button id="addBtn" class="btn primary">
-            + Add Record
-          </button>
-
-        </div>
-
-
-        <div class="table-wrap">
-
-          <table>
-
-            <thead id="thead"></thead>
-
-            <tbody id="tbody"></tbody>
-
-          </table>
-
-        </div>
-
-
-        <div id="empty" class="empty hidden">
-          No records found.
-        </div>
-
+      <div id="formFields" class="form-grid"></div>
+      <div class="dialog-actions">
+        <button type="button" id="cancelBtn" class="btn">Cancel</button>
+        <button type="submit" id="saveBtn" class="btn primary">Save</button>
       </div>
+    </form>
+  </dialog>
 
-    </section>
+  <section id="moduleInfo" class="content hidden">
+    <div class="panel">
+      <h2 id="moduleInfoTitle">Module</h2>
+      <p id="moduleInfoText">This module is ready to be connected to the database.</p>
+    </div>
+  </section>
+</main>
 
-
-    <!-- ================= RECORD DIALOG ================= -->
-
-    <dialog id="recordDialog">
-
-      <form id="recordForm">
-
-        <div class="dialog-head">
-
-          <h2 id="dialogTitle">
-            Add Record
-          </h2>
-
-          <button
-            type="button"
-            id="closeDialogBtn"
-            class="icon-btn">
-            ✕
-          </button>
-
-        </div>
-
-
-        <div
-          id="formFields"
-          class="form-grid">
-        </div>
-
-
-        <div class="dialog-actions">
-
-          <button
-            type="button"
-            id="cancelBtn"
-            INFORMATION ================= -->
-
-    <section
-      id="moduleInfo"
-      class="content hidden">
-
-      <div class="panel">
-
-        <h2 id="moduleInfoTitle">
-          Module
-        </h2>
-
-        <p id="moduleInfoText">
-          This module is ready to be connected to the database.
-        </p>
-
-      </div>
-
-    </section>
-
-  </main>
-
-
-  <!-- CONFIGURATION -->
-<!-- SUPABASE -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- CONFIGURATION -->
 <script src="config.js"></script>
 <script src="app.js"></script>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  const menuBtn = document.getElementById("menuBtn");
-  const sidebar = document.querySelector(".sidebar");
-
-  if (menuBtn && sidebar) {
-    menuBtn.addEventListener("click", function () {
-      const isOpen = sidebar.classList.toggle("open");
-      menuBtn.setAttribute("aria-expanded", String(isOpen));
-    });
-  }
-});
-</script>
-
 </body>
 </html>

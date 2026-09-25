@@ -179,8 +179,45 @@ if (!nav) {
   return;
 }
 
-nav.addEventListener("click", function () {
-  document.querySelector(".sidebar")?.classList.remove("open");
+nav.addEventListener("click", function (event) {
+    const button = event.target.closest("button");
+
+    if (!button) return;
+
+    const label = button.textContent
+        .replace(/[^\p{L}\p{N}\s&/-]/gu, "")
+        .trim()
+        .toLowerCase();
+
+    const moduleMap = {
+        "students": "students",
+        "teachers": "teachers",
+        "classes": "school_classes",
+        "subjects": "subjects",
+        "parents / guardians": "parents",
+        "attendance": "attendance",
+        "results": "results",
+        "fees & payments": "fee_payments"
+    };
+
+    if (label.includes("dashboard")) {
+        currentTable = null;
+        loadDashboard();
+    } else if (moduleMap[label]) {
+        loadTable(moduleMap[label]);
+    } else if (
+        label.includes("examinations") ||
+        label.includes("timetable") ||
+        label.includes("announcements") ||
+        label.includes("transport")
+    ) {
+        alert(
+            button.textContent.trim() +
+            " is not connected to a database table yet."
+        );
+    }
+
+    document.querySelector(".sidebar")?.classList.remove("open");
 });
 
   const refreshBtn = $("refreshBtn");

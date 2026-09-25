@@ -4,7 +4,7 @@
    ========================================================= */
 
 const TABLES = [
-  ["students", "Students"],
+  ["Students", "Students"],
   ["teachers", "Teachers"],
   ["school_classes", "Classes"],
   ["subjects", "Subjects"],

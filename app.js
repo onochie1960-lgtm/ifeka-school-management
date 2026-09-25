@@ -174,17 +174,14 @@ function init() {
 
   const nav = $("#nav");
 
-  if (!nav) {
-    console.error("Navigation element #nav was not found.");
-    return;
-  }
+if (!nav) {
+  console.error("Navigation element #nav was not found.");
+  return;
+}
 
-  nav.innerHTML =
+nav.addEventListener("click", function () {
   document.querySelector(".sidebar")?.classList.remove("open");
 });
-    });
-});
-
 
   const refreshBtn = $("refreshBtn");
 

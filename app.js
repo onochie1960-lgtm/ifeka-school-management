@@ -210,9 +210,8 @@ alert("Clicked: " + page);
         loadDashboard();
     } 
     else if (moduleMap[page]) {
-        currentTable = moduleMap[page];
-        loadTable(currentTable);
-    } 
+    openTable(moduleMap[page], button);
+}
     else {
         alert(
             button.textContent.trim() +

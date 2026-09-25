@@ -241,27 +241,7 @@ nav.addEventListener("click", function (event) {
   if (addBtn) {
     addBtn.onclick = () => openForm();
   }
-
-
-  const menuBtn = document.getElementById("menuBtn");
-const sidebar = document.querySelector(".sidebar");
-
-if (menuBtn && sidebar) {
-    menuBtn.onclick = function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        sidebar.classList.toggle("open");
-
-        const isOpen = sidebar.classList.contains("open");
-
-        menuBtn.setAttribute(
-            "aria-expanded",
-            isOpen ? "true" : "false"
-        );
-    };
-}
-
+   
 const recordForm = $("recordForm");
 const dialog = $("recordDialog");
 const closeDialogBtn = $("closeDialogBtn");

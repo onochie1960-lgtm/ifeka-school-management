@@ -184,33 +184,36 @@ nav.addEventListener("click", function (event) {
 
     if (!button) return;
 
-    const label = button.textContent
-        .replace(/[^\p{L}\p{N}\s&/-]/gu, "")
-        .trim()
-        .toLowerCase();
+    const page = button.dataset.page;
+
+    if (!page) return;
+
+    document.querySelectorAll("#nav button").forEach(btn => {
+        btn.classList.remove("active");
+    });
+
+    button.classList.add("active");
 
     const moduleMap = {
-        "students": "students",
-        "teachers": "teachers",
-        "classes": "school_classes",
-        "subjects": "subjects",
-        "parents / guardians": "parents",
-        "attendance": "attendance",
-        "results": "results",
-        "fees & payments": "fee_payments"
+        students: "students",
+        teachers: "teachers",
+        classes: "school_classes",
+        subjects: "subjects",
+        parents: "parents",
+        attendance: "attendance",
+        results: "results",
+        "fees-payments": "fee_payments"
     };
 
-    if (label.includes("dashboard")) {
+    if (page === "dashboard") {
         currentTable = null;
         loadDashboard();
-    } else if (moduleMap[label]) {
-        loadTable(moduleMap[label]);
-    } else if (
-        label.includes("examinations") ||
-        label.includes("timetable") ||
-        label.includes("announcements") ||
-        label.includes("transport")
-    ) {
+    } 
+    else if (moduleMap[page]) {
+        currentTable = moduleMap[page];
+        loadTable(currentTable);
+    } 
+    else {
         alert(
             button.textContent.trim() +
             " is not connected to a database table yet."
@@ -219,7 +222,6 @@ nav.addEventListener("click", function (event) {
 
     document.querySelector(".sidebar")?.classList.remove("open");
 });
-
   const refreshBtn = $("refreshBtn");
 
   if (refreshBtn) {

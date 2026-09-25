@@ -38,7 +38,7 @@ const FORM_FIELDS = {
   ],
 
   subjects: [
-    "subject_code", "subject_name", "class_id"
+    "subject_code", "subject_name", "class"
   ],
 
   attendance: [

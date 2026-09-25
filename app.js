@@ -19,7 +19,7 @@ const FORM_FIELDS = {
   students: [
     "student_id", "first_name", "last_name", "gender",
     "date_of_birth", "phone", "email", "address",
-    "class_id", "photo_url"
+    "class", "photo_url"
   ],
 
   teachers: [

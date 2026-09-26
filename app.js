@@ -236,6 +236,22 @@ function setupNavigation() {
 }
 
 function setupControls() {
+     const menuBtn = $("menuBtn");
+  const sidebar = document.querySelector(".sidebar");
+
+  if (menuBtn && sidebar) {
+    menuBtn.addEventListener("click", function () {
+      const isOpen = sidebar.classList.toggle("open");
+
+      document.body.classList.toggle("menu-open", isOpen);
+
+      menuBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      menuBtn.setAttribute(
+        "aria-label",
+        isOpen ? "Close menu" : "Open menu"
+      );
+    });
+  }
   const refreshBtn = $("refreshBtn");
   if (refreshBtn) {
     refreshBtn.addEventListener("click", function () {

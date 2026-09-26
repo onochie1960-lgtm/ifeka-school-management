@@ -42,8 +42,8 @@ const FORM_FIELDS = {
   ],
 
   attendance: [
-    "student_id", "date", "status", "remark"
-  ],
+  "student_id", "attendance_date", "status", "remarks"
+],
 
   results: [
     "student_id", "subject_id", "session", "term",

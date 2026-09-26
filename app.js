@@ -837,10 +837,17 @@ async function saveRecord(event) {
   const data = Object.fromEntries(formData.entries());
    // Attendance uses attendance_date in Supabase
 if (currentTable === "attendance" && data.date !== undefined) {
-  data.attendance_date = data.date;
+  const parts = data.date.split("/");
+
+  if (parts.length === 3) {
+    const [day, month, year] = parts;
+    data.attendance_date = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  } else {
+    data.attendance_date = data.date;
+  }
+
   delete data.date;
 }
-
   Object.keys(data).forEach(key => {
     if (data[key] === "") data[key] = null;
   });

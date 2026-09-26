@@ -835,6 +835,11 @@ async function saveRecord(event) {
 
   const formData = new FormData(event.target);
   const data = Object.fromEntries(formData.entries());
+   // Attendance uses attendance_date in Supabase
+if (currentTable === "attendance" && data.date !== undefined) {
+  data.attendance_date = data.date;
+  delete data.date;
+}
 
   Object.keys(data).forEach(key => {
     if (data[key] === "") data[key] = null;

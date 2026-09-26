@@ -236,22 +236,29 @@ function setupNavigation() {
 }
 
 function setupControls() {
-     const menuBtn = $("menuBtn");
+   const menuBtn = $("menuBtn");
   const sidebar = document.querySelector(".sidebar");
+   
+     if (menuBtn && sidebar) {
+      menuBtn.addEventListener("click", function (event) {
+    event.preventDefault();
+    event.stopPropagation();
 
-  if (menuBtn && sidebar) {
-    menuBtn.addEventListener("click", function () {
-      const isOpen = sidebar.classList.toggle("open");
+    const isOpen = sidebar.classList.contains("open");
 
-      document.body.classList.toggle("menu-open", isOpen);
-
-      menuBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
-      menuBtn.setAttribute(
-        "aria-label",
-        isOpen ? "Close menu" : "Open menu"
-      );
-    });
-  }
+    if (isOpen) {
+      sidebar.classList.remove("open");
+      document.body.classList.remove("menu-open");
+      menuBtn.setAttribute("aria-expanded", "false");
+      menuBtn.setAttribute("aria-label", "Open menu");
+    } else {
+      sidebar.classList.add("open");
+      document.body.classList.add("menu-open");
+      menuBtn.setAttribute("aria-expanded", "true");
+      menuBtn.setAttribute("aria-label", "Close menu");
+    }
+  });
+}
   const refreshBtn = $("refreshBtn");
   if (refreshBtn) {
     refreshBtn.addEventListener("click", function () {

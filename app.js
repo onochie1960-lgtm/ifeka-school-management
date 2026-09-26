@@ -510,6 +510,9 @@ async function loadTable(table) {
     }
 
     rows = result.data || [];
+     if (table === "students") {
+  window.studentsList = rows;
+}
 
     if (rows.length > 0) {
       columns = Object.keys(rows[0]);

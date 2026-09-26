@@ -663,7 +663,7 @@ function getFieldType(field) {
 function getFieldControl(field, value) {
   const v = value ?? "";
 
-  if (field === "gender") {
+  if  (field === "gender") {
     return `
       <select name="${esc(field)}">
         <option value="">Select gender</option>
@@ -673,7 +673,23 @@ function getFieldControl(field, value) {
     `;
   }
 
-  if (field === "relationship") {
+  if  (currentTable === "attendance" && field === "student_id") {
+  const students = window.studentsList || [];
+
+  return `
+    <select name="${esc(field)}" required>
+      <option value="">Select student</option>
+      ${students.map(student => `
+        <option value="${esc(student.student_id)}"
+          ${String(value ?? "") === String(student.student_id) ? "selected" : ""}>
+          ${esc(student.student_id)} - ${esc(
+            [student.first_name, student.last_name].filter(Boolean).join(" ")
+          )}
+        </option>
+      `).join("")}
+    </select>
+  `;
+}  (field === "relationship") {
     return `
       <select name="${esc(field)}">
         <option value="">Select relationship</option>

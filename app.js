@@ -196,27 +196,20 @@ function setupNavigation() {
   const nav = document.getElementById("nav");
 
   if (!nav) {
-    console.error("Ifeka School: #nav was not found.");
+    console.error("Navigation element #nav not found.");
     return;
   }
 
-  nav.addEventListener("click", function (event) {
+  nav.onclick = function (event) {
     const button = event.target.closest("button[data-page]");
 
-    if (!button || !nav.contains(button)) {
-      return;
-    }
+    if (!button) return;
 
     event.preventDefault();
-    event.stopPropagation();
 
-    const page = button.dataset.page;
+    const page = button.getAttribute("data-page");
 
-    if (!page) {
-      return;
-    }
-
-    console.log("Opening module:", page);
+    console.log("NAVIGATION CLICK:", page);
 
     document.querySelectorAll("#nav button").forEach(btn => {
       btn.classList.remove("active");
@@ -229,21 +222,20 @@ function setupNavigation() {
       return;
     }
 
-    if (MODULE_MAP[page]) {
+    if (MODULE_MAP && MODULE_MAP[page]) {
       openTable(MODULE_MAP[page], button);
       return;
     }
 
-    if (INFO_MODULES[page]) {
+    if (INFO_MODULES && INFO_MODULES[page]) {
       openInfoModule(page, button);
       return;
     }
 
-    console.error("Module not configured:", page);
+    console.error("No module configured for:", page);
     setStatus("Module not configured: " + page);
-  });
+  };
 }
-
 function setupControls() {
    const menuBtn = $("menuBtn");
   const sidebar = document.querySelector(".sidebar");

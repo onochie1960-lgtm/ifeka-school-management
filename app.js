@@ -208,6 +208,7 @@ function setupNavigation() {
     event.preventDefault();
 
     const page = button.dataset.page;
+     alert("Clicked module: " + page);
     if (!page) return;
 
     document.querySelectorAll("#nav button").forEach(btn => {

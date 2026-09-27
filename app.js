@@ -192,7 +192,7 @@ function init() {
   showDashboard();
 }
 
-function setupNavigation() {
+
 function setupNavigation() {
   const nav = document.getElementById("nav");
 
@@ -205,7 +205,6 @@ function setupNavigation() {
     const button = event.target.closest("button[data-page]");
 
     if (!button || !nav.contains(button)) {
-      return;
     }
 
     event.preventDefault();

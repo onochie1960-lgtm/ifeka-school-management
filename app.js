@@ -193,8 +193,8 @@ function init() {
 }
 
 function setupNavigation() {
-   alert("Navigation is working");
-  const nav = $("nav");
+function setupNavigation() {
+  const nav = document.getElementById("nav");
 
   if (!nav) {
     console.error("Ifeka School: #nav was not found.");
@@ -203,20 +203,27 @@ function setupNavigation() {
 
   nav.addEventListener("click", function (event) {
     const button = event.target.closest("button[data-page]");
-    if (!button) return;
+
+    if (!button || !nav.contains(button)) {
+      return;
+    }
 
     event.preventDefault();
+    event.stopPropagation();
 
     const page = button.dataset.page;
-     alert("Clicked module: " + page);
-    if (!page) return;
+
+    if (!page) {
+      return;
+    }
+
+    console.log("Opening module:", page);
 
     document.querySelectorAll("#nav button").forEach(btn => {
       btn.classList.remove("active");
     });
 
     button.classList.add("active");
-    closeMobileMenu();
 
     if (page === "dashboard") {
       showDashboard(button);
@@ -233,7 +240,8 @@ function setupNavigation() {
       return;
     }
 
-    setStatus("Module is not configured.");
+    console.error("Module not configured:", page);
+    setStatus("Module not configured: " + page);
   });
 }
 

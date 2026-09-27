@@ -194,79 +194,92 @@ function init() {
 
 
 function setupNavigation() {
-    const nav = document.getElementById("nav");
+  const nav = document.getElementById("nav");
 
-    if (!nav) {
-        console.error("Ifeka School: #nav was not found.");
+  if (!nav) {
+    console.error("Ifeka School: #nav was not found.");
+    return;
+  }
+
+  console.log("Navigation initialized.");
+
+  const buttons = nav.querySelectorAll("button[data-page]");
+
+  buttons.forEach(function(button) {
+
+    button.addEventListener("click", function(event) {
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const page = button.getAttribute("data-page");
+
+      console.log("CLICKED:", page);
+
+      if (!page) {
+        console.error("Button has no data-page:", button);
         return;
-    }
+      }
 
-    console.log("Navigation initialized.");
+      // Remove active state
+      buttons.forEach(function(btn) {
+        btn.classList.remove("active");
+      });
 
-    nav.querySelectorAll("button[data-page]").forEach(function(button) {
+      // Activate clicked button
+      button.classList.add("active");
 
-        button.addEventListener("click", function(event) {
-            event.preventDefault();
-            event.stopPropagation();
+      // Close mobile menu
+      closeMobileMenu();
 
-            const page = button.getAttribute("data-page");
+      // Dashboard
+      if (page === "dashboard") {
+        showDashboard(button);
+        return;
+      }
 
-            console.log("CLICKED:", page);
+      // Database/table modules
+      if (MODULE_MAP && MODULE_MAP[page]) {
+        console.log(
+          "Opening table:",
+          MODULE_MAP[page]
+        );
 
-            if (!page) {
-                console.error("Button has no data-page.");
-                return;
-            }
+        openTable(MODULE_MAP[page], button);
+        return;
+      }
 
-            // Remove active state
-            nav.querySelectorAll("button[data-page]").forEach(function(btn) {
-                btn.classList.remove("active");
-            });
+      // Information modules
+      if (
+        typeof INFO_MODULES !== "undefined" &&
+        INFO_MODULES[page]
+      ) {
+        console.log(
+          "Opening information module:",
+          page
+        );
 
-            button.classList.add("active");
+        openInfoModule(page, button);
+        return;
+      }
 
-            // Close mobile menu
-            closeMobileMenu();
+      // Fallback
+      console.warn(
+        "Module not configured:",
+        page
+      );
 
-            // Dashboard
-            if (page === "dashboard") {
-                showDashboard(button);
-                return;
-            }
-
-            // Database modules
-            if (MODULE_MAP && MODULE_MAP[page]) {
-                console.log(
-                    "Opening table:",
-                    MODULE_MAP[page]
-                );
-
-                openTable(MODULE_MAP[page], button);
-                return;
-            }
-
-            // Information modules
-            if (INFO_MODULES && INFO_MODULES[page]) {
-                console.log(
-                    "Opening information module:",
-                    page
-                );
-
-                openInfoModule(page, button);
-                return;
-            }
-
-            console.error(
-                "Module not configured:",
-                page
-            );
-
-            setStatus(
-                "Module is not configured: " + page
-            );
-        });
-
+      setStatus(
+        "Module not configured: " + page
+      );
     });
+
+  });
+
+  console.log(
+    "Navigation buttons found:",
+    buttons.length
+  );
 }
 
 function setupControls() {

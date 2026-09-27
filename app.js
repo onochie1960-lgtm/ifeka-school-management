@@ -193,7 +193,6 @@ function init() {
 }
 
 function setupNavigation() {
-function setupNavigation() {
   const nav = document.getElementById("nav");
 
   if (!nav) {

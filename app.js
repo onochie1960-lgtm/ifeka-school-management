@@ -193,6 +193,7 @@ function init() {
 }
 
 function setupNavigation() {
+   alert("Navigation is working");
   const nav = $("nav");
 
   if (!nav) {

@@ -175,56 +175,63 @@
     module has a JavaScript error.
   -->
   <script>
-    (function () {
-      function setupMenu() {
-        const menuBtn = document.getElementById("menuBtn");
-        const sidebar = document.getElementById("sidebar");
-        const nav = document.getElementById("nav");
+document.addEventListener("DOMContentLoaded", function () {
+    const menuBtn = document.getElementById("menuBtn");
+    const sidebar = document.getElementById("sidebar");
 
-        if (!menuBtn || !sidebar) return;
+    if (!menuBtn || !sidebar) {
+        console.error("Menu button or sidebar not found.");
+        return;
+    }
 
-        function setMenu(open) {
-          sidebar.classList.toggle("open", open);
-          document.body.classList.toggle("menu-open", open);
-          menuBtn.setAttribute("aria-expanded", String(open));
-          menuBtn.setAttribute(
-            "aria-label",
-            open ? "Close menu" : "Open menu"
-          );
+    function openMenu() {
+        sidebar.classList.add("open");
+        document.body.classList.add("menu-open");
+        menuBtn.setAttribute("aria-expanded", "true");
+        menuBtn.setAttribute("aria-label", "Close menu");
+    }
+
+    function closeMenu() {
+        sidebar.classList.remove("open");
+        document.body.classList.remove("menu-open");
+        menuBtn.setAttribute("aria-expanded", "false");
+        menuBtn.setAttribute("aria-label", "Open menu");
+    }
+
+    menuBtn.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (sidebar.classList.contains("open")) {
+            closeMenu();
+        } else {
+            openMenu();
         }
+    });
 
-        menuBtn.addEventListener("click", function (event) {
-          event.preventDefault();
-          event.stopPropagation();
-          setMenu(!sidebar.classList.contains("open"));
-        });
+    sidebar.addEventListener("click", function (event) {
+        const button = event.target.closest("button[data-page]");
 
-        if (nav) {
-          nav.addEventListener("click", function (event) {
-            const button = event.target.closest("button");
-            if (!button) return;
-            setMenu(false);
-          });
+        if (button) {
+            closeMenu();
         }
+    });
 
-        document.addEventListener("click", function (event) {
-          if (!sidebar.classList.contains("open")) return;
-          if (sidebar.contains(event.target) || menuBtn.contains(event.target)) return;
-          setMenu(false);
-        });
+    document.addEventListener("click", function (event) {
+        if (!sidebar.classList.contains("open")) return;
 
-        document.addEventListener("keydown", function (event) {
-          if (event.key === "Escape") setMenu(false);
-        });
-      }
+        if (!sidebar.contains(event.target) && event.target !== menuBtn) {
+            closeMenu();
+        }
+    });
 
-      if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", setupMenu);
-      } else {
-        setupMenu();
-      }
-    })();
-  </script>
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+            closeMenu();
+        }
+    });
+});
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
 <script src="app.js"></script>

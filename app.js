@@ -283,29 +283,7 @@ function setupNavigation() {
 }
 
 function setupControls() {
-   const menuBtn = $("menuBtn");
-  const sidebar = document.querySelector(".sidebar");
    
-     if (menuBtn && sidebar) {
-      menuBtn.addEventListener("click", function (event) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    const isOpen = sidebar.classList.contains("open");
-
-    if (isOpen) {
-      sidebar.classList.remove("open");
-      document.body.classList.remove("menu-open");
-      menuBtn.setAttribute("aria-expanded", "false");
-      menuBtn.setAttribute("aria-label", "Open menu");
-    } else {
-      sidebar.classList.add("open");
-      document.body.classList.add("menu-open");
-      menuBtn.setAttribute("aria-expanded", "true");
-      menuBtn.setAttribute("aria-label", "Close menu");
-    }
-  });
-}
   const refreshBtn = $("refreshBtn");
   if (refreshBtn) {
     refreshBtn.addEventListener("click", function () {

@@ -285,25 +285,7 @@ dialog::backdrop {
   gap: 6px;
 }
 
-.field.full {
-  grid-column: 1 / -1;
-}
 
-.field label {
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.field input,
-.field select,
-.field textarea {
-  width: 100%;
-  border: 1px solid #d7dee6;
-  border-radius: 9px;
-  padding: 10px 11px;
-  font: inherit;
-  background: #fff;
-}
 
 .field textarea {
   min-height: 100px;

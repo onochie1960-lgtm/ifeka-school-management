@@ -746,21 +746,7 @@ function getFieldControl(field, value) {
     `;
   }
 
-  if  (currentTable === "attendance" && field === "student_id") {
-  const students = window.studentsList || [];
-
-  return `
-    <select name="${esc(field)}" required>
-      <option value="">Select student</option>
-      ${students.map(student => `
-        <option value="${esc(student.student_id)}"
-          ${String(value ?? "") === String(student.student_id) ? "selected" : ""}>
-          ${esc(student.student_id)} - ${esc(
-            [student.first_name, student.last_name].filter(Boolean).join(" ")
-          )}
-        </option>
-      `).join("")}
-    </select>
+  
   `;
 }  (field === "relationship") {
     return `

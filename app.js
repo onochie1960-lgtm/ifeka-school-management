@@ -711,8 +711,7 @@ function getFieldType(field) {
   return "text";
 }
 
-function getFieldControl(field, value) {
-    const v = value ?? "";
+function getFieldControl(field, value, attendanceStudents = []) {
 
     /* =========================================================
        ATTENDANCE → STUDENT DROPDOWN
@@ -732,45 +731,29 @@ function getFieldControl(field, value) {
     `;
   }
 
-  if (field === "date") {
+  if (field === "date" || field === "attendance_date") {
+    let dateValue = v;
+
+    if (dateValue && dateValue.includes("/")) {
+        const parts = dateValue.split("/");
+
+        if (parts.length === 3) {
+            const [day, month, year] = parts;
+            dateValue =
+                `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+        }
+    }
+
     return `
-      <input
-        name="${esc(field)}"
-        type="date"
-        value="${esc(v)}"
-        required
-      >
+        <input
+            name="${esc(field)}"
+            type="date"
+            value="${esc(dateValue)}"
+            required
+        >
     `;
   }
-
-    /* =========================================================
-       ATTENDANCE → DATE CALENDAR
-       ========================================================= */
-    if (field === "date" || field === "attendance_date") {
-        let dateValue = v;
-
-        /*
-         * Convert an existing date such as 28/09/2026
-         * into the format required by <input type="date">
-         */
-        if (dateValue && dateValue.includes("/")) {
-            const parts = dateValue.split("/");
-
-            if (parts.length === 3) {
-                const [day, month, year] = parts;
-                dateValue = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-            }
-        }
-
-        return `
-            <input
-                name="date"
-                type="date"
-                value="${esc(dateValue)}"
-                required
-            >
-        `;
-    }
+        
 
     /* =========================================================
        EXISTING SELECT CONTROLS
@@ -895,11 +878,11 @@ if (currentTable === "attendance") {
         const value = row?.[field] ?? "";
 
         return `
-          <div class="field">
-            <label>${esc(pretty(field))}</label>
-            ${getFieldControl(field, value)}
-          </div>
-        `;
+  <div class="field">
+    <label>${esc(pretty(field))}</label>
+    ${getFieldControl(field, value, attendanceStudents)}
+  </div>
+`;
       })
       .join("");
   }

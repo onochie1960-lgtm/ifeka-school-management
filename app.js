@@ -712,83 +712,160 @@ function getFieldType(field) {
 }
 
 function getFieldControl(field, value) {
-  const v = value ?? "";
+    const v = value ?? "";
 
-  if  (field === "gender") {
+    /* =========================================================
+       ATTENDANCE → STUDENT DROPDOWN
+       ========================================================= */
+      // Attendance controls
+  if (field === "student_id") {
     return `
-      <select name="${esc(field)}">
-        <option value="">Select gender</option>
-        <option value="Male" ${v === "Male" ? "selected" : ""}>Male</option>
-        <option value="Female" ${v === "Female" ? "selected" : ""}>Female</option>
+      <select name="${esc(field)}" required>
+        <option value="">Select student</option>
+        ${attendanceStudents.map(s => `
+          <option value="${esc(s.student_id)}"
+            ${v === s.student_id ? "selected" : ""}>
+            ${esc(s.student_id)}
+          </option>
+        `).join("")}
       </select>
     `;
   }
 
-  
-  
-
-  if (field === "relationship") {
+  if (field === "date") {
     return `
-      <select name="${esc(field)}">
-        <option value="">Select relationship</option>
-        <option value="Father" ${v === "Father" ? "selected" : ""}>Father</option>
-        <option value="Mother" ${v === "Mother" ? "selected" : ""}>Mother</option>
-        <option value="Guardian" ${v === "Guardian" ? "selected" : ""}>Guardian</option>
-      </select>
-    `;
-  }
-  
-
-  if (field === "status") {
-    return `
-      <select name="${esc(field)}">
-        <option value="">Select status</option>
-        <option value="Present" ${v === "Present" ? "selected" : ""}>Present</option>
-        <option value="Absent" ${v === "Absent" ? "selected" : ""}>Absent</option>
-        <option value="Late" ${v === "Late" ? "selected" : ""}>Late</option>
-      </select>
+      <input
+        name="${esc(field)}"
+        type="date"
+        value="${esc(v)}"
+        required
+      >
     `;
   }
 
-  if (field === "term") {
-    return `
-      <select name="${esc(field)}">
-        <option value="">Select term</option>
-        <option value="First Term" ${v === "First Term" ? "selected" : ""}>First Term</option>
-        <option value="Second Term" ${v === "Second Term" ? "selected" : ""}>Second Term</option>
-        <option value="Third Term" ${v === "Third Term" ? "selected" : ""}>Third Term</option>
-      </select>
-    `;
-  }
+    /* =========================================================
+       ATTENDANCE → DATE CALENDAR
+       ========================================================= */
+    if (field === "date" || field === "attendance_date") {
+        let dateValue = v;
 
-  if (field === "payment_method") {
-    return `
-      <select name="${esc(field)}">
-        <option value="">Select method</option>
-        <option value="Cash" ${v === "Cash" ? "selected" : ""}>Cash</option>
-        <option value="Transfer" ${v === "Transfer" ? "selected" : ""}>Transfer</option>
-        <option value="POS" ${v === "POS" ? "selected" : ""}>POS</option>
-        <option value="Online" ${v === "Online" ? "selected" : ""}>Online</option>
-      </select>
-    `;
-  }
+        /*
+         * Convert an existing date such as 28/09/2026
+         * into the format required by <input type="date">
+         */
+        if (dateValue && dateValue.includes("/")) {
+            const parts = dateValue.split("/");
 
-  return `
-    <input
-      name="${esc(field)}"
-      type="${getFieldType(field)}"
-      value="${esc(v)}"
-    >
-  `;
+            if (parts.length === 3) {
+                const [day, month, year] = parts;
+                dateValue = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+            }
+        }
+
+        return `
+            <input
+                name="date"
+                type="date"
+                value="${esc(dateValue)}"
+                required
+            >
+        `;
+    }
+
+    /* =========================================================
+       EXISTING SELECT CONTROLS
+       ========================================================= */
+
+    if (field === "gender") {
+        return `
+            <select name="${esc(field)}">
+                <option value="">Select gender</option>
+                <option value="Male" ${v === "Male" ? "selected" : ""}>Male</option>
+                <option value="Female" ${v === "Female" ? "selected" : ""}>Female</option>
+            </select>
+        `;
+    }
+
+    if (field === "relationship") {
+        return `
+            <select name="${esc(field)}">
+                <option value="">Select relationship</option>
+                <option value="Father" ${v === "Father" ? "selected" : ""}>Father</option>
+                <option value="Mother" ${v === "Mother" ? "selected" : ""}>Mother</option>
+                <option value="Guardian" ${v === "Guardian" ? "selected" : ""}>Guardian</option>
+            </select>
+        `;
+    }
+
+    if (field === "status") {
+        return `
+            <select name="${esc(field)}">
+                <option value="">Select status</option>
+                <option value="Present" ${v === "Present" ? "selected" : ""}>Present</option>
+                <option value="Absent" ${v === "Absent" ? "selected" : ""}>Absent</option>
+                <option value="Late" ${v === "Late" ? "selected" : ""}>Late</option>
+            </select>
+        `;
+    }
+
+    if (field === "term") {
+        return `
+            <select name="${esc(field)}">
+                <option value="">Select term</option>
+                <option value="First Term" ${v === "First Term" ? "selected" : ""}>First Term</option>
+                <option value="Second Term" ${v === "Second Term" ? "selected" : ""}>Second Term</option>
+                <option value="Third Term" ${v === "Third Term" ? "selected" : ""}>Third Term</option>
+            </select>
+        `;
+    }
+
+    if (field === "payment_method") {
+        return `
+            <select name="${esc(field)}">
+                <option value="">Select method</option>
+                <option value="Cash" ${v === "Cash" ? "selected" : ""}>Cash</option>
+                <option value="Transfer" ${v === "Transfer" ? "selected" : ""}>Transfer</option>
+                <option value="POS" ${v === "POS" ? "selected" : ""}>POS</option>
+                <option value="Online" ${v === "Online" ? "selected" : ""}>Online</option>
+            </select>
+        `;
+    }
+
+    return `
+        <input
+            name="${esc(field)}"
+            type="${getFieldType(field)}"
+            value="${esc(v)}"
+        >
+    `;
 }
-
-function openForm(row = null) {
+let attendanceStudents = [];
+async function openForm(row = null) {
   if (!currentTable) {
     alert("Please select a module first.");
     return;
   }
 
-  const fields = FORM_FIELDS[currentTable] || columns;
+
+if (currentTable === "attendance") {
+    const { data, error } = await db
+        .from("students")
+        .select("*")
+        .order("student_id", { ascending: true });
+
+    if (error) {
+        console.error("Failed to load students:", error);
+        alert("Could not load students for Attendance.");
+        return;
+    }
+
+    attendanceStudents = data || [];
+}
+  let fields = FORM_FIELDS[currentTable] || columns;
+
+if (currentTable === "attendance") {
+    fields = ["student_id", "date", "status", "remarks"];
+}
 
   if (!fields.length) {
     alert("No fields are available for this table.");

@@ -747,8 +747,9 @@ function getFieldControl(field, value) {
   }
 
   
-  `;
-}  (field === "relationship") {
+  }
+
+  if (field === "relationship") {
     return `
       <select name="${esc(field)}">
         <option value="">Select relationship</option>
@@ -757,6 +758,7 @@ function getFieldControl(field, value) {
         <option value="Guardian" ${v === "Guardian" ? "selected" : ""}>Guardian</option>
       </select>
     `;
+  }
   }
 
   if (field === "status") {

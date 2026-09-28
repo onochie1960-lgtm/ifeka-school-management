@@ -759,7 +759,7 @@ function getFieldControl(field, value) {
       </select>
     `;
   }
-  }
+  
 
   if (field === "status") {
     return `

@@ -717,7 +717,7 @@ function getFieldControl(field, value, attendanceStudents = []) {
        ATTENDANCE → STUDENT DROPDOWN
        ========================================================= */
       // Attendance controls
-  if (field === "student_id") {
+  if (field === "student_id" && currentTable === "attendance") {
   return `
     <input
       type="text"

@@ -718,16 +718,24 @@ function getFieldControl(field, value, attendanceStudents = []) {
        ========================================================= */
       // Attendance controls
   if (field === "student_id") {
-    return `
-      <select name="${esc(field)}" required>
-        <option value="">Select student</option>
-        ${attendanceStudents.map(s => `
-          <option value="${esc(s.student_id)}"
-            ${String(value ?? "") === String(s.student_id ?? "") ? "selected" : ""}>
-            ${esc(s.student_id)}
-          </option>
-        `).join("")}
-      </select>
+  return `
+    <input
+      type="text"
+      name="${esc(field)}"
+      list="student-id-options"
+      value="${esc(value ?? "")}"
+      placeholder="Type or select student ID"
+      autocomplete="off"
+      required
+    >
+
+    <datalist id="student-id-options">
+      ${attendanceStudents.map(s => `
+        <option value="${esc(s.student_id)}">
+      `).join("")}
+    </datalist>
+  `;
+}
     `;
   }
 

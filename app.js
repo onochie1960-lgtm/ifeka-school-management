@@ -723,7 +723,7 @@ function getFieldControl(field, value, attendanceStudents = []) {
         <option value="">Select student</option>
         ${attendanceStudents.map(s => `
           <option value="${esc(s.student_id)}"
-            ${v === s.student_id ? "selected" : ""}>
+            ${String(value ?? "") === String(s.student_id ?? "") ? "selected" : ""}>
             ${esc(s.student_id)}
           </option>
         `).join("")}
@@ -732,7 +732,7 @@ function getFieldControl(field, value, attendanceStudents = []) {
   }
 
   if (field === "date" || field === "attendance_date") {
-    let dateValue = v;
+    let dateValue = value;
 
     if (dateValue && dateValue.includes("/")) {
         const parts = dateValue.split("/");
@@ -763,8 +763,8 @@ function getFieldControl(field, value, attendanceStudents = []) {
         return `
             <select name="${esc(field)}">
                 <option value="">Select gender</option>
-                <option value="Male" ${v === "Male" ? "selected" : ""}>Male</option>
-                <option value="Female" ${v === "Female" ? "selected" : ""}>Female</option>
+                <option value="Male" ${value === "Male" ? "selected" : ""}>Male</option>
+                <option value="Female" ${value === "Female" ? "selected" : ""}>Female</option>
             </select>
         `;
     }
@@ -773,9 +773,9 @@ function getFieldControl(field, value, attendanceStudents = []) {
         return `
             <select name="${esc(field)}">
                 <option value="">Select relationship</option>
-                <option value="Father" ${v === "Father" ? "selected" : ""}>Father</option>
-                <option value="Mother" ${v === "Mother" ? "selected" : ""}>Mother</option>
-                <option value="Guardian" ${v === "Guardian" ? "selected" : ""}>Guardian</option>
+                <option value="Father" ${value === "Father" ? "selected" : ""}>Father</option>
+                <option value="Mother" ${value === "Mother" ? "selected" : ""}>Mother</option>
+                <option value="Guardian" ${value === "Guardian" ? "selected" : ""}>Guardian</option>
             </select>
         `;
     }
@@ -784,9 +784,9 @@ function getFieldControl(field, value, attendanceStudents = []) {
         return `
             <select name="${esc(field)}">
                 <option value="">Select status</option>
-                <option value="Present" ${v === "Present" ? "selected" : ""}>Present</option>
-                <option value="Absent" ${v === "Absent" ? "selected" : ""}>Absent</option>
-                <option value="Late" ${v === "Late" ? "selected" : ""}>Late</option>
+                <option value="Present" ${value === "Present" ? "selected" : ""}>Present</option>
+                <option value="Absent" ${value === "Absent" ? "selected" : ""}>Absent</option>
+                <option value="Late" ${value === "Late" ? "selected" : ""}>Late</option>
             </select>
         `;
     }
@@ -795,9 +795,9 @@ function getFieldControl(field, value, attendanceStudents = []) {
         return `
             <select name="${esc(field)}">
                 <option value="">Select term</option>
-                <option value="First Term" ${v === "First Term" ? "selected" : ""}>First Term</option>
-                <option value="Second Term" ${v === "Second Term" ? "selected" : ""}>Second Term</option>
-                <option value="Third Term" ${v === "Third Term" ? "selected" : ""}>Third Term</option>
+                <option value="First Term" ${value === "First Term" ? "selected" : ""}>First Term</option>
+                <option value="Second Term" ${value === "Second Term" ? "selected" : ""}>Second Term</option>
+                <option value="Third Term" ${value === "Third Term" ? "selected" : ""}>Third Term</option>
             </select>
         `;
     }
@@ -806,10 +806,10 @@ function getFieldControl(field, value, attendanceStudents = []) {
         return `
             <select name="${esc(field)}">
                 <option value="">Select method</option>
-                <option value="Cash" ${v === "Cash" ? "selected" : ""}>Cash</option>
-                <option value="Transfer" ${v === "Transfer" ? "selected" : ""}>Transfer</option>
-                <option value="POS" ${v === "POS" ? "selected" : ""}>POS</option>
-                <option value="Online" ${v === "Online" ? "selected" : ""}>Online</option>
+                <option value="Cash" ${value === "Cash" ? "selected" : ""}>Cash</option>
+                <option value="Transfer" ${value === "Transfer" ? "selected" : ""}>Transfer</option>
+                <option value="POS" ${value === "POS" ? "selected" : ""}>POS</option>
+                <option value="Online" ${value === "Online" ? "selected" : ""}>Online</option>
             </select>
         `;
     }
@@ -818,7 +818,7 @@ function getFieldControl(field, value, attendanceStudents = []) {
         <input
             name="${esc(field)}"
             type="${getFieldType(field)}"
-            value="${esc(v)}"
+            value="${esc(value)}"
         >
     `;
 }
@@ -829,6 +829,10 @@ async function openForm(row = null) {
     return;
   }
 
+  if (!db) {
+    alert("Database is not connected.");
+    return;
+  }
 
 if (currentTable === "attendance") {
     const { data, error } = await db
@@ -875,7 +879,10 @@ if (currentTable === "attendance") {
         field !== "updated_at"
       )
       .map(field => {
-        const value = row?.[field] ?? "";
+        const value =
+          currentTable === "attendance" && field === "date"
+            ? (row?.attendance_date ?? row?.date ?? "")
+            : (row?.[field] ?? "");
 
         return `
   <div class="field">

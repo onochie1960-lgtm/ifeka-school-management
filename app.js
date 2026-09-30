@@ -878,7 +878,7 @@ function getFieldControl(field, value, attendanceStudents = []) {
         `;
     }
 
-    if (field === "student_id" && attendanceStudents.length) {
+    if (field === "student_id") {
     return `
         <select name="${esc(field)}">
             <option value="">Select student</option>

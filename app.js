@@ -878,22 +878,32 @@ function getFieldControl(field, value, attendanceStudents = []) {
         `;
     }
 
-    if (field === "status") {
-       if (field === "student_id" && attendanceStudents.length) {
-  return `
-    <select name="${esc(field)}">
-      <option value="">Select student</option>
-      ${attendanceStudents.map(student => {
-        const id = student.student_id || "";
-        const name = student.full_name || student.name || "";
-        return `
-          <option value="${esc(id)}" ${value === id ? "selected" : ""}>
-            ${esc(id)}${name ? " - " + esc(name) : ""}
-          </option>
-        `;
-      }).join("")}
-    </select>
-  `;
+    if (field === "student_id" && attendanceStudents.length) {
+    return `
+        <select name="${esc(field)}">
+            <option value="">Select student</option>
+            ${attendanceStudents.map(student => {
+                const id = student.student_id || "";
+                const name = student.full_name || student.name || "";
+                return `
+                    <option value="${esc(id)}" ${value === id ? "selected" : ""}>
+                        ${esc(name ? id + " - " + name : id)}
+                    </option>
+                `;
+            }).join("")}
+        </select>
+    `;
+}
+
+if (field === "status") {
+    return `
+        <select name="${esc(field)}">
+            <option value="">Select status</option>
+            <option value="Present" ${value === "Present" ? "selected" : ""}>Present</option>
+            <option value="Absent" ${value === "Absent" ? "selected" : ""}>Absent</option>
+            <option value="Late" ${value === "Late" ? "selected" : ""}>Late</option>
+        </select>
+    `;
 }
         return `
             <select name="${esc(field)}">

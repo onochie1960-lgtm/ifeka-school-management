@@ -982,7 +982,13 @@ if (currentTable === "attendance" && data.date !== undefined) {
   Object.keys(data).forEach(key => {
     if (data[key] === "") data[key] = null;
   });
+// Automatically calculate Total for Results
+if (currentTable === "results") {
+  const caScore = Number(data.ca_score || 0);
+  const examScore = Number(data.exam_score || 0);
 
+  data.total = caScore + examScore;
+}
   const key = primaryKey(currentTable);
 
   if (editingKey !== null) {

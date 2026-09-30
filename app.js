@@ -319,7 +319,23 @@ function setupControls() {
   if (form) {
     form.addEventListener("submit", saveRecord);
   }
+// Live calculation of Results Total
+if (form) {
+  form.addEventListener("input", function (event) {
+    if (currentTable !== "results") return;
 
+    const caInput = form.querySelector('[name="ca_score"]');
+    const examInput = form.querySelector('[name="exam_score"]');
+    const totalInput = form.querySelector('[name="total"]');
+
+    if (!caInput || !examInput || !totalInput) return;
+
+    const caScore = Number(caInput.value || 0);
+    const examScore = Number(examInput.value || 0);
+
+    totalInput.value = caScore + examScore;
+  });
+}
   const closeBtn = $("closeDialogBtn");
   if (closeBtn) {
     closeBtn.addEventListener("click", function () {

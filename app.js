@@ -320,19 +320,8 @@ function setupControls() {
     form.addEventListener("submit", saveRecord);
   }
 // Live Results calculation: Total, Grade and Remark
-document.addEventListener("input", function (event) {
-  if (currentTable !== "results") return;
-
-  const target = event.target;
-
-  if (
-    !target.matches('[name="ca_score"], [name="exam_score"]')
-  ) {
-    return;
-  }
-
-  const form = target.closest("form");
-  if (!form) return;
+function calculateResultFields(form) {
+  if (!form || currentTable !== "results") return;
 
   const caInput = form.querySelector('[name="ca_score"]');
   const examInput = form.querySelector('[name="exam_score"]');
@@ -340,17 +329,13 @@ document.addEventListener("input", function (event) {
   const gradeInput = form.querySelector('[name="grade"]');
   const remarkInput = form.querySelector('[name="remark"]');
 
-  if (!caInput || !examInput || !totalInput) return;
+  if (!caInput || !examInput) return;
 
-  const caScore = Number(caInput.value || 0);
-  const examScore = Number(examInput.value || 0);
+  const caScore = Number(caInput.value) || 0;
+  const examScore = Number(examInput.value) || 0;
 
   const total = caScore + examScore;
 
-  // Show Total immediately
-  totalInput.value = total;
-
-  // Automatically determine Grade and Remark
   let grade = "";
   let remark = "";
 
@@ -374,8 +359,55 @@ document.addEventListener("input", function (event) {
     remark = "Fail";
   }
 
-  if (gradeInput) gradeInput.value = grade;
-  if (remarkInput) remarkInput.value = remark;
+  if (totalInput) {
+    totalInput.value = total;
+  }
+
+  if (gradeInput) {
+    gradeInput.value = grade;
+  }
+
+  if (remarkInput) {
+    remarkInput.value = remark;
+  }
+}
+
+
+// Run calculation whenever CA or Exam changes
+document.addEventListener("input", function (event) {
+  if (currentTable !== "results") return;
+
+  const target = event.target;
+
+  if (
+    !target.matches('[name="ca_score"], [name="exam_score"]')
+  ) {
+    return;
+  }
+
+  const form = target.closest("form");
+
+  if (!form) return;
+
+  calculateResultFields(form);
+});
+
+
+// Also calculate when the form is opened/loaded
+document.addEventListener("change", function (event) {
+  if (currentTable !== "results") return;
+
+  const target = event.target;
+
+  if (
+    target.matches('[name="ca_score"], [name="exam_score"]')
+  ) {
+    const form = target.closest("form");
+
+    if (form) {
+      calculateResultFields(form);
+    }
+  }
 });
   const closeBtn = $("closeDialogBtn");
   if (closeBtn) {

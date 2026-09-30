@@ -40,7 +40,14 @@ const FORM_FIELDS = {
   subjects: [
     "subject_code", "subject_name", "class"
   ],
-
+  examinations: [
+    "examination_name",
+    "session",
+    "term",
+    "class",
+    "examination_date",
+    "description"
+  ],
   attendance: [
   "student_id", "attendance_date", "status", "remarks"
 ],
@@ -110,6 +117,7 @@ const MODULE_MAP = {
   subjects: "subjects",
   parents: "parents",
   attendance: "attendance",
+  exams: "examinations",
   results: "results",
   "fees-payments": "fee_payments"
 };
@@ -692,7 +700,8 @@ function getFieldType(field) {
     field === "date" ||
     field === "dob" ||
     field === "date_of_birth" ||
-    field === "payment_date"
+    field === "payment_date" ||
+    field === "examination_date"
   ) {
     return "date";
   }

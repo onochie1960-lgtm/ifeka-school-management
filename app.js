@@ -879,6 +879,22 @@ function getFieldControl(field, value, attendanceStudents = []) {
     }
 
     if (field === "status") {
+       if (field === "student_id" && attendanceStudents.length) {
+  return `
+    <select name="${esc(field)}">
+      <option value="">Select student</option>
+      ${attendanceStudents.map(student => {
+        const id = student.student_id || "";
+        const name = student.full_name || student.name || "";
+        return `
+          <option value="${esc(id)}" ${value === id ? "selected" : ""}>
+            ${esc(id)}${name ? " - " + esc(name) : ""}
+          </option>
+        `;
+      }).join("")}
+    </select>
+  `;
+}
         return `
             <select name="${esc(field)}">
                 <option value="">Select status</option>
@@ -932,7 +948,7 @@ async function openForm(row = null) {
     return;
   }
 
-if (currentTable === "attendance") {
+if (currentTable === "attendance" || currentTable === "fees_payments") {
     const { data, error } = await db
         .from("students")
         .select("*")

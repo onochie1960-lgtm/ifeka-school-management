@@ -319,23 +319,64 @@ function setupControls() {
   if (form) {
     form.addEventListener("submit", saveRecord);
   }
-// Live calculation of Results Total
-if (form) {
-  form.addEventListener("input", function (event) {
-    if (currentTable !== "results") return;
+// Live Results calculation: Total, Grade and Remark
+document.addEventListener("input", function (event) {
+  if (currentTable !== "results") return;
 
-    const caInput = form.querySelector('[name="ca_score"]');
-    const examInput = form.querySelector('[name="exam_score"]');
-    const totalInput = form.querySelector('[name="total"]');
+  const target = event.target;
 
-    if (!caInput || !examInput || !totalInput) return;
+  if (
+    !target.matches('[name="ca_score"], [name="exam_score"]')
+  ) {
+    return;
+  }
 
-    const caScore = Number(caInput.value || 0);
-    const examScore = Number(examInput.value || 0);
+  const form = target.closest("form");
+  if (!form) return;
 
-    totalInput.value = caScore + examScore;
-  });
-}
+  const caInput = form.querySelector('[name="ca_score"]');
+  const examInput = form.querySelector('[name="exam_score"]');
+  const totalInput = form.querySelector('[name="total"]');
+  const gradeInput = form.querySelector('[name="grade"]');
+  const remarkInput = form.querySelector('[name="remark"]');
+
+  if (!caInput || !examInput || !totalInput) return;
+
+  const caScore = Number(caInput.value || 0);
+  const examScore = Number(examInput.value || 0);
+
+  const total = caScore + examScore;
+
+  // Show Total immediately
+  totalInput.value = total;
+
+  // Automatically determine Grade and Remark
+  let grade = "";
+  let remark = "";
+
+  if (total >= 70) {
+    grade = "A";
+    remark = "Excellent";
+  } else if (total >= 60) {
+    grade = "B";
+    remark = "Very Good";
+  } else if (total >= 50) {
+    grade = "C";
+    remark = "Good";
+  } else if (total >= 45) {
+    grade = "D";
+    remark = "Fair";
+  } else if (total >= 40) {
+    grade = "E";
+    remark = "Pass";
+  } else {
+    grade = "F";
+    remark = "Fail";
+  }
+
+  if (gradeInput) gradeInput.value = grade;
+  if (remarkInput) remarkInput.value = remark;
+});
   const closeBtn = $("closeDialogBtn");
   if (closeBtn) {
     closeBtn.addEventListener("click", function () {

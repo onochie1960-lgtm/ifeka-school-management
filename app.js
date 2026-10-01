@@ -59,7 +59,7 @@ const FORM_FIELDS = {
 
   fee_payments: [
     "student_id", "amount", "payment_date",
-    "payment_method", "term", "session",
+    "payment_type", "term", "session",
     "reference", "remark"
   ],
 
@@ -917,7 +917,7 @@ if (field === "status") {
         `;
     }
 
-    if (field === "payment_method") {
+    if (field === "payment_type") {
         return `
             <select name="${esc(field)}">
                 <option value="">Select method</option>

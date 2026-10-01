@@ -905,15 +905,6 @@ if (field === "status") {
         </select>
     `;
 }
-        return `
-            <select name="${esc(field)}">
-                <option value="">Select status</option>
-                <option value="Present" ${value === "Present" ? "selected" : ""}>Present</option>
-                <option value="Absent" ${value === "Absent" ? "selected" : ""}>Absent</option>
-                <option value="Late" ${value === "Late" ? "selected" : ""}>Late</option>
-            </select>
-        `;
-    }
 
     if (field === "term") {
         return `
@@ -958,7 +949,7 @@ async function openForm(row = null) {
     return;
   }
 
-if (currentTable === "attendance" || currentTable === "fees_payments") {
+if (currentTable === "attendance" || currentTable === "fee_payments") {
     const { data, error } = await db
         .from("students")
         .select("*")

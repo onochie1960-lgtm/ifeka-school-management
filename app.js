@@ -60,7 +60,7 @@ const FORM_FIELDS = {
   fee_payments: [
     "student_id", "amount", "payment_date",
     "payment_type", "term", "session",
-    "reference", "remark"
+    "reference", "remarks"
   ],
 
   student_parents: [

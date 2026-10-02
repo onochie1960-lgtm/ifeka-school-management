@@ -58,16 +58,19 @@ const FORM_FIELDS = {
     "ca_score", "exam_score", "total", "grade", "remark"
   ],
 
-  fee_payments: [
-  "student_id", "amount", "payment_date",
-  "payment_type",
-  "reference", "remarks"
-],
+    fee_payments: [
+    "student_id",
+    "amount",
+    "payment_date",
+    "payment_type",
+    "reference",
+    "remarks"
+  ],
+
   student_parents: [
-    "student_id", "parent_id", "relationship"
-  ]
-     student_parents: [
-    "student_id", "parent_id", "relationship"
+    "student_id",
+    "parent_id",
+    "relationship"
   ],
 
   timetable: [
@@ -80,7 +83,6 @@ const FORM_FIELDS = {
     "term",
     "session"
   ]
-
 };
 
 const PRIMARY_KEYS = {

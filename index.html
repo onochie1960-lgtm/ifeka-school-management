@@ -276,6 +276,73 @@ document.addEventListener("DOMContentLoaded", function () {
         z-index: 10001;
       }
     }
+        /* View Record mobile-friendly layout */
+    #viewDialog {
+      width: min(92vw, 600px);
+      max-width: 600px;
+      max-height: 85vh;
+      padding: 20px;
+      border: none;
+      border-radius: 18px;
+      overflow: auto;
+    }
+
+    #viewDialog::backdrop {
+      background: rgba(0, 0, 0, 0.45);
+    }
+
+    #viewDialog .dialog-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    #viewDialogTitle {
+      margin: 0;
+    }
+
+    #viewFields {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    #viewFields .field {
+      padding: 12px 14px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      background: #f8fafc;
+    }
+
+    #viewFields .field label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    #viewFields .view-value {
+      display: block;
+      font-size: 16px;
+      line-height: 1.5;
+      word-break: break-word;
+      color: #222;
+    }
+
+    @media (max-width: 600px) {
+      #viewDialog {
+        width: 90vw;
+        max-height: 80vh;
+        padding: 16px;
+        border-radius: 16px;
+      }
+
+      #viewFields .field {
+        padding: 10px 12px;
+      }
+    }
   </style>
 
 </body>

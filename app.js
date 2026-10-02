@@ -882,29 +882,25 @@ function getFieldControl(field, value, attendanceStudents = []) {
         <select name="${esc(field)}">
             <option value="">Select student</option>
             ${attendanceStudents.map(student => {
-                const id = student.student_id || "";
-                const name = student.full_name || student.name || "";
+                const studentCode = student.student_id || "";
+                const studentDbId = student.id ?? "";
+                const optionValue =
+                    currentTable === "fee_payments"
+                        ? studentDbId
+                        : studentCode;
+
+                const name = student.full_name || "";
+
                 return `
-                    <option value="${esc(id)}" ${value === id ? "selected" : ""}>
-                        ${esc(name ? id + " - " + name : id)}
+                    <option value="${esc(optionValue)}"
+                        ${String(value) === String(optionValue) ? "selected" : ""}>
+                        ${esc(name ? studentCode + " - " + name : studentCode)}
                     </option>
                 `;
             }).join("")}
         </select>
     `;
 }
-
-if (field === "status") {
-    return `
-        <select name="${esc(field)}">
-            <option value="">Select status</option>
-            <option value="Present" ${value === "Present" ? "selected" : ""}>Present</option>
-            <option value="Absent" ${value === "Absent" ? "selected" : ""}>Absent</option>
-            <option value="Late" ${value === "Late" ? "selected" : ""}>Late</option>
-        </select>
-    `;
-}
-
     if (field === "term") {
         return `
             <select name="${esc(field)}">

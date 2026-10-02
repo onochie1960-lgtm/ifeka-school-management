@@ -11,8 +11,9 @@ const TABLES = [
   ["parents", "Parents / Guardians"],
   ["attendance", "Attendance"],
   ["results", "Results"],
-  ["fee_payments", "Fees & Payments"],
-  ["student_parents", "Student Parents"]
+    ["fee_payments", "Fees & Payments"],
+  ["student_parents", "Student Parents"],
+  ["timetable", "Timetable"]
 ];
 
 const FORM_FIELDS = {
@@ -65,6 +66,21 @@ const FORM_FIELDS = {
   student_parents: [
     "student_id", "parent_id", "relationship"
   ]
+     student_parents: [
+    "student_id", "parent_id", "relationship"
+  ],
+
+  timetable: [
+    "class_id",
+    "subject_id",
+    "teacher_id",
+    "day",
+    "start_time",
+    "end_time",
+    "term",
+    "session"
+  ]
+
 };
 
 const PRIMARY_KEYS = {
@@ -76,7 +92,8 @@ const PRIMARY_KEYS = {
   attendance: "id",
   results: "id",
   fee_payments: "id",
-  student_parents: "id"
+  student_parents: "id",
+timetable: "id"
 };
 
 /* Modules that currently do not have a table in the supplied
@@ -87,10 +104,7 @@ const INFO_MODULES = {
     title: "Examinations",
     text: "Examinations module is ready. It can be connected when the examinations database table is available."
   },
-  timetable: {
-    title: "Timetable",
-    text: "Timetable module is ready. It can be connected when the timetable database table is available."
-  },
+  
   announcements: {
     title: "Announcements",
     text: "Announcements module is ready. It can be connected when the announcements database table is available."
@@ -118,7 +132,8 @@ const MODULE_MAP = {
   attendance: "attendance",
   exams: "examinations",
   results: "results",
-  "fees-payments": "fee_payments"
+  "fees-payments": "fee_payments",
+  timetable: "timetable"
 };
 
 let db = null;

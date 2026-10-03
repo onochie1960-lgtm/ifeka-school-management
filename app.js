@@ -1427,8 +1427,8 @@ async function viewRow(index) {
     );
 
     const teacherItem = (teacherData || []).find(
-      item => String(item.teacher_id) === String(row.teacher_id)
-    );
+  item => String(item.teacher_id ?? item.id) === String(row.teacher_id)
+);
 
     displayRow.class_id = classItem
       ? classItem.class_name +

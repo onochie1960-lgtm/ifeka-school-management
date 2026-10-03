@@ -671,10 +671,31 @@ async function loadTable(table) {
     }
 
     rows = result.data || [];
-     if (table === "students") {
+
+if (table === "students") {
   window.studentsList = rows;
 }
 
+if (table === "timetable") {
+  const [
+    { data: classData },
+    { data: subjectData },
+    { data: teacherData }
+  ] = await Promise.all([
+    db.from("school_classes")
+      .select("id, class_name, section"),
+
+    db.from("subjects")
+      .select("id, subject_name, subject_code"),
+
+    db.from("teachers")
+      .select("teacher_id, first_name, last_name")
+  ]);
+
+  window.timetableClasses = classData || [];
+  window.timetableSubjects = subjectData || [];
+  window.timetableTeachers = teacherData || [];
+}
     if (rows.length > 0) {
       columns = Object.keys(rows[0]);
       renderRows();
@@ -708,9 +729,17 @@ function renderEmptyTable() {
   if (thead) {
     thead.innerHTML =
       "<tr>" +
-      columns.map(column =>
-        "<th>" + esc(pretty(column)) + "</th>"
-      ).join("") +
+      columns.map(column => {
+  let heading = pretty(column);
+
+  if (currentTable === "timetable") {
+    if (column === "class_id") heading = "Class";
+    if (column === "subject_id") heading = "Subject";
+    if (column === "teacher_id") heading = "Teacher";
+  }
+
+  return "<th>" + esc(heading) + "</th>";
+}).join("") +
       "<th>Actions</th>" +
       "</tr>";
   }
@@ -762,9 +791,51 @@ function renderRows() {
 
     return (
       "<tr>" +
-      columns.map(column =>
-        "<td>" + formatCell(row[column]) + "</td>"
-      ).join("") +
+      columns.map(column => {
+  let value = row[column];
+
+  if (currentTable === "timetable") {
+
+    if (column === "class_id") {
+      const item = (window.timetableClasses || []).find(
+        x => String(x.id) === String(value)
+      );
+
+      if (item) {
+        value = item.class_name +
+          (item.section ? " - " + item.section : "");
+      }
+    }
+
+    if (column === "subject_id") {
+      const item = (window.timetableSubjects || []).find(
+        x => String(x.id) === String(value)
+      );
+
+      if (item) {
+        value = item.subject_name +
+          (item.subject_code
+            ? " (" + item.subject_code + ")"
+            : "");
+      }
+    }
+
+    if (column === "teacher_id") {
+      const item = (window.timetableTeachers || []).find(
+        x => String(x.teacher_id) === String(value)
+      );
+
+      if (item) {
+        value =
+          (item.first_name || "") +
+          " " +
+          (item.last_name || "");
+      }
+    }
+  }
+
+  return "<td>" + formatCell(value) + "</td>";
+}).join("")+
       '<td class="actions">' +
         '<button class="small-btn" type="button" ' +
           'onclick="viewRow(' + index + ')">View</button>' +

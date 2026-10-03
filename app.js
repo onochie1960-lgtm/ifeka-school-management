@@ -1320,7 +1320,96 @@ function ensureViewDialog() {
   });
 }
 
-function viewRow(index) {
+async function viewRow(index) {
+  const row = rows[index];
+  if (!row) return;
+
+  ensureViewDialog();
+
+  $("viewDialogTitle").textContent =
+    tableLabel(currentTable) + " — View Record";
+
+  let displayRow = { ...row };
+
+  if (currentTable === "timetable" && db) {
+    const [
+      { data: classData },
+      { data: subjectData },
+      { data: teacherData }
+    ] = await Promise.all([
+      db.from("school_classes")
+        .select("id, class_name, section"),
+
+      db.from("subjects")
+        .select("id, subject_name, subject_code"),
+
+      db.from("teachers")
+        .select("teacher_id, first_name, last_name")
+    ]);
+
+    const classItem = (classData || []).find(
+      item => String(item.id) === String(row.class_id)
+    );
+
+    const subjectItem = (subjectData || []).find(
+      item => String(item.id) === String(row.subject_id)
+    );
+
+    const teacherItem = (teacherData || []).find(
+      item => String(item.teacher_id) === String(row.teacher_id)
+    );
+
+    displayRow.class_id = classItem
+      ? classItem.class_name +
+        (classItem.section ? " - " + classItem.section : "")
+      : row.class_id;
+
+    displayRow.subject_id = subjectItem
+      ? subjectItem.subject_name +
+        (subjectItem.subject_code
+          ? " (" + subjectItem.subject_code + ")"
+          : "")
+      : row.subject_id;
+
+    displayRow.teacher_id = teacherItem
+      ? (teacherItem.first_name || "") +
+        " " +
+        (teacherItem.last_name || "")
+      : row.teacher_id;
+  }
+
+  $("viewFields").innerHTML = columns
+    .filter(field =>
+      field !== "created_at" &&
+      field !== "updated_at"
+    )
+    .map(field => {
+      const value = displayRow[field];
+
+      let display =
+        value == null || value === ""
+          ? "—"
+          : esc(value);
+
+      return `
+        <div class="field">
+          <label>${esc(pretty(field))}</label>
+          <div class="view-value">${display}</div>
+        </div>
+      `;
+    })
+    .join("");
+
+  const dialog = $("viewDialog");
+
+  if (dialog) {
+    if (typeof dialog.showModal === "function") {
+      dialog.showModal();
+    } else {
+      dialog.classList.remove("hidden");
+    }
+  }
+}
   function viewRow(index) {
 
 /* =========================================================

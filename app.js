@@ -1410,7 +1410,7 @@ async function viewRow(index) {
     }
   }
 }
-  function viewRow(index) {
+
 
 /* =========================================================
    Edit / Delete

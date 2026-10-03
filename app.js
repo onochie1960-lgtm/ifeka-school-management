@@ -689,7 +689,7 @@ if (table === "timetable") {
       .select("id, subject_name, subject_code"),
 
     db.from("teachers")
-      .select("teacher_id, first_name, last_name")
+      .select("id, teacher_id, first_name, last_name")
   ]);
 
   window.timetableClasses = classData || [];

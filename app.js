@@ -1426,7 +1426,9 @@ async function viewRow(index) {
       item => String(item.id) === String(row.subject_id)
     );
 
-    const teacherItem = (teacherData || []).find(
+    const teacherItem = (window.timetableTeachers || []).find(
+  item => String(item.teacher_id ?? item.id) === String(row.teacher_id)
+);
   item => String(item.teacher_id ?? item.id) === String(row.teacher_id)
 );
 

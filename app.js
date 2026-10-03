@@ -893,7 +893,58 @@ function getFieldControl(field, value, attendanceStudents = []) {
             </select>
         `;
     }
+    if (currentTable === "timetable" && field === "class_id") {
+        return `
+            <select name="class_id">
+                <option value="">Select class</option>
+                ${(window.timetableClasses || []).map(item => `
+                    <option value="${esc(item.id)}"
+                        ${String(value) === String(item.id) ? "selected" : ""}>
+                        ${esc(
+                            item.class_name +
+                            (item.section ? " - " + item.section : "")
+                        )}
+                    </option>
+                `).join("")}
+            </select>
+        `;
+    }
 
+    if (currentTable === "timetable" && field === "subject_id") {
+        return `
+            <select name="subject_id">
+                <option value="">Select subject</option>
+                ${(window.timetableSubjects || []).map(item => `
+                    <option value="${esc(item.id)}"
+                        ${String(value) === String(item.id) ? "selected" : ""}>
+                        ${esc(
+                            item.subject_name ||
+                            item.subject_code ||
+                            ("Subject " + item.id)
+                        )}
+                    </option>
+                `).join("")}
+            </select>
+        `;
+    }
+
+    if (currentTable === "timetable" && field === "teacher_id") {
+        return `
+            <select name="teacher_id">
+                <option value="">Select teacher</option>
+                ${(window.timetableTeachers || []).map(item => `
+                    <option value="${esc(item.id)}"
+                        ${String(value) === String(item.id) ? "selected" : ""}>
+                        ${esc(
+                            item.first_name
+                                ? item.first_name + " " + (item.last_name || "")
+                                : (item.teacher_id || ("Teacher " + item.id))
+                        )}
+                    </option>
+                `).join("")}
+            </select>
+        `;
+    }
     if (field === "student_id") {
     return `
         <select name="${esc(field)}">
@@ -950,6 +1001,10 @@ function getFieldControl(field, value, attendanceStudents = []) {
     `;
 }
 let attendanceStudents = [];
+
+window.timetableClasses = [];
+window.timetableSubjects = [];
+window.timetableTeachers = [];
 async function openForm(row = null) {
   if (!currentTable) {
     alert("Please select a module first.");
@@ -960,7 +1015,36 @@ async function openForm(row = null) {
     alert("Database is not connected.");
     return;
   }
+if (currentTable === "timetable") {
+    const [classesResult, subjectsResult, teachersResult] =
+        await Promise.all([
+            db.from("school_classes").select("*").order("class_name"),
+            db.from("subjects").select("*").order("subject_name"),
+            db.from("teachers").select("*").order("first_name")
+        ]);
 
+    if (classesResult.error) {
+        console.error("Timetable classes error:", classesResult.error);
+        alert("Could not load Classes for Timetable.");
+        return;
+    }
+
+    if (subjectsResult.error) {
+        console.error("Timetable subjects error:", subjectsResult.error);
+        alert("Could not load Subjects for Timetable.");
+        return;
+    }
+
+    if (teachersResult.error) {
+        console.error("Timetable teachers error:", teachersResult.error);
+        alert("Could not load Teachers for Timetable.");
+        return;
+    }
+
+    window.timetableClasses = classesResult.data || [];
+    window.timetableSubjects = subjectsResult.data || [];
+    window.timetableTeachers = teachersResult.data || [];
+}
 if (currentTable === "attendance" || currentTable === "fee_payments") {
     const { data, error } = await db
         .from("students")

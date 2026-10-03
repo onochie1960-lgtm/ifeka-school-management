@@ -1321,65 +1321,7 @@ function ensureViewDialog() {
 }
 
 function viewRow(index) {
-  const row = rows[index];
-  if (!row) return;
-
-  ensureViewDialog();
-
-  $("viewDialogTitle").textContent =
-    tableLabel(currentTable) + " — View Record";
-
-  $("viewFields").innerHTML = columns
-    .filter(field =>
-      field !== "created_at" &&
-      field !== "updated_at"
-    )
-    .map(field => {
-      const value = row[field];
-
-      let display =
-        value == null || value === ""
-          ? "—"
-          : esc(value);
-
-      if (
-        typeof value === "string" &&
-        /^https?:\/\//i.test(value) &&
-        /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(value)
-      ) {
-        display = `
-          <img
-            src="${esc(value)}"
-            alt="Photo"
-            style="
-              max-width:180px;
-              max-height:180px;
-              object-fit:cover;
-              border-radius:12px;
-            "
-          >
-        `;
-      }
-
-      return `
-        <div class="field">
-          <label>${esc(pretty(field))}</label>
-          <div class="view-value">${display}</div>
-        </div>
-      `;
-    })
-    .join("");
-
-  const dialog = $("viewDialog");
-
-  if (dialog) {
-    if (typeof dialog.showModal === "function") {
-      dialog.showModal();
-    } else {
-      dialog.setAttribute("open", "");
-    }
-  }
-}
+  function viewRow(index) {
 
 /* =========================================================
    Edit / Delete

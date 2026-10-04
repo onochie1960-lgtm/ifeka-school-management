@@ -14,8 +14,10 @@ const TABLES = [
     ["fee_payments", "Fees & Payments"],
   ["student_parents", "Student Parents"],
 ["timetable", "Timetable"],
-["announcements", "Announcements"]
+["announcements", "Announcements"],
+["transport", "Transport"]
 ];
+
 
 
 const FORM_FIELDS = {
@@ -85,7 +87,16 @@ const FORM_FIELDS = {
     "term",
       "session"
 ],
-
+transport: [
+  "vehicle_number",
+  "vehicle_type",
+  "driver_name",
+  "driver_phone",
+  "route",
+  "capacity",
+  "status",
+  "remarks"
+]
 announcements: [
   "title",
   "message",

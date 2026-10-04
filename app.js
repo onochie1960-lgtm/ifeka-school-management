@@ -833,7 +833,19 @@ function renderRows() {
       }
     }
   }
+if (column === "day") {
+  const days = {
+    1: "Monday",
+    2: "Tuesday",
+    3: "Wednesday",
+    4: "Thursday",
+    5: "Friday",
+    6: "Saturday",
+    7: "Sunday"
+  };
 
+  value = days[value] || value;
+}
   return "<td>" + formatCell(value) + "</td>";
 }).join("")+
       '<td class="actions">' +

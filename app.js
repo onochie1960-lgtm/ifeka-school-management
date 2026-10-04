@@ -106,7 +106,8 @@ const PRIMARY_KEYS = {
   results: "id",
   fee_payments: "id",
   student_parents: "id",
-  timetable: "id"
+  timetable: "id",
+announcements: "id"
 };
 
 /* Modules that currently do not have a table in the supplied

@@ -1052,6 +1052,21 @@ ${esc(
         </select>
     `;
 }
+   // Day Code Here
+   if (currentTable === "timetable" && field === "day") {
+    return `
+        <select name="day">
+            <option value="">Select day</option>
+            <option value="1" ${String(value) === "1" ? "selected" : ""}>Monday</option>
+            <option value="2" ${String(value) === "2" ? "selected" : ""}>Tuesday</option>
+            <option value="3" ${String(value) === "3" ? "selected" : ""}>Wednesday</option>
+            <option value="4" ${String(value) === "4" ? "selected" : ""}>Thursday</option>
+            <option value="5" ${String(value) === "5" ? "selected" : ""}>Friday</option>
+            <option value="6" ${String(value) === "6" ? "selected" : ""}>Saturday</option>
+            <option value="7" ${String(value) === "7" ? "selected" : ""}>Sunday</option>
+        </select>
+    `;
+}
     if (field === "term") {
         return `
             <select name="${esc(field)}">

@@ -1484,13 +1484,27 @@ async function viewRow(index) {
       field !== "updated_at"
     )
     .map(field => {
-      const value = displayRow[field];
+      const value = row[field];
 
-      let display =
-        value == null || value === ""
-          ? "—"
-          : esc(value);
+let display =
+  value == null || value === ""
+    ? "—"
+    : esc(value);
 
+if (currentTable === "timetable" && field === "day") {
+  const days = [
+    "",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday"
+  ];
+
+  display = days[Number(value)] || esc(value);
+}
       return `
         <div class="field">
           <label>${esc(pretty(field))}</label>

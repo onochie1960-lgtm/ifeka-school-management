@@ -1089,6 +1089,15 @@ ${esc(
             </select>
         `;
     }
+if (field === "message") {
+    return `
+        <textarea
+            name="message"
+            rows="8"
+            placeholder="Write the full announcement message here..."
+        >${esc(value)}</textarea>
+    `;
+}
 
     if (field === "payment_type") {
         return `

@@ -822,7 +822,7 @@ function renderRows() {
 
     if (column === "teacher_id") {
       const item = (window.timetableTeachers || []).find(
-        x => String(x.teacher_id) === String(value)
+        x => String(x.id) === String(value)
       );
 
       if (item) {

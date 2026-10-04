@@ -1484,8 +1484,7 @@ async function viewRow(index) {
       field !== "updated_at"
     )
     .map(field => {
-      const value = row[field];
-
+      const value = displayRow[field];
 let display =
   value == null || value === ""
     ? "—"

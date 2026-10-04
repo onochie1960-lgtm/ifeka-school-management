@@ -331,6 +331,15 @@ function setupNavigation() {
 
 function setupControls() {
    
+     const menuBtn = $("menuBtn");
+  const sidebar = document.querySelector(".sidebar");
+
+  if (menuBtn && sidebar) {
+    menuBtn.addEventListener("click", function () {
+      sidebar.classList.toggle("open");
+      document.body.classList.toggle("menu-open");
+    });
+  }
   const refreshBtn = $("refreshBtn");
   if (refreshBtn) {
     refreshBtn.addEventListener("click", function () {

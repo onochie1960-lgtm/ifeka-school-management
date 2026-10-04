@@ -157,7 +157,8 @@ const MODULE_MAP = {
   results: "results",
   "fees-payments": "fee_payments",
   timetable: "timetable",
-announcements: "announcements"
+announcements: "announcements",
+transport: "transport"
 };
 
 let db = null;

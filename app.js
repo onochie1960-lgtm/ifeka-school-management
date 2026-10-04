@@ -330,20 +330,7 @@ function setupNavigation() {
   );
 }
 
-function setupControls() {
-
-  const menuBtn = $("menuBtn");
-  const sidebar = $("sidebar");
-
-  if (menuBtn && sidebar) {
-    menuBtn.addEventListener("click", function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-
-      sidebar.classList.toggle("open");
-      document.body.classList.toggle("menu-open");
-    });
-  }
+function setupControls() {  
 
   const refreshBtn = $("refreshBtn");
   if (refreshBtn) {

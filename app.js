@@ -83,8 +83,17 @@ const FORM_FIELDS = {
     "start_time",
     "end_time",
     "term",
-    "session"
-  ]
+      "session"
+],
+
+announcements: [
+  "title",
+  "message",
+  "audience",
+  "publish_date",
+  "expiry_date",
+  "status"
+]
 };
 
 const PRIMARY_KEYS = {

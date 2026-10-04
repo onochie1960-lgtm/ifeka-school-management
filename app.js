@@ -1021,7 +1021,7 @@ function getFieldControl(field, value, attendanceStudents = []) {
                         ${esc(
                             item.first_name
                                 ? item.first_name + " " + (item.last_name || "")
-                                : (item.id || ("Teacher " + item.id))
+                                : (item.teacher_id || ("Teacher " + item.teacher_id))
                         )}
                     </option>
                 `).join("")}

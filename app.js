@@ -13,7 +13,7 @@ const TABLES = [
   ["results", "Results"],
     ["fee_payments", "Fees & Payments"],
   ["student_parents", "Student Parents"],
-  ["timetable", "Timetable"],
+["timetable", "Timetable"],
 ["announcements", "Announcements"]
 ];
 

@@ -1016,14 +1016,14 @@ function getFieldControl(field, value, attendanceStudents = []) {
             <select name="teacher_id">
                 <option value="">Select teacher</option>
                 ${(window.timetableTeachers || []).map(item => `
-                    <option value="${esc(item.teacher_id)}"
-  ${String(value) === String(item.teacher_id) ? "selected" : ""}
-                        ${esc(
-                            item.first_name
-                                ? item.first_name + " " + (item.last_name || "")
-                                : (item.teacher_id || ("Teacher " + item.teacher_id))
-                        )}
-                    </option>
+                    <option value="${esc(item.teacher_id || item.id)}"
+${String(value) === String(item.teacher_id || item.id) ? "selected" : ""}>
+${esc(
+    ((item.first_name || "") + " " + (item.last_name || "")).trim() ||
+    item.teacher_id ||
+    ("Teacher " + item.id)
+)}
+</option>
                 `).join("")}
             </select>
         `;

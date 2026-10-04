@@ -331,16 +331,20 @@ function setupNavigation() {
 }
 
 function setupControls() {
-   
-     const menuBtn = $("menuBtn");
-  const sidebar = document.querySelector(".sidebar");
+
+  const menuBtn = $("menuBtn");
+  const sidebar = $("sidebar");
 
   if (menuBtn && sidebar) {
-    menuBtn.addEventListener("click", function () {
+    menuBtn.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+
       sidebar.classList.toggle("open");
       document.body.classList.toggle("menu-open");
     });
   }
+
   const refreshBtn = $("refreshBtn");
   if (refreshBtn) {
     refreshBtn.addEventListener("click", function () {

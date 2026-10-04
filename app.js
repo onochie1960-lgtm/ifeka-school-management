@@ -96,7 +96,8 @@ transport: [
   "capacity",
   "status",
   "remarks"
-]
+],
+
 announcements: [
   "title",
   "message",

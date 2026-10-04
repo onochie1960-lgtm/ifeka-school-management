@@ -1427,7 +1427,7 @@ async function viewRow(index) {
     );
 
     const teacherItem = (window.timetableTeachers || []).find(
-  item => String(item.teacher_id ?? item.id) === String(row.teacher_id)
+  item => String(item.id) === String(row.teacher_id)
 );
 
     displayRow.class_id = classItem

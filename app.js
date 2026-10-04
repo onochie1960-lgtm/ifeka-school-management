@@ -119,10 +119,7 @@ const INFO_MODULES = {
     text: "Examinations module is ready. It can be connected when the examinations database table is available."
   },
   
-  announcements: {
-    title: "Announcements",
-    text: "Announcements module is ready. It can be connected when the announcements database table is available."
-  },
+  
   transport: {
     title: "Transport",
     text: "Transport module is ready. It can be connected when the transport database table is available."

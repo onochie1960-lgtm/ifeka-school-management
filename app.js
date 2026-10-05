@@ -679,7 +679,6 @@ function openInfoModule(page, button) {
       `;
 
       const reportButtons = {
-      const reportButtons = {
   studentReportBtn: "students",
   teacherReportBtn: "teachers",
   attendanceReportBtn: "attendance",

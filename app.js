@@ -646,8 +646,90 @@ function openInfoModule(page, button) {
     $("moduleInfoTitle").textContent = info.title;
   }
 
-  if ($("moduleInfoText")) {
-    $("moduleInfoText").textContent = info.text;
+  if (page === "reports") {
+    if ($("moduleInfoText")) {
+      $("moduleInfoText").innerHTML = `
+        <div style="margin-top:15px;">
+          <p>Generate useful reports from your school records.</p>
+
+          <div style="display:grid; gap:12px; margin-top:20px;">
+            <button type="button" id="studentReportBtn">
+              Student Report
+            </button>
+
+            <button type="button" id="teacherReportBtn">
+              Teacher Report
+            </button>
+
+            <button type="button" id="attendanceReportBtn">
+              Attendance Report
+            </button>
+
+            <button type="button" id="resultReportBtn">
+              Results Report
+            </button>
+
+            <button type="button" id="feeReportBtn">
+              Fees & Payments Report
+            </button>
+          </div>
+
+          <div id="reportOutput" style="margin-top:20px;"></div>
+        </div>
+      `;
+
+      const reportButtons = {
+        studentReportBtn: "students",
+        teacherReportBtn: "teachers",
+        attendanceReportBtn: "attendance",
+        resultReportBtn: "results",
+        feeReportBtn: "fee_payments"
+      };
+
+      Object.keys(reportButtons).forEach(id => {
+        const btn = $(id);
+
+        if (btn) {
+          btn.addEventListener("click", async function () {
+            const table = reportButtons[id];
+            const output = $("reportOutput");
+
+            if (!output || !db) return;
+
+            output.innerHTML = "Loading report...";
+
+            try {
+              const result = await db
+                .from(table)
+                .select("*");
+
+              if (result.error) {
+                throw result.error;
+              }
+
+              const data = result.data || [];
+
+              output.innerHTML = `
+                <div style="padding:15px; border:1px solid #ddd; border-radius:10px;">
+                  <h3>${table.replace("_", " ")} Report</h3>
+                  <p><strong>Total records:</strong> ${data.length}</p>
+                </div>
+              `;
+            } catch (error) {
+              output.innerHTML = `
+                <div style="padding:15px; color:#b00020;">
+                  Report failed: ${error.message}
+                </div>
+              `;
+            }
+          });
+        }
+      });
+    }
+  } else {
+    if ($("moduleInfoText")) {
+      $("moduleInfoText").textContent = info.text;
+    }
   }
 
   if ($("addBtn")) {
@@ -658,7 +740,9 @@ function openInfoModule(page, button) {
     btn.classList.remove("active");
   });
 
-  if (button) button.classList.add("active");
+  if (button) {
+    button.classList.add("active");
+  }
 
   setStatus(info.title + " module");
 }

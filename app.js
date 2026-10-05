@@ -1922,17 +1922,21 @@ async function deleteRow(index) {
     return;
   }
 
-  const key = primaryKey(currentTable);
-  const keyValue = row[key];
+  const key =
+  currentTable === "students" && !row.student_id
+    ? "id"
+    : primaryKey(currentTable);
 
-  if (keyValue === undefined || keyValue === null) {
-    alert(
-      "This record has no " +
-      key +
-      " value, so it cannot be deleted."
-    );
-    return;
-  }
+const keyValue = row[key];
+
+if (keyValue === undefined || keyValue === null) {
+  alert(
+    "This record has no " +
+    key +
+    " value, so it cannot be deleted."
+  );
+  return;
+}
 
   const confirmed = confirm(
     "Delete this " +

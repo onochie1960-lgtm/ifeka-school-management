@@ -948,7 +948,7 @@ Object.keys(reportButtons).forEach(id => {
 
       const teachers = teacherResult.data || [];
 
-      if (!teachers.length) {
+            if (!teachers.length) {
         output.innerHTML = `
           <div style="padding:15px;">
             No teachers found.
@@ -956,7 +956,7 @@ Object.keys(reportButtons).forEach(id => {
         `;
               return;
     }
-    }
+
     if (table === "attendance") {
       const attendanceResult = await db
         .from("attendance")

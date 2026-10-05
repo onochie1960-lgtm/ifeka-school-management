@@ -937,7 +937,67 @@ Object.keys(reportButtons).forEach(id => {
 
           return;
         }
+    if (table === "teachers") {
+      const teacherResult = await db
+        .from("teachers")
+        .select("*");
 
+      if (teacherResult.error) {
+        throw teacherResult.error;
+      }
+
+      const teachers = teacherResult.data || [];
+
+      if (!teachers.length) {
+        output.innerHTML = `
+          <div style="padding:15px;">
+            No teachers found.
+          </div>
+        `;
+        return;
+      }
+
+      const teacherColumns = Object.keys(teachers[0]);
+
+      output.innerHTML = `
+        <div style="padding:15px; border:1px solid #ddd; border-radius:10px;">
+          <h3>Teacher Report</h3>
+
+          <p>
+            <strong>Total Teachers:</strong>
+            ${teachers.length}
+          </p>
+
+          <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse;">
+              <thead>
+                <tr>
+                  ${teacherColumns.map(column => `
+                    <th style="border:1px solid #ddd; padding:8px; text-align:left;">
+                      ${esc(pretty(column))}
+                    </th>
+                  `).join("")}
+                </tr>
+              </thead>
+
+              <tbody>
+                ${teachers.map(teacher => `
+                  <tr>
+                    ${teacherColumns.map(column => `
+                      <td style="border:1px solid #ddd; padding:8px;">
+                        ${esc(teacher[column] ?? "")}
+                      </td>
+                    `).join("")}
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+
+      return;
+    }
         const result = await db
           .from(table)
           .select("*");

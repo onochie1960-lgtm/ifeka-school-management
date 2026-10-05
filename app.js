@@ -1640,6 +1640,27 @@ if (currentTable === "attendance" && data.date !== undefined) {
   Object.keys(data).forEach(key => {
     if (data[key] === "") data[key] = null;
   });
+   // Automatically generate Student ID
+if (currentTable === "students" && !data.student_id) {
+  const studentIdsResult = await db
+    .from("students")
+    .select("student_id");
+
+  if (studentIdsResult.error) {
+    throw studentIdsResult.error;
+  }
+
+  const numbers = (studentIdsResult.data || [])
+    .map(row => String(row.student_id || "").match(/^STU(\d+)$/i))
+    .filter(match => match)
+    .map(match => Number(match[1]));
+
+  const nextNumber = numbers.length
+    ? Math.max(...numbers) + 1
+    : 1;
+
+  data.student_id = "STU" + String(nextNumber).padStart(3, "0");
+}
 // Automatically calculate Total for Results
 if (currentTable === "results") {
   const caScore = Number(data.ca_score || 0);

@@ -956,7 +956,67 @@ Object.keys(reportButtons).forEach(id => {
         `;
         return;
       }
+    if (table === "attendance") {
+      const attendanceResult = await db
+        .from("attendance")
+        .select("*");
 
+      if (attendanceResult.error) {
+        throw attendanceResult.error;
+      }
+
+      const attendance = attendanceResult.data || [];
+
+      if (!attendance.length) {
+        output.innerHTML = `
+          <div style="padding:15px;">
+            No attendance records found.
+          </div>
+        `;
+        return;
+      }
+
+      const attendanceColumns = Object.keys(attendance[0]);
+
+      output.innerHTML = `
+        <div style="padding:15px; border:1px solid #ddd; border-radius:10px;">
+          <h3>Attendance Report</h3>
+
+          <p>
+            <strong>Total Attendance Records:</strong>
+            ${attendance.length}
+          </p>
+
+          <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse;">
+              <thead>
+                <tr>
+                  ${attendanceColumns.map(column => `
+                    <th style="border:1px solid #ddd; padding:8px; text-align:left;">
+                      ${esc(pretty(column))}
+                    </th>
+                  `).join("")}
+                </tr>
+              </thead>
+
+              <tbody>
+                ${attendance.map(record => `
+                  <tr>
+                    ${attendanceColumns.map(column => `
+                      <td style="border:1px solid #ddd; padding:8px;">
+                        ${esc(record[column] ?? "")}
+                      </td>
+                    `).join("")}
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+
+      return;
+    }
       const teacherColumns = Object.keys(teachers[0]);
 
       output.innerHTML = `

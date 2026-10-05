@@ -1949,7 +1949,7 @@ if (keyValue === undefined || keyValue === null) {
   try {
 
   if (currentTable === "students") {
-    const studentId = row.student_id;
+    const studentId = row.id;
 
     if (studentId) {
       const relatedTables = [

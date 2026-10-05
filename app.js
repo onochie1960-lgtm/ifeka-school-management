@@ -1947,6 +1947,36 @@ if (keyValue === undefined || keyValue === null) {
   if (!confirmed) return;
 
   try {
+
+  if (currentTable === "students") {
+    const studentId = row.student_id;
+
+    if (studentId) {
+      const relatedTables = [
+        "attendance",
+        "results",
+        "fee_payments",
+        "student_parents"
+      ];
+
+      for (const table of relatedTables) {
+        const relatedResult = await db
+          .from(table)
+          .delete()
+          .eq("student_id", studentId);
+
+        if (relatedResult.error) {
+          throw relatedResult.error;
+        }
+      }
+    }
+  }
+
+  const result = await db
+    .from(currentTable)
+    .delete()
+    .eq(key, keyValue)
+    .select();
     const result = await db
       .from(currentTable)
       .delete()

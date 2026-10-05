@@ -1977,11 +1977,6 @@ if (keyValue === undefined || keyValue === null) {
     .delete()
     .eq(key, keyValue)
     .select();
-    const result = await db
-      .from(currentTable)
-      .delete()
-      .eq(key, keyValue)
-      .select();
 
     if (result.error) {
       throw result.error;

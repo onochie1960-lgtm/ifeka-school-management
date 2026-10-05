@@ -679,52 +679,292 @@ function openInfoModule(page, button) {
       `;
 
       const reportButtons = {
-        studentReportBtn: "students",
-        teacherReportBtn: "teachers",
-        attendanceReportBtn: "attendance",
-        resultReportBtn: "results",
-        feeReportBtn: "fee_payments"
-      };
+      const reportButtons = {
+  studentReportBtn: "students",
+  teacherReportBtn: "teachers",
+  attendanceReportBtn: "attendance",
+  resultReportBtn: "results",
+  feeReportBtn: "fee_payments"
+};
 
-      Object.keys(reportButtons).forEach(id => {
-        const btn = $(id);
+Object.keys(reportButtons).forEach(id => {
+  const btn = $(id);
 
-        if (btn) {
-          btn.addEventListener("click", async function () {
-            const table = reportButtons[id];
-            const output = $("reportOutput");
+  if (btn) {
+    btn.addEventListener("click", async function () {
+      const table = reportButtons[id];
+      const output = $("reportOutput");
 
-            if (!output || !db) return;
+      if (!output || !db) return;
 
-            output.innerHTML = "Loading report...";
+      output.innerHTML = "Loading report...";
 
-            try {
-              const result = await db
-                .from(table)
-                .select("*");
+      try {
+        if (table === "students") {
+          const studentResult = await db
+            .from("students")
+            .select("*")
+            .order("first_name");
 
-              if (result.error) {
-                throw result.error;
+          if (studentResult.error) {
+            throw studentResult.error;
+          }
+
+          const students = studentResult.data || [];
+
+          if (!students.length) {
+            output.innerHTML = `
+              <div style="padding:15px;">
+                No students found.
+              </div>
+            `;
+            return;
+          }
+
+          output.innerHTML = `
+            <div style="padding:15px; border:1px solid #ddd; border-radius:10px;">
+              <h3>Student Report</h3>
+
+              <label for="studentReportSelect">
+                <strong>Select Student</strong>
+              </label>
+
+              <select id="studentReportSelect"
+                style="width:100%; padding:10px; margin-top:8px;">
+                <option value="">-- Select Student --</option>
+
+                ${students.map(student => `
+                  <option value="${esc(student.student_id)}">
+                    ${esc(
+                      (student.first_name || "") +
+                      " " +
+                      (student.last_name || "")
+                    )} -
+                    ${esc(student.student_id)}
+                  </option>
+                `).join("")}
+              </select>
+
+              <div id="studentReportDetails" style="margin-top:20px;"></div>
+            </div>
+          `;
+
+          const select = $("studentReportSelect");
+
+          if (select) {
+            select.addEventListener("change", async function () {
+              const studentId = this.value;
+              const details = $("studentReportDetails");
+
+              if (!details || !studentId) {
+                if (details) details.innerHTML = "";
+                return;
               }
 
-              const data = result.data || [];
+              details.innerHTML = "Loading student details...";
 
-              output.innerHTML = `
-                <div style="padding:15px; border:1px solid #ddd; border-radius:10px;">
-                  <h3>${table.replace("_", " ")} Report</h3>
-                  <p><strong>Total records:</strong> ${data.length}</p>
-                </div>
-              `;
-            } catch (error) {
-              output.innerHTML = `
-                <div style="padding:15px; color:#b00020;">
-                  Report failed: ${error.message}
-                </div>
-              `;
-            }
-          });
+              try {
+                const studentResult = await db
+                  .from("students")
+                  .select("*")
+                  .eq("student_id", studentId)
+                  .limit(1);
+
+                if (studentResult.error) {
+                  throw studentResult.error;
+                }
+
+                const student = (studentResult.data || [])[0];
+
+                if (!student) {
+                  details.innerHTML = "Student record not found.";
+                  return;
+                }
+
+                const resultData = await db
+                  .from("results")
+                  .select("*")
+                  .eq("student_id", studentId)
+                  .order("session")
+                  .order("term");
+
+                if (resultData.error) {
+                  throw resultData.error;
+                }
+
+                const results = resultData.data || [];
+
+                const subjectIds = [
+                  ...new Set(
+                    results
+                      .map(row => row.subject_id)
+                      .filter(value => value !== null && value !== undefined)
+                  )
+                ];
+
+                let subjects = [];
+
+                if (subjectIds.length) {
+                  const subjectData = await db
+                    .from("subjects")
+                    .select("*")
+                    .in("id", subjectIds);
+
+                  if (subjectData.error) {
+                    throw subjectData.error;
+                  }
+
+                  subjects = subjectData.data || [];
+                }
+
+                const subjectMap = {};
+
+                subjects.forEach(subject => {
+                  subjectMap[String(subject.id)] =
+                    subject.subject_name ||
+                    subject.subject_code ||
+                    "Subject";
+                });
+
+                details.innerHTML = `
+                  <div style="margin-bottom:20px;">
+                    <h3>
+                      ${esc(
+                        (student.first_name || "") +
+                        " " +
+                        (student.last_name || "")
+                      )}
+                    </h3>
+
+                    <p>
+                      <strong>Student ID:</strong>
+                      ${esc(student.student_id || "")}
+                    </p>
+
+                    <p>
+                      <strong>Gender:</strong>
+                      ${esc(student.gender || "")}
+                    </p>
+
+                    <p>
+                      <strong>Date of Birth:</strong>
+                      ${esc(student.date_of_birth || "")}
+                    </p>
+
+                    <p>
+                      <strong>Class:</strong>
+                      ${esc(student.class || "")}
+                    </p>
+
+                    <p>
+                      <strong>Phone:</strong>
+                      ${esc(student.phone || "")}
+                    </p>
+
+                    <p>
+                      <strong>Email:</strong>
+                      ${esc(student.email || "")}
+                    </p>
+                  </div>
+
+                  <h3>Academic Results</h3>
+
+                  ${
+                    results.length
+                      ? `
+                        <div style="overflow-x:auto;">
+                          <table style="width:100%; border-collapse:collapse;">
+                            <thead>
+                              <tr>
+                                <th style="border:1px solid #ddd; padding:8px;">Subject</th>
+                                <th style="border:1px solid #ddd; padding:8px;">CA</th>
+                                <th style="border:1px solid #ddd; padding:8px;">Exam</th>
+                                <th style="border:1px solid #ddd; padding:8px;">Total</th>
+                                <th style="border:1px solid #ddd; padding:8px;">Grade</th>
+                                <th style="border:1px solid #ddd; padding:8px;">Remark</th>
+                              </tr>
+                            </thead>
+
+                            <tbody>
+                              ${results.map(row => `
+                                <tr>
+                                  <td style="border:1px solid #ddd; padding:8px;">
+                                    ${esc(
+                                      subjectMap[String(row.subject_id)] ||
+                                      row.subject_id ||
+                                      ""
+                                    )}
+                                  </td>
+
+                                  <td style="border:1px solid #ddd; padding:8px;">
+                                    ${esc(row.ca_score ?? "")}
+                                  </td>
+
+                                  <td style="border:1px solid #ddd; padding:8px;">
+                                    ${esc(row.exam_score ?? "")}
+                                  </td>
+
+                                  <td style="border:1px solid #ddd; padding:8px;">
+                                    ${esc(row.total ?? "")}
+                                  </td>
+
+                                  <td style="border:1px solid #ddd; padding:8px;">
+                                    ${esc(row.grade ?? "")}
+                                  </td>
+
+                                  <td style="border:1px solid #ddd; padding:8px;">
+                                    ${esc(row.remark ?? "")}
+                                  </td>
+                                </tr>
+                              `).join("")}
+                            </tbody>
+                          </table>
+                        </div>
+                      `
+                      : `
+                        <p>No results found for this student.</p>
+                      `
+                  }
+                `;
+              } catch (error) {
+                details.innerHTML = `
+                  <div style="padding:15px; color:#b00020;">
+                    Student report failed: ${esc(error.message)}
+                  </div>
+                `;
+              }
+            });
+          }
+
+          return;
         }
-      });
+
+        const result = await db
+          .from(table)
+          .select("*");
+
+        if (result.error) {
+          throw result.error;
+        }
+
+        const data = result.data || [];
+
+        output.innerHTML = `
+          <div style="padding:15px; border:1px solid #ddd; border-radius:10px;">
+            <h3>${table.replace("_", " ")} Report</h3>
+            <p><strong>Total records:</strong> ${data.length}</p>
+          </div>
+        `;
+      } catch (error) {
+        output.innerHTML = `
+          <div style="padding:15px; color:#b00020;">
+            Report failed: ${esc(error.message)}
+          </div>
+        `;
+      }
+    });
+  }
+});
     }
   } else {
     if ($("moduleInfoText")) {

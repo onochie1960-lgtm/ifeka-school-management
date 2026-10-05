@@ -954,8 +954,9 @@ Object.keys(reportButtons).forEach(id => {
             No teachers found.
           </div>
         `;
-        return;
-      }
+              return;
+    }
+    }
     if (table === "attendance") {
       const attendanceResult = await db
         .from("attendance")

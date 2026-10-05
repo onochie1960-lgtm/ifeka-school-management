@@ -109,7 +109,7 @@ announcements: [
 };
 
 const PRIMARY_KEYS = {
-  students: "student_id",
+  students: "id",
   teachers: "teacher_id",
   parents: "parent_id",
   school_classes: "id",

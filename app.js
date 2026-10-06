@@ -700,10 +700,9 @@ Object.keys(reportButtons).forEach(id => {
 
       try {
         if (table === "students") {
-          const studentResult = await db
-            .from("students")
-            .select("*")
-            .order("first_name");
+          const studentsResult = await db
+  .from("students")
+  .select("*");
 
           if (studentResult.error) {
             throw studentResult.error;
@@ -1090,11 +1089,13 @@ if (table === "attendance") {
 
   const studentMap = {};
 
-  (studentsResult.data || []).forEach(student => {
-    studentMap[String(student.student_id)] =
-      `${student.first_name || ""} ${student.last_name || ""}`.trim();
-  });
+(studentsResult.data || []).forEach(student => {
+  const name =
+    `${student.first_name || ""} ${student.last_name || ""}`.trim();
 
+  studentMap[String(student.student_id)] =
+    name || String(student.student_id || "");
+});
   const subjectMap = {};
 
   (subjectsResult.data || []).forEach(subject => {
@@ -1132,10 +1133,12 @@ if (table === "attendance") {
               <tr>
                 <td style="border:1px solid #ddd; padding:8px;">
                   ${esc(
-                    studentMap[String(row.student_id)] ||
-                    row.student_id ||
-                    ""
-                  )}
+  studentMap[String(row.student_id)] ||
+  row.student_id ||
+  ""
+)}
+<br>
+<small>${esc(row.student_id || "")}</small>
                 </td>
 
                 <td style="border:1px solid #ddd; padding:8px;">

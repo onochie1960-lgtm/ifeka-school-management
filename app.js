@@ -938,127 +938,128 @@ Object.keys(reportButtons).forEach(id => {
           return;
         }
     if (table === "teachers") {
-      const teacherResult = await db
-        .from("teachers")
-        .select("*");
+  const teacherResult = await db
+    .from("teachers")
+    .select("*");
 
-      if (teacherResult.error) {
-        throw teacherResult.error;
-      }
+  if (teacherResult.error) {
+    throw teacherResult.error;
+  }
 
-      const teachers = teacherResult.data || [];
+  const teachers = teacherResult.data || [];
 
-      if (!teachers.length) {
-        output.innerHTML = `
-          <div style="padding:15px;">
-            No teachers found.
-          </div>
-        `;
-              return;
-    }
-    }
-    if (table === "attendance") {
-      const attendanceResult = await db
-        .from("attendance")
-        .select("*");
+  if (!teachers.length) {
+    output.innerHTML = `
+      <div style="padding:15px;">
+        No teachers found.
+      </div>
+    `;
+    return;
+  }
 
-      if (attendanceResult.error) {
-        throw attendanceResult.error;
-      }
+  const teacherColumns = Object.keys(teachers[0]);
 
-      const attendance = attendanceResult.data || [];
+  output.innerHTML = `
+    <div style="padding:15px; border:1px solid #ddd; border-radius:10px;">
+      <h3>Teacher Report</h3>
 
-      if (!attendance.length) {
-        output.innerHTML = `
-          <div style="padding:15px;">
-            No attendance records found.
-          </div>
-        `;
-        return;
-      }
+      <p>
+        <strong>Total Teachers:</strong>
+        ${teachers.length}
+      </p>
 
-      const attendanceColumns = Object.keys(attendance[0]);
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr>
+              ${teacherColumns.map(column => `
+                <th style="border:1px solid #ddd; padding:8px; text-align:left;">
+                  ${esc(pretty(column))}
+                </th>
+              `).join("")}
+            </tr>
+          </thead>
 
-      output.innerHTML = `
-        <div style="padding:15px; border:1px solid #ddd; border-radius:10px;">
-          <h3>Attendance Report</h3>
-
-          <p>
-            <strong>Total Attendance Records:</strong>
-            ${attendance.length}
-          </p>
-
-          <div style="overflow-x:auto;">
-            <table style="width:100%; border-collapse:collapse;">
-              <thead>
-                <tr>
-                  ${attendanceColumns.map(column => `
-                    <th style="border:1px solid #ddd; padding:8px; text-align:left;">
-                      ${esc(pretty(column))}
-                    </th>
-                  `).join("")}
-                </tr>
-              </thead>
-
-              <tbody>
-                ${attendance.map(record => `
-                  <tr>
-                    ${attendanceColumns.map(column => `
-                      <td style="border:1px solid #ddd; padding:8px;">
-                        ${esc(record[column] ?? "")}
-                      </td>
-                    `).join("")}
-                  </tr>
+          <tbody>
+            ${teachers.map(teacher => `
+              <tr>
+                ${teacherColumns.map(column => `
+                  <td style="border:1px solid #ddd; padding:8px;">
+                    ${esc(teacher[column] ?? "")}
+                  </td>
                 `).join("")}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      `;
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
 
-      return;
-    }
-      const teacherColumns = Object.keys(teachers[0]);
+  return;
+}
 
-      output.innerHTML = `
-        <div style="padding:15px; border:1px solid #ddd; border-radius:10px;">
-          <h3>Teacher Report</h3>
+if (table === "attendance") {
+  const attendanceResult = await db
+    .from("attendance")
+    .select("*");
 
-          <p>
-            <strong>Total Teachers:</strong>
-            ${teachers.length}
-          </p>
+  if (attendanceResult.error) {
+    throw attendanceResult.error;
+  }
 
-          <div style="overflow-x:auto;">
-            <table style="width:100%; border-collapse:collapse;">
-              <thead>
-                <tr>
-                  ${teacherColumns.map(column => `
-                    <th style="border:1px solid #ddd; padding:8px; text-align:left;">
-                      ${esc(pretty(column))}
-                    </th>
-                  `).join("")}
-                </tr>
-              </thead>
+  const attendance = attendanceResult.data || [];
 
-              <tbody>
-                ${teachers.map(teacher => `
-                  <tr>
-                    ${teacherColumns.map(column => `
-                      <td style="border:1px solid #ddd; padding:8px;">
-                        ${esc(teacher[column] ?? "")}
-                      </td>
-                    `).join("")}
-                  </tr>
+  if (!attendance.length) {
+    output.innerHTML = `
+      <div style="padding:15px;">
+        No attendance records found.
+      </div>
+    `;
+    return;
+  }
+
+  const attendanceColumns = Object.keys(attendance[0]);
+
+  output.innerHTML = `
+    <div style="padding:15px; border:1px solid #ddd; border-radius:10px;">
+      <h3>Attendance Report</h3>
+
+      <p>
+        <strong>Total Attendance Records:</strong>
+        ${attendance.length}
+      </p>
+
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr>
+              ${attendanceColumns.map(column => `
+                <th style="border:1px solid #ddd; padding:8px; text-align:left;">
+                  ${esc(pretty(column))}
+                </th>
+              `).join("")}
+            </tr>
+          </thead>
+
+          <tbody>
+            ${attendance.map(record => `
+              <tr>
+                ${attendanceColumns.map(column => `
+                  <td style="border:1px solid #ddd; padding:8px;">
+                    ${esc(record[column] ?? "")}
+                  </td>
                 `).join("")}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      `;
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
 
-      return;
-    }
+  return;
+}
         const result = await db
           .from(table)
           .select("*");

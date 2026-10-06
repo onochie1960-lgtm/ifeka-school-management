@@ -704,11 +704,11 @@ Object.keys(reportButtons).forEach(id => {
   .from("students")
   .select("*");
 
-          if (studentResult.error) {
-            throw studentResult.error;
+          if (studentsResult.error) {
+            throw studentsResult.error;
           }
 
-          const students = studentResult.data || [];
+          const students = studentsResult.data || [];
 
           if (!students.length) {
             output.innerHTML = `
@@ -763,16 +763,16 @@ Object.keys(reportButtons).forEach(id => {
 
               try {
                 const studentResult = await db
-                  .from("students")
-                  .select("*")
-                  .eq("student_id", studentId)
-                  .limit(1);
+  .from("students")
+  .select("*")
+  .eq("student_id", studentId)
+  .limit(1);
 
-                if (studentResult.error) {
-                  throw studentResult.error;
-                }
+if (studentResult.error) {
+  throw studentResult.error;
+}
 
-                const student = (studentResult.data || [])[0];
+const student = (studentResult.data || [])[0];
 
                 if (!student) {
                   details.innerHTML = "Student record not found.";

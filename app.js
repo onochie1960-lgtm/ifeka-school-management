@@ -1060,6 +1060,129 @@ if (table === "attendance") {
 
   return;
 }
+         if (table === "results") {
+  const resultsResult = await db
+    .from("results")
+    .select("*");
+
+  if (resultsResult.error) {
+    throw resultsResult.error;
+  }
+
+  const results = resultsResult.data || [];
+
+  if (!results.length) {
+    output.innerHTML = `
+      <div style="padding:15px;">
+        No results found.
+      </div>
+    `;
+    return;
+  }
+
+  const studentsResult = await db
+    .from("students")
+    .select("student_id, first_name, last_name");
+
+  const subjectsResult = await db
+    .from("subjects")
+    .select("id, subject_name");
+
+  const studentMap = {};
+
+  (studentsResult.data || []).forEach(student => {
+    studentMap[String(student.student_id)] =
+      `${student.first_name || ""} ${student.last_name || ""}`.trim();
+  });
+
+  const subjectMap = {};
+
+  (subjectsResult.data || []).forEach(subject => {
+    subjectMap[String(subject.id)] =
+      subject.subject_name || "";
+  });
+
+  output.innerHTML = `
+    <div style="padding:15px; border:1px solid #ddd; border-radius:10px;">
+      <h3>Results Report</h3>
+
+      <p>
+        <strong>Total Results:</strong>
+        ${results.length}
+      </p>
+
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr>
+              <th style="border:1px solid #ddd; padding:8px;">Student</th>
+              <th style="border:1px solid #ddd; padding:8px;">Subject</th>
+              <th style="border:1px solid #ddd; padding:8px;">Session</th>
+              <th style="border:1px solid #ddd; padding:8px;">Term</th>
+              <th style="border:1px solid #ddd; padding:8px;">CA</th>
+              <th style="border:1px solid #ddd; padding:8px;">Exam</th>
+              <th style="border:1px solid #ddd; padding:8px;">Total</th>
+              <th style="border:1px solid #ddd; padding:8px;">Grade</th>
+              <th style="border:1px solid #ddd; padding:8px;">Remark</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            ${results.map(row => `
+              <tr>
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(
+                    studentMap[String(row.student_id)] ||
+                    row.student_id ||
+                    ""
+                  )}
+                </td>
+
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(
+                    subjectMap[String(row.subject_id)] ||
+                    row.subject_id ||
+                    ""
+                  )}
+                </td>
+
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(row.session ?? "")}
+                </td>
+
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(row.term ?? "")}
+                </td>
+
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(row.ca_score ?? "")}
+                </td>
+
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(row.exam_score ?? "")}
+                </td>
+
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(row.total ?? "")}
+                </td>
+
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(row.grade ?? "")}
+                </td>
+
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(row.remark ?? "")}
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  return;
+}
         const result = await db
           .from(table)
           .select("*");

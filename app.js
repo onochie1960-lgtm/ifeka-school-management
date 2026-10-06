@@ -1637,7 +1637,8 @@ ${esc(
                         ? studentDbId
                         : studentCode;
 
-                const name = student.full_name || "";
+                const name =
+    `${student.first_name || ""} ${student.last_name || ""}`.trim();
 
                 return `
                     <option value="${esc(optionValue)}"
@@ -1749,7 +1750,11 @@ if (currentTable === "timetable") {
     window.timetableSubjects = subjectsResult.data || [];
     window.timetableTeachers = teachersResult.data || [];
 }
-if (currentTable === "attendance" || currentTable === "fee_payments") {
+if (
+  currentTable === "attendance" ||
+  currentTable === "fee_payments" ||
+  currentTable === "results"
+) {
     const { data, error } = await db
         .from("students")
         .select("*")
@@ -1757,7 +1762,7 @@ if (currentTable === "attendance" || currentTable === "fee_payments") {
 
     if (error) {
         console.error("Failed to load students:", error);
-        alert("Could not load students for Attendance.");
+        alert("Could not load students.");
         return;
     }
 

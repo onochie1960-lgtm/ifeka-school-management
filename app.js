@@ -886,7 +886,7 @@ subjects.forEach(subject => {
                               ${results.map(row => `
                                 <tr>
                                   <td style="border:1px solid #ddd; padding:8px;">
-                                    ${esc(
+                                    
                                       ${esc(
   subjectMap[String(row.subject_id).trim()] ||
   row.subject_id ||

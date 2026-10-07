@@ -1018,7 +1018,25 @@ if (table === "attendance") {
     return;
   }
 
-  const attendanceColumns = Object.keys(attendance[0]);
+  const studentsResult = await db
+    .from("students")
+    .select("student_id, first_name, last_name");
+
+  if (studentsResult.error) {
+    throw studentsResult.error;
+  }
+
+  const students = studentsResult.data || [];
+
+  const studentMap = {};
+
+  students.forEach(student => {
+    const name =
+      `${student.first_name || ""} ${student.last_name || ""}`.trim();
+
+    studentMap[String(student.student_id).trim()] =
+      name || String(student.student_id || "");
+  });
 
   output.innerHTML = `
     <div style="padding:15px; border:1px solid #ddd; border-radius:10px;">
@@ -1033,22 +1051,63 @@ if (table === "attendance") {
         <table style="width:100%; border-collapse:collapse;">
           <thead>
             <tr>
-              ${attendanceColumns.map(column => `
-                <th style="border:1px solid #ddd; padding:8px; text-align:left;">
-                  ${esc(pretty(column))}
-                </th>
-              `).join("")}
+              <th style="border:1px solid #ddd; padding:8px; text-align:left;">
+                ID
+              </th>
+              <th style="border:1px solid #ddd; padding:8px; text-align:left;">
+                Student ID
+              </th>
+              <th style="border:1px solid #ddd; padding:8px; text-align:left;">
+                Student Name
+              </th>
+              <th style="border:1px solid #ddd; padding:8px; text-align:left;">
+                Attendance Date
+              </th>
+              <th style="border:1px solid #ddd; padding:8px; text-align:left;">
+                Status
+              </th>
+              <th style="border:1px solid #ddd; padding:8px; text-align:left;">
+                Remarks
+              </th>
+              <th style="border:1px solid #ddd; padding:8px; text-align:left;">
+                Created At
+              </th>
             </tr>
           </thead>
 
           <tbody>
             ${attendance.map(record => `
               <tr>
-                ${attendanceColumns.map(column => `
-                  <td style="border:1px solid #ddd; padding:8px;">
-                    ${esc(record[column] ?? "")}
-                  </td>
-                `).join("")}
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(record.id ?? "")}
+                </td>
+
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(record.student_id ?? "")}
+                </td>
+
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(
+                    studentMap[String(record.student_id ?? "").trim()] ||
+                    ""
+                  )}
+                </td>
+
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(record.attendance_date ?? "")}
+                </td>
+
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(record.status ?? "")}
+                </td>
+
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(record.remarks ?? "")}
+                </td>
+
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(record.created_at ?? "")}
+                </td>
               </tr>
             `).join("")}
           </tbody>

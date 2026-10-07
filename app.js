@@ -802,28 +802,27 @@ const student = (studentResult.data || [])[0];
 
                 let subjects = [];
 
-                if (subjectIds.length) {
-                  const subjectData = await db
-                    .from("subjects")
-                    .select("*")
-                    .in("id", subjectIds);
+const subjectData = await db
+  .from("subjects")
+  .select("*");
 
-                  if (subjectData.error) {
-                    throw subjectData.error;
-                  }
+if (subjectData.error) {
+  throw subjectData.error;
+}
 
-                  subjects = subjectData.data || [];
-                }
+subjects = subjectData.data || [];
 
-                const subjectMap = {};
+const subjectMap = {};
 
-                subjects.forEach(subject => {
-                  subjectMap[String(subject.id)] =
-                    subject.subject_name ||
-                    subject.subject_code ||
-                    "Subject";
-                });
+subjects.forEach(subject => {
+  const subjectName =
+    subject.subject_name ||
+    subject.subject_code ||
+    "Subject";
 
+  subjectMap[String(subject.id)] = subjectName;
+  subjectMap[String(subjectName).trim()] = subjectName;
+});
                 details.innerHTML = `
                   <div style="margin-bottom:20px;">
                     <h3>
@@ -888,10 +887,11 @@ const student = (studentResult.data || [])[0];
                                 <tr>
                                   <td style="border:1px solid #ddd; padding:8px;">
                                     ${esc(
-                                      subjectMap[String(row.subject_id)] ||
-                                      row.subject_id ||
-                                      ""
-                                    )}
+                                      ${esc(
+  subjectMap[String(row.subject_id).trim()] ||
+  row.subject_id ||
+  ""
+)}
                                   </td>
 
                                   <td style="border:1px solid #ddd; padding:8px;">

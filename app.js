@@ -22,10 +22,10 @@ const TABLES = [
 
 const FORM_FIELDS = {
   students: [
-    "student_id", "first_name", "last_name", "gender",
-    "date_of_birth", "phone", "email", "address",
-    "class", "photo_url"
-  ],
+  "student_id", "first_name", "last_name", "gender",
+  "date_of_birth", "phone", "email", "address",
+  "class", "photo_url", "total_fee"
+],
 
   teachers: [
     "teacher_id", "first_name", "last_name", "gender",

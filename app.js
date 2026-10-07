@@ -1245,6 +1245,114 @@ if (table === "attendance") {
 
   return;
 }
+         if (table === "fee_payments") {
+  const feeResult = await db
+    .from("fee_payments")
+    .select("*");
+
+  if (feeResult.error) {
+    throw feeResult.error;
+  }
+
+  const fees = feeResult.data || [];
+
+  if (!fees.length) {
+    output.innerHTML = `
+      <div style="padding:15px;">
+        No fee payment records found.
+      </div>
+    `;
+    return;
+  }
+
+  const studentsResult = await db
+    .from("students")
+    .select("id, student_id, first_name, last_name");
+
+  if (studentsResult.error) {
+    throw studentsResult.error;
+  }
+
+  const studentMap = {};
+
+  (studentsResult.data || []).forEach(student => {
+    const name =
+      `${student.first_name || ""} ${student.last_name || ""}`.trim();
+
+    studentMap[String(student.id).trim()] =
+      name || String(student.student_id || "");
+  });
+
+  output.innerHTML = `
+    <div style="padding:15px; border:1px solid #ddd; border-radius:10px;">
+      <h3>Fees & Payments Report</h3>
+
+      <p>
+        <strong>Total Payment Records:</strong>
+        ${fees.length}
+      </p>
+
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr>
+              <th style="border:1px solid #ddd; padding:8px;">ID</th>
+              <th style="border:1px solid #ddd; padding:8px;">Student ID</th>
+              <th style="border:1px solid #ddd; padding:8px;">Student Name</th>
+              <th style="border:1px solid #ddd; padding:8px;">Amount</th>
+              <th style="border:1px solid #ddd; padding:8px;">Payment Date</th>
+              <th style="border:1px solid #ddd; padding:8px;">Payment Type</th>
+              <th style="border:1px solid #ddd; padding:8px;">Reference</th>
+              <th style="border:1px solid #ddd; padding:8px;">Remarks</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            ${fees.map(record => `
+              <tr>
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(record.id ?? "")}
+                </td>
+
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(record.student_id ?? "")}
+                </td>
+
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(
+                    studentMap[String(record.student_id ?? "").trim()] || ""
+                  )}
+                </td>
+
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(record.amount ?? "")}
+                </td>
+
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(record.payment_date ?? "")}
+                </td>
+
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(record.payment_type ?? "")}
+                </td>
+
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(record.reference ?? "")}
+                </td>
+
+                <td style="border:1px solid #ddd; padding:8px;">
+                  ${esc(record.remarks ?? "")}
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  return;
+}
         const result = await db
           .from(table)
           .select("*");

@@ -1256,35 +1256,31 @@ if (table === "attendance") {
 
   const fees = feeResult.data || [];
 
-  if (!fees.length) {
-    output.innerHTML = `
-      <div style="padding:15px;">
-        No fee payment records found.
-      </div>
-    `;
-    return;
-  }
-
   const studentsResult = await db
     .from("students")
-    .select("id, student_id, first_name, last_name");
+    .select("id, student_id, first_name, last_name, total_fee");
 
   if (studentsResult.error) {
     throw studentsResult.error;
   }
 
-  const studentMap = {};
+  const students = studentsResult.data || [];
 
-  (studentsResult.data || []).forEach(student => {
-    const name =
-      `${student.first_name || ""} ${student.last_name || ""}`.trim();
+  const paymentMap = {};
 
-    studentMap[String(student.id).trim()] =
-      name || String(student.student_id || "");
+  fees.forEach(payment => {
+    const key = String(payment.student_id ?? "").trim();
+
+    if (!paymentMap[key]) {
+      paymentMap[key] = 0;
+    }
+
+    paymentMap[key] += Number(payment.amount) || 0;
   });
 
   output.innerHTML = `
     <div style="padding:15px; border:1px solid #ddd; border-radius:10px;">
+
       <h3>Fees & Payments Report</h3>
 
       <p>
@@ -1294,57 +1290,100 @@ if (table === "attendance") {
 
       <div style="overflow-x:auto;">
         <table style="width:100%; border-collapse:collapse;">
+
           <thead>
             <tr>
-              <th style="border:1px solid #ddd; padding:8px;">ID</th>
-              <th style="border:1px solid #ddd; padding:8px;">Student ID</th>
-              <th style="border:1px solid #ddd; padding:8px;">Student Name</th>
-              <th style="border:1px solid #ddd; padding:8px;">Amount</th>
-              <th style="border:1px solid #ddd; padding:8px;">Payment Date</th>
-              <th style="border:1px solid #ddd; padding:8px;">Payment Type</th>
-              <th style="border:1px solid #ddd; padding:8px;">Reference</th>
-              <th style="border:1px solid #ddd; padding:8px;">Remarks</th>
+              <th style="border:1px solid #ddd; padding:8px;">
+                Student ID
+              </th>
+
+              <th style="border:1px solid #ddd; padding:8px;">
+                Student Name
+              </th>
+
+              <th style="border:1px solid #ddd; padding:8px;">
+                Total Fee
+              </th>
+
+              <th style="border:1px solid #ddd; padding:8px;">
+                Amount Paid
+              </th>
+
+              <th style="border:1px solid #ddd; padding:8px;">
+                Balance
+              </th>
+
+              <th style="border:1px solid #ddd; padding:8px;">
+                Payment Status
+              </th>
             </tr>
           </thead>
 
           <tbody>
-            ${fees.map(record => `
-              <tr>
-                <td style="border:1px solid #ddd; padding:8px;">
-                  ${esc(record.id ?? "")}
-                </td>
 
-                <td style="border:1px solid #ddd; padding:8px;">
-                  ${esc(record.student_id ?? "")}
-                </td>
+            ${students.map(student => {
 
-                <td style="border:1px solid #ddd; padding:8px;">
-                  ${esc(
-                    studentMap[String(record.student_id ?? "").trim()] || ""
-                  )}
-                </td>
+              const studentDbId =
+                String(student.id ?? "").trim();
 
-                <td style="border:1px solid #ddd; padding:8px;">
-                  ${esc(record.amount ?? "")}
-                </td>
+              const totalFee =
+                Number(student.total_fee) || 0;
 
-                <td style="border:1px solid #ddd; padding:8px;">
-                  ${esc(record.payment_date ?? "")}
-                </td>
+              const amountPaid =
+                paymentMap[studentDbId] || 0;
 
-                <td style="border:1px solid #ddd; padding:8px;">
-                  ${esc(record.payment_type ?? "")}
-                </td>
+              const balance =
+                Math.max(totalFee - amountPaid, 0);
 
-                <td style="border:1px solid #ddd; padding:8px;">
-                  ${esc(record.reference ?? "")}
-                </td>
+              let status = "No Fee Set";
 
-                <td style="border:1px solid #ddd; padding:8px;">
-                  ${esc(record.remarks ?? "")}
-                </td>
-              </tr>
-            `).join("")}
+              if (totalFee > 0) {
+
+                if (amountPaid <= 0) {
+                  status = "Not Paid";
+                } else if (amountPaid >= totalFee) {
+                  status = "Full Payment";
+                } else if (amountPaid * 2 === totalFee) {
+                  status = "Half Payment";
+                } else {
+                  status = "Part Payment";
+                }
+              }
+
+              const studentName =
+                `${student.first_name || ""} ${student.last_name || ""}`.trim();
+
+              return `
+                <tr>
+
+                  <td style="border:1px solid #ddd; padding:8px;">
+                    ${esc(student.student_id || "")}
+                  </td>
+
+                  <td style="border:1px solid #ddd; padding:8px;">
+                    ${esc(studentName)}
+                  </td>
+
+                  <td style="border:1px solid #ddd; padding:8px;">
+                    ₦${totalFee.toLocaleString()}
+                  </td>
+
+                  <td style="border:1px solid #ddd; padding:8px;">
+                    ₦${amountPaid.toLocaleString()}
+                  </td>
+
+                  <td style="border:1px solid #ddd; padding:8px;">
+                    ₦${balance.toLocaleString()}
+                  </td>
+
+                  <td style="border:1px solid #ddd; padding:8px;">
+                    ${esc(status)}
+                  </td>
+
+                </tr>
+              `;
+            }).join("")}
+
           </tbody>
         </table>
       </div>

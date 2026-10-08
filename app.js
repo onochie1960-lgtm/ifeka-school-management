@@ -1704,7 +1704,7 @@ function getFieldType(field) {
   field === "total" ||
   field === "total_fee"
 ) {
-  return "number";
+  return "number";}
 }
 function getFieldControl(field, value, attendanceStudents = []) {
 
@@ -1828,7 +1828,10 @@ ${esc(
             </select>
         `;
     }
-    if (field === "student_id") {
+    if (
+  field === "student_id" &&
+  (currentTable === "fee_payments" || currentTable === "results")
+) {
     return `
         <select name="${esc(field)}">
             <option value="">Select student</option>

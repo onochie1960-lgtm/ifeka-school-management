@@ -1476,7 +1476,18 @@ async function loadTable(table) {
 if (table === "students") {
   window.studentsList = rows;
 }
+if (table === "fee_payments") {
+  const { data: feeStudents, error: feeStudentsError } = await db
+    .from("students")
+    .select("id, student_id, first_name, last_name");
 
+  if (feeStudentsError) {
+    console.error("Could not load fee payment student names:", feeStudentsError);
+    window.feePaymentStudents = [];
+  } else {
+    window.feePaymentStudents = feeStudents || [];
+  }
+}
 if (table === "timetable") {
   const [
     { data: classData },
@@ -1572,12 +1583,19 @@ function renderRows() {
   if (empty) {
     empty.classList.toggle("hidden", filtered.length !== 0);
   }
-
+const displayColumns =
+  currentTable === "fee_payments"
+    ? columns.flatMap(column =>
+        column === "student_id"
+          ? ["student_id", "student_name"]
+          : [column]
+      )
+    : columns;
   const thead = $("thead");
   if (thead) {
     thead.innerHTML =
       "<tr>" +
-      columns.map(column =>
+      displayColumns.map(column =>
         "<th>" + esc(pretty(column)) + "</th>"
       ).join("") +
       "<th>Actions</th>" +
@@ -1587,13 +1605,23 @@ function renderRows() {
   const tbody = $("tbody");
   if (!tbody) return;
 
+  
   tbody.innerHTML = filtered.map(row => {
     const index = rows.indexOf(row);
 
     return (
       "<tr>" +
-      columns.map(column => {
+      displayColumns.map(column => {
   let value = row[column];
+      if (currentTable === "fee_payments" && column === "student_name") {
+  const student = (window.feePaymentStudents || []).find(
+    s => String(s.id) === String(row.student_id)
+  );
+
+  value = student
+    ? `${student.first_name || ""} ${student.last_name || ""}`.trim()
+    : "";
+}   
 
   if (currentTable === "timetable") {
 

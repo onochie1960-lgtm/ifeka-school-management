@@ -1699,16 +1699,13 @@ function getFieldType(field) {
   if (field.includes("phone")) return "tel";
 
   if (
-    field.includes("score") ||
-    field === "amount" ||
-    field === "total"
-  ) {
-    return "number";
-  }
-
-  return "text";
+  field.includes("score") ||
+  field === "amount" ||
+  field === "total" ||
+  field === "total_fee"
+) {
+  return "number";
 }
-
 function getFieldControl(field, value, attendanceStudents = []) {
 
     /* =========================================================
@@ -1916,6 +1913,119 @@ let attendanceStudents = [];
 window.timetableClasses = [];
 window.timetableSubjects = [];
 window.timetableTeachers = [];
+   async function updateFeePaymentCalculation(form) {
+  if (!form || currentTable !== "fee_payments") return;
+
+  const studentSelect = form.querySelector('[name="student_id"]');
+  const amountInput = form.querySelector('[name="amount"]');
+  const preview = form.querySelector("#feePaymentPreview");
+
+  if (!studentSelect || !amountInput || !preview) return;
+
+  const studentId = studentSelect.value;
+
+  if (!studentId) {
+    preview.innerHTML = "";
+    return;
+  }
+
+  const student = (attendanceStudents || []).find(
+    s => String(s.id) === String(studentId)
+  );
+
+  if (!student) {
+    preview.innerHTML = "";
+    return;
+  }
+
+  const totalFee = Number(student.total_fee) || 0;
+  const newAmount = Number(amountInput.value) || 0;
+
+  let previousPaid = 0;
+
+  const paymentResult = await db
+    .from("fee_payments")
+    .select("id, amount")
+    .eq("student_id", studentId);
+
+  if (paymentResult.error) {
+    console.error("Payment calculation error:", paymentResult.error);
+    preview.innerHTML =
+      "<div style='color:#b00020;'>Could not calculate payment.</div>";
+    return;
+  }
+
+  (paymentResult.data || []).forEach(payment => {
+    // When editing, don't count the payment being edited twice.
+    if (
+      editingKey !== null &&
+      String(payment.id) === String(editingKey)
+    ) {
+      return;
+    }
+
+    previousPaid += Number(payment.amount) || 0;
+  });
+
+  const amountPaid = previousPaid + newAmount;
+  const balance = Math.max(totalFee - amountPaid, 0);
+
+  let status = "No Fee Set";
+
+  if (totalFee > 0) {
+    if (amountPaid <= 0) {
+      status = "Not Paid";
+    } else if (amountPaid >= totalFee) {
+      status = "Full Payment";
+    } else if (amountPaid * 2 === totalFee) {
+      status = "Half Payment";
+    } else {
+      status = "Part Payment";
+    }
+  }
+
+  preview.innerHTML = `
+    <div style="
+      margin-top:12px;
+      padding:12px;
+      border:1px solid #ddd;
+      border-radius:8px;
+      background:#f8f9fa;
+    ">
+      <div><strong>Total Fee:</strong> ₦${totalFee.toLocaleString()}</div>
+      <div><strong>Previously Paid:</strong> ₦${previousPaid.toLocaleString()}</div>
+      <div><strong>Total Amount Paid:</strong> ₦${amountPaid.toLocaleString()}</div>
+      <div><strong>Balance:</strong> ₦${balance.toLocaleString()}</div>
+      <div><strong>Payment Status:</strong> ${esc(status)}</div>
+    </div>
+  `;
+}
+
+function setupFeePaymentCalculation(form) {
+  if (!form || currentTable !== "fee_payments") return;
+
+  const studentSelect = form.querySelector('[name="student_id"]');
+  const amountInput = form.querySelector('[name="amount"]');
+
+  if (!studentSelect || !amountInput) return;
+
+  if (!form.querySelector("#feePaymentPreview")) {
+    amountInput.insertAdjacentHTML(
+      "afterend",
+      `<div id="feePaymentPreview"></div>`
+    );
+  }
+
+  studentSelect.addEventListener("change", function () {
+    updateFeePaymentCalculation(form);
+  });
+
+  amountInput.addEventListener("input", function () {
+    updateFeePaymentCalculation(form);
+  });
+
+  updateFeePaymentCalculation(form);
+}
 async function openForm(row = null) {
   if (!currentTable) {
     alert("Please select a module first.");
@@ -2042,6 +2152,14 @@ if (currentTable === "attendance") {
         </div>
       `
     );
+  }
+
+    if (currentTable === "fee_payments") {
+    const feeForm = $("recordForm");
+
+    if (feeForm) {
+      setupFeePaymentCalculation(feeForm);
+    }
   }
 
   const dialog = $("recordDialog");

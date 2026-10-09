@@ -1436,6 +1436,16 @@ if (table === "attendance") {
         ${fees.length}
       </p>
 
+<div style="margin:15px 0;">
+  <button
+    type="button"
+    id="printFeeReportBtn"
+    onclick="printFeeReport()"
+    style="width:100%; padding:12px; font-weight:bold;"
+  >
+    Print / Save as PDF
+  </button>
+</div>
       <div style="overflow-x:auto;">
         <table style="width:100%; border-collapse:collapse;">
 

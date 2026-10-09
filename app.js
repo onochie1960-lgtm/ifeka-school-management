@@ -209,7 +209,75 @@ function getSchoolSettings() {
     currentTerm: settings.currentTerm || ""
   };
 }
+function printStudentReport() {
+  const details = $("studentReportDetails");
 
+  if (!details || !details.innerHTML.trim()) {
+    alert("Please select a student first.");
+    return;
+  }
+
+  const schoolSettings = getSchoolSettings();
+
+  const printWindow = window.open("", "_blank");
+
+  if (!printWindow) {
+    alert("Please allow pop-ups to print the report.");
+    return;
+  }
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>${esc(schoolSettings.schoolName || "Student Report")}</title>
+
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          padding: 30px;
+          color: #111;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+
+        th, td {
+          border: 1px solid #ddd;
+          padding: 8px;
+        }
+
+        h2, h3 {
+          margin-top: 10px;
+        }
+
+        #printStudentReportBtn {
+          display: none !important;
+        }
+
+        @media print {
+          body {
+            padding: 15px;
+          }
+        }
+      </style>
+    </head>
+
+    <body>
+      ${details.innerHTML}
+    </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+  printWindow.focus();
+
+  setTimeout(() => {
+    printWindow.print();
+  }, 300);
+}
 function pretty(value) {
   return String(value || "")
     .replaceAll("_", " ")
@@ -765,8 +833,17 @@ Object.keys(reportButtons).forEach(id => {
                 `).join("")}
               </select>
 
-              <div id="studentReportDetails" style="margin-top:20px;"></div>
-            </div>
+              <div style="margin-top:15px;">
+  <button
+    type="button"
+    id="printStudentReportBtn"
+    onclick="printStudentReport()"
+    style="width:100%; padding:12px; font-weight:bold;">
+    Print / Save as PDF
+  </button>
+</div>
+
+<div id="studentReportDetails" style="margin-top:20px;"></div>
           `;
 
           const select = $("studentReportSelect");

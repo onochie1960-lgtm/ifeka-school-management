@@ -845,8 +845,41 @@ subjects.forEach(subject => {
   subjectMap[String(subject.id)] = subjectName;
   subjectMap[String(subjectName).trim()] = subjectName;
 });
+                 const schoolSettings = getSchoolSettings();
                 details.innerHTML = `
-                  <div style="margin-bottom:20px;">
+                  <div style="
+  margin-bottom:20px;
+  padding:20px;
+  border:1px solid #ddd;
+  border-radius:10px;
+  text-align:center;
+">
+
+  <h2 style="margin:0 0 6px 0;">
+    ${esc(schoolSettings.schoolName || "School")}
+  </h2>
+
+  <div style="font-size:14px;">
+    ${esc(schoolSettings.schoolAddress || "")}
+  </div>
+
+  <div style="font-size:14px; margin-top:4px;">
+    ${esc(schoolSettings.schoolPhone || "")}
+    ${schoolSettings.schoolEmail
+      ? " | " + esc(schoolSettings.schoolEmail)
+      : ""}
+  </div>
+
+  <div style="margin-top:10px; font-weight:bold;">
+    ${esc(schoolSettings.academicSession || "")}
+    ${schoolSettings.currentTerm
+      ? " | " + esc(schoolSettings.currentTerm)
+      : ""}
+  </div>
+
+</div>
+
+<div style="margin-bottom:20px;">
                     <h3>
                       ${esc(
                         (student.first_name || "") +

@@ -2258,13 +2258,18 @@ function renderRows() {
     empty.classList.toggle("hidden", filtered.length !== 0);
   }
 const displayColumns =
-  currentTable === "fee_payments" || currentTable === "results"
-    ? columns.flatMap(column =>
-        column === "student_id"
-          ? ["student_id", "student_name"]
-          : [column]
+  currentTable === "school_classes"
+    ? columns.filter(column =>
+        column !== "teacher_id" &&
+        column !== "description"
       )
-    : columns;
+    : currentTable === "fee_payments" || currentTable === "results"
+      ? columns.flatMap(column =>
+          column === "student_id"
+            ? ["student_id", "student_name"]
+            : [column]
+        )
+      : columns;
   const thead = $("thead");
   if (thead) {
     thead.innerHTML =

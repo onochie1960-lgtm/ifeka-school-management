@@ -1419,6 +1419,382 @@ if (table === "attendance") {
   }
 });
     }
+    } else if (page === "settings") {
+    let saved = {};
+
+    try {
+      saved = JSON.parse(
+        localStorage.getItem("ifekaSchoolSettings") || "{}"
+      ) || {};
+    } catch (error) {
+      saved = {};
+    }
+
+    if ($("moduleInfoText")) {
+      $("moduleInfoText").innerHTML = `
+        <div style="max-width:720px; margin-top:15px;">
+
+          <p style="margin-bottom:20px;">
+            Manage your school profile and academic settings.
+          </p>
+
+          <div style="
+            display:grid;
+            gap:15px;
+          ">
+
+            <label>
+              <strong>School Name</strong>
+              <input
+                type="text"
+                id="schoolSettingName"
+                value="${esc(saved.schoolName || "")}"
+                placeholder="e.g. Ifeka School"
+                style="
+                  width:100%;
+                  box-sizing:border-box;
+                  padding:10px;
+                  margin-top:6px;
+                "
+              >
+            </label>
+
+            <label>
+              <strong>School Address</strong>
+              <input
+                type="text"
+                id="schoolSettingAddress"
+                value="${esc(saved.schoolAddress || "")}"
+                placeholder="School address"
+                style="
+                  width:100%;
+                  box-sizing:border-box;
+                  padding:10px;
+                  margin-top:6px;
+                "
+              >
+            </label>
+
+            <label>
+              <strong>School Phone</strong>
+              <input
+                type="text"
+                id="schoolSettingPhone"
+                value="${esc(saved.schoolPhone || "")}"
+                placeholder="Phone number"
+                style="
+                  width:100%;
+                  box-sizing:border-box;
+                  padding:10px;
+                  margin-top:6px;
+                "
+              >
+            </label>
+
+            <label>
+              <strong>School Email</strong>
+              <input
+                type="email"
+                id="schoolSettingEmail"
+                value="${esc(saved.schoolEmail || "")}"
+                placeholder="school@example.com"
+                style="
+                  width:100%;
+                  box-sizing:border-box;
+                  padding:10px;
+                  margin-top:6px;
+                "
+              >
+            </label>
+
+            <label>
+              <strong>Head Teacher / Principal</strong>
+              <input
+                type="text"
+                id="schoolSettingPrincipal"
+                value="${esc(saved.principal || "")}"
+                placeholder="Name of Head Teacher / Principal"
+                style="
+                  width:100%;
+                  box-sizing:border-box;
+                  padding:10px;
+                  margin-top:6px;
+                "
+              >
+            </label>
+
+            <label>
+              <strong>Academic Session</strong>
+              <input
+                type="text"
+                id="schoolSettingSession"
+                value="${esc(saved.academicSession || "")}"
+                placeholder="e.g. 2026/2027"
+                style="
+                  width:100%;
+                  box-sizing:border-box;
+                  padding:10px;
+                  margin-top:6px;
+                "
+              >
+            </label>
+
+            <label>
+              <strong>Current Term</strong>
+              <select
+                id="schoolSettingTerm"
+                style="
+                  width:100%;
+                  box-sizing:border-box;
+                  padding:10px;
+                  margin-top:6px;
+                "
+              >
+                <option value="">Select Term</option>
+                <option value="First Term" ${saved.currentTerm === "First Term" ? "selected" : ""}>
+                  First Term
+                </option>
+                <option value="Second Term" ${saved.currentTerm === "Second Term" ? "selected" : ""}>
+                  Second Term
+                </option>
+                <option value="Third Term" ${saved.currentTerm === "Third Term" ? "selected" : ""}>
+                  Third Term
+                </option>
+              </select>
+            </label>
+
+          </div>
+
+          <div style="
+            display:flex;
+            gap:10px;
+            flex-wrap:wrap;
+            margin-top:22px;
+          ">
+
+            <button
+              type="button"
+              id="saveSettingsBtn"
+              style="padding:10px 16px;"
+            >
+              Save Settings
+            </button>
+
+            <button
+              type="button"
+              id="printSettingsBtn"
+              style="padding:10px 16px;"
+            >
+              Print / Save as PDF
+            </button>
+
+          </div>
+
+          <div
+            id="settingsMessage"
+            style="margin-top:15px;"
+          ></div>
+
+        </div>
+      `;
+
+      const saveBtn = $("saveSettingsBtn");
+      const printBtn = $("printSettingsBtn");
+      const message = $("settingsMessage");
+
+      if (saveBtn) {
+        saveBtn.addEventListener("click", () => {
+
+          const settings = {
+            schoolName: $("schoolSettingName")?.value.trim() || "",
+            schoolAddress: $("schoolSettingAddress")?.value.trim() || "",
+            schoolPhone: $("schoolSettingPhone")?.value.trim() || "",
+            schoolEmail: $("schoolSettingEmail")?.value.trim() || "",
+            principal: $("schoolSettingPrincipal")?.value.trim() || "",
+            academicSession: $("schoolSettingSession")?.value.trim() || "",
+            currentTerm: $("schoolSettingTerm")?.value || ""
+          };
+
+          try {
+            localStorage.setItem(
+              "ifekaSchoolSettings",
+              JSON.stringify(settings)
+            );
+
+            if (message) {
+              message.innerHTML = `
+                <span style="color:green; font-weight:bold;">
+                  ✓ Settings saved successfully.
+                </span>
+              `;
+            }
+
+            if (typeof setStatus === "function") {
+              setStatus("School settings saved.");
+            }
+
+          } catch (error) {
+
+            if (message) {
+              message.innerHTML = `
+                <span style="color:#b00020;">
+                  Unable to save settings: ${esc(error.message)}
+                </span>
+              `;
+            }
+          }
+        });
+      }
+
+      if (printBtn) {
+        printBtn.addEventListener("click", () => {
+
+          const settings = {
+            schoolName: $("schoolSettingName")?.value.trim() || "",
+            schoolAddress: $("schoolSettingAddress")?.value.trim() || "",
+            schoolPhone: $("schoolSettingPhone")?.value.trim() || "",
+            schoolEmail: $("schoolSettingEmail")?.value.trim() || "",
+            principal: $("schoolSettingPrincipal")?.value.trim() || "",
+            academicSession: $("schoolSettingSession")?.value.trim() || "",
+            currentTerm: $("schoolSettingTerm")?.value || ""
+          };
+
+          const printWindow = window.open(
+            "",
+            "_blank",
+            "width=800,height=900"
+          );
+
+          if (!printWindow) {
+            if (message) {
+              message.innerHTML = `
+                <span style="color:#b00020;">
+                  Please allow pop-ups to print the settings.
+                </span>
+              `;
+            }
+            return;
+          }
+
+          printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <title>${esc(settings.schoolName || "School Settings")}</title>
+
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  padding: 40px;
+                  color: #111;
+                }
+
+                h1 {
+                  text-align: center;
+                  margin-bottom: 5px;
+                }
+
+                .subtitle {
+                  text-align: center;
+                  margin-bottom: 30px;
+                  color: #555;
+                }
+
+                table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  margin-top: 20px;
+                }
+
+                th, td {
+                  border: 1px solid #ccc;
+                  padding: 12px;
+                  text-align: left;
+                }
+
+                th {
+                  width: 35%;
+                  background: #f3f3f3;
+                }
+
+                .footer {
+                  margin-top: 40px;
+                  text-align: center;
+                  font-size: 12px;
+                  color: #666;
+                }
+
+                @media print {
+                  body {
+                    padding: 20px;
+                  }
+                }
+              </style>
+            </head>
+
+            <body>
+
+              <h1>${esc(settings.schoolName || "School")}</h1>
+
+              <div class="subtitle">
+                School Settings
+              </div>
+
+              <table>
+                <tr>
+                  <th>School Name</th>
+                  <td>${esc(settings.schoolName)}</td>
+                </tr>
+
+                <tr>
+                  <th>School Address</th>
+                  <td>${esc(settings.schoolAddress)}</td>
+                </tr>
+
+                <tr>
+                  <th>School Phone</th>
+                  <td>${esc(settings.schoolPhone)}</td>
+                </tr>
+
+                <tr>
+                  <th>School Email</th>
+                  <td>${esc(settings.schoolEmail)}</td>
+                </tr>
+
+                <tr>
+                  <th>Head Teacher / Principal</th>
+                  <td>${esc(settings.principal)}</td>
+                </tr>
+
+                <tr>
+                  <th>Academic Session</th>
+                  <td>${esc(settings.academicSession)}</td>
+                </tr>
+
+                <tr>
+                  <th>Current Term</th>
+                  <td>${esc(settings.currentTerm)}</td>
+                </tr>
+              </table>
+
+              <div class="footer">
+                Generated from Ifeka School Management
+              </div>
+
+            </body>
+            </html>
+          `);
+
+          printWindow.document.close();
+
+          setTimeout(() => {
+            printWindow.focus();
+            printWindow.print();
+          }, 300);
+        });
+      }
+    }
+
   } else {
     if ($("moduleInfoText")) {
       $("moduleInfoText").textContent = info.text;

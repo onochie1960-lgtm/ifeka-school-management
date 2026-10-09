@@ -2000,7 +2000,7 @@ window.timetableTeachers = [];
 
   const amountPaid = previousPaid + newAmount;
   const balance = Math.max(totalFee - amountPaid, 0);
-
+const excessPayment = Math.max(amountPaid - totalFee, 0);
   let status = "No Fee Set";
 
   if (totalFee > 0) {
@@ -2024,11 +2024,11 @@ window.timetableTeachers = [];
       background:#f8f9fa;
     ">
       <div><strong>Total Fee:</strong> ₦${totalFee.toLocaleString()}</div>
-      <div><strong>Previously Paid:</strong> ₦${previousPaid.toLocaleString()}</div>
-      <div><strong>Total Amount Paid:</strong> ₦${amountPaid.toLocaleString()}</div>
-      <div><strong>Balance:</strong> ₦${balance.toLocaleString()}</div>
-      <div><strong>Payment Status:</strong> ${esc(status)}</div>
-    </div>
+<div><strong>Previously Paid:</strong> ₦${previousPaid.toLocaleString()}</div>
+<div><strong>Total Amount Paid:</strong> ₦${amountPaid.toLocaleString()}</div>
+<div><strong>Balance:</strong> ₦${balance.toLocaleString()}</div>
+<div><strong>Excess Payment:</strong> ₦${excessPayment.toLocaleString()}</div>
+<div><strong>Payment Status:</strong> ${esc(status)}</div>
   `;
 }
 

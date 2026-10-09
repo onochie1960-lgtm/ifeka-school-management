@@ -3180,10 +3180,14 @@ async function viewRow(index) {
       : row.teacher_id;
   }
 
-  $("viewFields").innerHTML = columns
+    $("viewFields").innerHTML = columns
     .filter(field =>
       field !== "created_at" &&
-      field !== "updated_at"
+      field !== "updated_at" &&
+      (
+        currentTable !== "school_classes" ||
+        !["description", "class_teacher_id"].includes(field)
+      )
     )
     .map(field => {
       const value = displayRow[field];
@@ -3208,7 +3212,11 @@ if (currentTable === "timetable" && field === "day") {
 }
       return `
         <div class="field">
-          <label>${esc(pretty(field))}</label>
+          <label>${esc(
+  currentTable === "school_classes" && field === "teacher_id"
+    ? "Class Teacher"
+    : pretty(field)
+)}</label>
           <div class="view-value">${display}</div>
         </div>
       `;

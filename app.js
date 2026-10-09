@@ -1476,6 +1476,21 @@ async function loadTable(table) {
 if (table === "students") {
   window.studentsList = rows;
 }
+     
+
+if (table === "results") {
+  const { data: resultStudents, error: resultStudentsError } = await db
+    .from("students")
+    .select("id, student_id, first_name, last_name");
+
+  if (resultStudentsError) {
+    console.error("Could not load result student names:", resultStudentsError);
+    window.studentsList = [];
+  } else {
+    window.studentsList = resultStudents || [];
+  }
+}
+
 if (table === "fee_payments") {
   const { data: feeStudents, error: feeStudentsError } = await db
     .from("students")

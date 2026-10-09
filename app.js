@@ -188,6 +188,28 @@ function esc(value) {
   });
 }
 
+function getSchoolSettings() {
+  let settings = {};
+
+  try {
+    settings = JSON.parse(
+      localStorage.getItem("ifekaSchoolSettings") || "{}"
+    ) || {};
+  } catch (error) {
+    settings = {};
+  }
+
+  return {
+    schoolName: settings.schoolName || "",
+    schoolAddress: settings.schoolAddress || "",
+    schoolPhone: settings.schoolPhone || "",
+    schoolEmail: settings.schoolEmail || "",
+    principal: settings.principal || "",
+    academicSession: settings.academicSession || "",
+    currentTerm: settings.currentTerm || ""
+  };
+}
+
 function pretty(value) {
   return String(value || "")
     .replaceAll("_", " ")

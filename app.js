@@ -2302,13 +2302,7 @@ function renderRows() {
       displayColumns.map(column => {
   let value = row[column];
          if (currentTable === "school_classes" && column === "class_teacher") {
-  const teacher = (window.classTeachers || []).find(
-    t => String(t.teacher_id) === String(row.teacher_id)
-  );
-
-  value = teacher
-    ? `${teacher.first_name || ""} ${teacher.last_name || ""}`.trim()
-    : "";
+  value = row.teacher_id || "";
 }
       if (currentTable === "fee_payments" && column === "student_name") {
   const student = (window.feePaymentStudents || []).find(

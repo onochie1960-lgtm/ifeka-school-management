@@ -2167,6 +2167,21 @@ if (table === "timetable") {
   window.timetableSubjects = subjectData || [];
   window.timetableTeachers = teacherData || [];
 }
+     if (table === "school_classes") {
+  const { data: classTeachers, error: classTeachersError } = await db
+    .from("teachers")
+    .select("id, teacher_id, first_name, last_name");
+
+  if (classTeachersError) {
+    console.error(
+      "Could not load class teacher names:",
+      classTeachersError
+    );
+    window.classTeachers = [];
+  } else {
+    window.classTeachers = classTeachers || [];
+  }
+}
     if (rows.length > 0) {
       columns = Object.keys(rows[0]);
       renderRows();
@@ -2329,7 +2344,19 @@ if (currentTable === "results" && column === "student_name") {
       }
     }
   }
-if (column === "day") {
+
+    if (currentTable === "school_classes" && column === "teacher_id") {
+  const teacher = (window.classTeachers || []).find(
+    t => String(t.teacher_id) === String(value)
+  );
+
+  if (teacher) {
+    value =
+      (teacher.first_name || "") +
+      " " +
+      (teacher.last_name || "");
+  }
+}     if (column === "day") {
   const days = {
     1: "Monday",
     2: "Tuesday",

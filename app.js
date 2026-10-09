@@ -294,6 +294,116 @@ function printStudentReport() {
     printWindow.print();
   }, 300);
 }
+
+function printFeeReport() {
+  const output = $("reportOutput");
+
+  if (!output || !output.innerHTML.trim()) {
+    alert("Please open the Fees & Payments Report first.");
+    return;
+  }
+
+  const schoolSettings = getSchoolSettings();
+
+  const printWindow = window.open("", "_blank");
+
+  if (!printWindow) {
+    alert("Please allow pop-ups for this school management app.");
+    return;
+  }
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>${esc(schoolSettings.schoolName || "Fees & Payments Report")}</title>
+
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          padding: 30px;
+          color: #111;
+        }
+
+        .school-header {
+          text-align: center;
+          border: 1px solid #ddd;
+          border-radius: 10px;
+          padding: 15px;
+          margin-bottom: 20px;
+        }
+
+        h1 {
+          margin-bottom: 5px;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 15px;
+        }
+
+        th,
+        td {
+          border: 1px solid #ccc;
+          padding: 8px;
+          text-align: left;
+        }
+
+        #printFeeReportBtn {
+          display: none !important;
+        }
+
+        @media print {
+          body {
+            padding: 15px;
+          }
+        }
+      </style>
+    </head>
+
+    <body>
+
+      <div class="school-header">
+        <h1>${esc(schoolSettings.schoolName || "School")}</h1>
+
+        <div>
+          ${esc(schoolSettings.schoolAddress || "")}
+        </div>
+
+        <div>
+          ${esc(schoolSettings.schoolPhone || "")}
+          ${
+            schoolSettings.schoolEmail
+              ? " | " + esc(schoolSettings.schoolEmail)
+              : ""
+          }
+        </div>
+
+        <h3>
+          ${esc(schoolSettings.academicSession || "")}
+          ${
+            schoolSettings.currentTerm
+              ? " | " + esc(schoolSettings.currentTerm)
+              : ""
+          }
+        </h3>
+      </div>
+
+      ${output.innerHTML}
+
+    </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+  printWindow.focus();
+
+  setTimeout(() => {
+    printWindow.print();
+  }, 500);
+}
+
 function pretty(value) {
   return String(value || "")
     .replaceAll("_", " ")

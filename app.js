@@ -2353,13 +2353,11 @@ if (currentTable === "results" && column === "student_name") {
             : "");
       }
     }
-
+       }
     if (currentTable === "school_classes" && column === "teacher_id") {
   value = row.teacher_id || "";
 }
-
-    
-}     if (column === "day") {
+  if (column === "day") {
   const days = {
     1: "Monday",
     2: "Tuesday",

@@ -2354,31 +2354,11 @@ if (currentTable === "results" && column === "student_name") {
       }
     }
 
-    if (column === "teacher_id") {
-      const item = (window.timetableTeachers || []).find(
-        x => String(x.id) === String(value)
-      );
-
-      if (item) {
-        value =
-          (item.first_name || "") +
-          " " +
-          (item.last_name || "");
-      }
-    }
-  }
-
     if (currentTable === "school_classes" && column === "teacher_id") {
-  const teacher = (window.classTeachers || []).find(
-    t => String(t.teacher_id) === String(value)
-  );
+  value = row.teacher_id || "";
+}
 
-  if (teacher) {
-    value =
-      (teacher.first_name || "") +
-      " " +
-      (teacher.last_name || "");
-  }
+    
 }     if (column === "day") {
   const days = {
     1: "Monday",

@@ -1584,7 +1584,7 @@ function renderRows() {
     empty.classList.toggle("hidden", filtered.length !== 0);
   }
 const displayColumns =
-  currentTable === "fee_payments"
+  currentTable === "fee_payments" || currentTable === "results"
     ? columns.flatMap(column =>
         column === "student_id"
           ? ["student_id", "student_name"]
@@ -1622,7 +1622,15 @@ const displayColumns =
     ? `${student.first_name || ""} ${student.last_name || ""}`.trim()
     : "";
 }   
+if (currentTable === "results" && column === "student_name") {
+    const student = (window.studentsList || []).find(
+        s => String(s.student_id) === String(row.student_id)
+    );
 
+    value = student
+        ? `${student.first_name || ""} ${student.last_name || ""}`.trim()
+        : "";
+}
   if (currentTable === "timetable") {
 
     if (column === "class_id") {

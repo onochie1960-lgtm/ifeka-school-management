@@ -2262,7 +2262,7 @@ function renderRows() {
   currentTable === "school_classes"
     ? [
         ...columns.filter(column =>
-          !["description", "created_at", "teacher_id"].includes(column)
+          !["description", "created_at", "teacher_id", "class_teacher_id"].includes(column)
         ),
         "class_teacher"
       ]

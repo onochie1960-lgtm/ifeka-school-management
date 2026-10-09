@@ -2257,12 +2257,15 @@ function renderRows() {
   if (empty) {
     empty.classList.toggle("hidden", filtered.length !== 0);
   }
-const displayColumns =
+
+  const displayColumns =
   currentTable === "school_classes"
-    ? columns.filter(column =>
-        column !== "teacher_id" &&
-        column !== "description"
-      )
+    ? [
+        ...columns.filter(column =>
+          !["description", "created_at", "teacher_id"].includes(column)
+        ),
+        "class_teacher"
+      ]
     : currentTable === "fee_payments" || currentTable === "results"
       ? columns.flatMap(column =>
           column === "student_id"
@@ -2274,9 +2277,15 @@ const displayColumns =
   if (thead) {
     thead.innerHTML =
       "<tr>" +
-      displayColumns.map(column =>
-        "<th>" + esc(pretty(column)) + "</th>"
-      ).join("") +
+      displayColumns.map(column => {
+  let heading = pretty(column);
+
+  if (currentTable === "school_classes" && column === "class_teacher") {
+    heading = "Class Teacher";
+  }
+
+  return "<th>" + esc(heading) + "</th>";
+}).join("") +
       "<th>Actions</th>" +
       "</tr>";
   }
@@ -2292,6 +2301,15 @@ const displayColumns =
       "<tr>" +
       displayColumns.map(column => {
   let value = row[column];
+         if (currentTable === "school_classes" && column === "class_teacher") {
+  const teacher = (window.classTeachers || []).find(
+    t => String(t.teacher_id) === String(row.teacher_id)
+  );
+
+  value = teacher
+    ? `${teacher.first_name || ""} ${teacher.last_name || ""}`.trim()
+    : "";
+}
       if (currentTable === "fee_payments" && column === "student_name") {
   const student = (window.feePaymentStudents || []).find(
     s => String(s.id) === String(row.student_id)

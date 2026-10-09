@@ -266,7 +266,23 @@ function printStudentReport() {
     </head>
 
     <body>
-      ${details.innerHTML}
+  ${details.innerHTML}
+
+  <div style="margin-top:60px; display:flex; justify-content:space-between; gap:40px;">
+    
+    <div style="width:45%; text-align:center;">
+      <div style="border-top:1px solid #000; padding-top:8px;">
+        Class Teacher's Signature
+      </div>
+    </div>
+
+    <div style="width:45%; text-align:center;">
+      <div style="border-top:1px solid #000; padding-top:8px;">
+        ${esc(schoolSettings.principal || "Principal / Head Teacher")}
+      </div>
+    </div>
+
+  </div>
     </body>
     </html>
   `);

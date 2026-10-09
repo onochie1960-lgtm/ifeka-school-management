@@ -2553,7 +2553,24 @@ function getFieldControl(field, value, attendanceStudents = []) {
             </select>
         `;
     }
+if (currentTable === "school_classes" && field === "teacher_id") {
+    return `
+        <select name="teacher_id" required>
+            <option value="">Select Class Teacher</option>
+            ${(window.classTeachers || []).map(item => {
+                const teacherName =
+                    `${item.first_name || ""} ${item.last_name || ""}`.trim();
 
+                return `
+                    <option value="${esc(teacherName)}"
+                        ${String(value || "") === String(teacherName) ? "selected" : ""}>
+                        ${esc(teacherName)}
+                    </option>
+                `;
+            }).join("")}
+        </select>
+    `;
+}
     if (currentTable === "timetable" && field === "teacher_id") {
         return `
             <select name="teacher_id">
@@ -2784,6 +2801,20 @@ async function openForm(row = null) {
     alert("Database is not connected.");
     return;
   }
+   if (currentTable === "school_classes") {
+  const { data, error } = await db
+    .from("teachers")
+    .select("teacher_id, first_name, last_name")
+    .order("first_name");
+
+  if (error) {
+    console.error("Could not load teachers:", error);
+    alert("Could not load teachers.");
+    return;
+  }
+
+  window.classTeachers = data || [];
+}
 if (currentTable === "timetable") {
     const [classesResult, subjectsResult, teachersResult] =
         await Promise.all([

@@ -3235,15 +3235,28 @@ if (currentTable === "timetable" && field === "day") {
   display = days[Number(value)] || esc(value);
 }
       return `
+  <div class="field">
+    <label>${esc(
+      currentTable === "school_classes" && field === "teacher_id"
+        ? "Class Teacher"
+        : pretty(field)
+    )}</label>
+    <div class="view-value">${display}</div>
+  </div>
+
+  ${
+    currentTable === "fee_payments" &&
+    field === "student_id" &&
+    displayRow.student_name
+      ? `
         <div class="field">
-          <label>${esc(
-  currentTable === "school_classes" && field === "teacher_id"
-    ? "Class Teacher"
-    : pretty(field)
-)}</label>
-          <div class="view-value">${display}</div>
+          <label>Student Name</label>
+          <div class="view-value">${esc(displayRow.student_name)}</div>
         </div>
-      `;
+      `
+      : ""
+  }
+`;
     })
     .join("");
 

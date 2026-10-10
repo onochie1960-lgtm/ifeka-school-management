@@ -710,7 +710,30 @@ async function showDashboard(button) {
   editingKey = null;
 
   showOnly("dashboard");
+  const dashboardPanel = document.querySelector("#dashboard .panel");
+  const schoolLogo = getSchoolSettings().schoolLogo;
 
+  if (dashboardPanel) {
+    let dashboardLogo = document.getElementById("dashboardSchoolLogo");
+
+    if (schoolLogo) {
+      if (!dashboardLogo) {
+        dashboardLogo = document.createElement("img");
+        dashboardLogo.id = "dashboardSchoolLogo";
+        dashboardLogo.alt = "School Logo";
+
+        dashboardLogo.style.cssText =
+          "display:block; max-width:100px; max-height:100px; object-fit:contain; margin:0 auto 16px;";
+
+        dashboardPanel.prepend(dashboardLogo);
+      }
+
+      dashboardLogo.src = schoolLogo;
+      dashboardLogo.style.display = "block";
+    } else if (dashboardLogo) {
+      dashboardLogo.style.display = "none";
+    }
+  }
   if ($("pageTitle")) {
     $("pageTitle").textContent = "Dashboard";
   }

@@ -1903,26 +1903,59 @@ if (table === "attendance") {
         saveBtn.addEventListener("click", async () => {
            
           const logoInput = $("schoolSettingLogo");
-          const logoFile = logoInput?.files?.[0];
+const logoFile = logoInput?.files?.[0];
 
-          let schoolLogo = saved.schoolLogo || "";
+let schoolLogo = saved.schoolLogo || "";
 
-          if (logoFile) {
-            if (logoFile.size > 1024 * 1024) {
-              throw new Error("School logo must be 1MB or smaller.");
-            }
+if (logoFile) {
+  schoolLogo = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
 
-            schoolLogo = await new Promise((resolve, reject) => {
-              const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
 
-              reader.onload = () => resolve(reader.result);
-              reader.onerror = () => reject(
-                new Error("Unable to read school logo.")
-              );
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
 
-              reader.readAsDataURL(logoFile);
-            });
+        const maxSize = 500;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxSize) {
+            height = Math.round(height * maxSize / width);
+            width = maxSize;
           }
+        } else {
+          if (height > maxSize) {
+            width = Math.round(width * maxSize / height);
+            height = maxSize;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        resolve(canvas.toDataURL("image/jpeg", 0.75));
+      };
+
+      img.onerror = () => reject(
+        new Error("Unable to process school logo.")
+      );
+
+      img.src = reader.result;
+    };
+
+    reader.onerror = () => reject(
+      new Error("Unable to read school logo.")
+    );
+
+    reader.readAsDataURL(logoFile);
+  });
+}
           const settings = {
             schoolName: $("schoolSettingName")?.value.trim() || "",
             schoolAddress: $("schoolSettingAddress")?.value.trim() || "",

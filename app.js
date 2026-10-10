@@ -1585,9 +1585,29 @@ if (table === "attendance") {
       : ""
   }
 </div>
-    <div style="padding:15px; border:1px solid #ddd; border-radius:10px;">
+    <div style="padding:15px; border:1px solid #ddd; border-radius:10px; text-align:center;">
 
-      <h3>Fees & Payments Report</h3>
+<h2 style="margin:0 0 6px;">
+  ${esc(getSchoolSettings().schoolName || "School")}
+</h2>
+
+<div style="font-size:14px; margin-top:5px;">
+  ${esc(getSchoolSettings().schoolAddress || "")}
+</div>
+
+<div style="font-size:14px; margin-top:4px;">
+  ${esc(getSchoolSettings().schoolPhone || "")}
+  ${getSchoolSettings().schoolEmail ? " | " + esc(getSchoolSettings().schoolEmail) : ""}
+</div>
+
+<div style="margin-top:10px; font-weight:bold;">
+  ${esc(getSchoolSettings().academicSession || "")}
+  ${getSchoolSettings().currentTerm ? " | " + esc(getSchoolSettings().currentTerm) : ""}
+</div>
+
+<div style="margin:15px 0; padding:10px; font-size:20px; font-weight:bold; border-top:2px solid #222; border-bottom:2px solid #222;">
+  FEES & PAYMENTS REPORT
+</div>
 
       <p>
         <strong>Total Payment Records:</strong>

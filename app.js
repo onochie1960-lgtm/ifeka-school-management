@@ -712,7 +712,14 @@ async function showDashboard(button) {
   showOnly("dashboard");
   const dashboardPanel = document.querySelector("#dashboard .panel");
   const schoolLogo = getSchoolSettings().schoolLogo;
+  const schoolName = getSchoolSettings().schoolName;
+  const welcomeHeading = $("dashboardWelcome");
 
+  if (welcomeHeading) {
+    welcomeHeading.textContent = schoolName
+      ? "Welcome to " + schoolName
+      : "Welcome to Ifeka School Management";
+  }
   if (dashboardPanel) {
     let dashboardLogo = document.getElementById("dashboardSchoolLogo");
 

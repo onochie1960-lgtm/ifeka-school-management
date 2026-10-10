@@ -1553,6 +1553,17 @@ if (table === "attendance") {
   });
 
   output.innerHTML = `
+  <div style="text-align:center; margin-bottom:15px;">
+  ${
+    getSchoolSettings().schoolLogo
+      ? `<img
+          src="${getSchoolSettings().schoolLogo}"
+          alt="School Logo"
+          style="max-width:120px; max-height:120px; object-fit:contain;"
+        >`
+      : ""
+  }
+</div>
     <div style="padding:15px; border:1px solid #ddd; border-radius:10px;">
 
       <h3>Fees & Payments Report</h3>

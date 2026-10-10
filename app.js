@@ -365,39 +365,7 @@ function printFeeReport() {
 
     <body>
 
-          <div class="school-header">
-      ${
-        schoolSettings.schoolLogo
-          ? `<img
-              src="${schoolSettings.schoolLogo}"
-              alt="School Logo"
-              style="max-width:100px; max-height:100px; object-fit:contain;"
-            >`
-          : ""
-      }
-
-      <h1>${esc(schoolSettings.schoolName || "School")}</h1>
-
-      <div>${esc(schoolSettings.schoolAddress || "")}</div>
-
-      <div>
-        ${esc(schoolSettings.schoolPhone || "")}
-        ${
-          schoolSettings.schoolEmail
-            ? " | " + esc(schoolSettings.schoolEmail)
-            : ""
-        }
-      </div>
-
-      <h3>
-        ${esc(schoolSettings.academicSession || "")}
-        ${
-          schoolSettings.currentTerm
-            ? " | " + esc(schoolSettings.currentTerm)
-            : ""
-        }
-      </h3>
-    </div>
+          
 
       ${output.innerHTML}
 

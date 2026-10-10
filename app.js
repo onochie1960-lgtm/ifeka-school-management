@@ -3204,7 +3204,7 @@ async function viewRow(index) {
       : row.teacher_id;
   }
 
-    $("viewFields").innerHTML = viewcolumns
+    $("viewFields").innerHTML = columns
     .filter(field =>
       field !== "created_at" &&
       field !== "updated_at" &&

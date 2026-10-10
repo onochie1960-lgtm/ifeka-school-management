@@ -1095,7 +1095,17 @@ ${schoolSettings.schoolLogo
       ? " | " + esc(schoolSettings.currentTerm)
       : ""}
   </div>
-
+<div style="
+  margin:15px 0;
+  padding:10px;
+  text-align:center;
+  font-size:20px;
+  font-weight:bold;
+  border-top:2px solid #222;
+  border-bottom:2px solid #222;
+">
+  STUDENT REPORT
+</div>
 </div>
 
 <div style="margin-bottom:20px;">

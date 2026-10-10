@@ -1574,18 +1574,18 @@ if (table === "attendance") {
   });
 
   output.innerHTML = `
-  <div style="text-align:center; margin-bottom:15px;">
-  ${
-    getSchoolSettings().schoolLogo
-      ? `<img
-          src="${getSchoolSettings().schoolLogo}"
-          alt="School Logo"
-          style="max-width:120px; max-height:120px; object-fit:contain;"
-        >`
-      : ""
-  }
-</div>
+  
     <div style="padding:15px; border:1px solid #ddd; border-radius:10px; text-align:center;">
+
+${
+  getSchoolSettings().schoolLogo
+    ? `<img
+        src="${getSchoolSettings().schoolLogo}"
+        alt="School Logo"
+        style="max-width:100px; max-height:100px; object-fit:contain; margin-bottom:10px;"
+      >`
+    : ""
+}
 
 <h2 style="margin:0 0 6px;">
   ${esc(getSchoolSettings().schoolName || "School")}

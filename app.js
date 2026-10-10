@@ -206,7 +206,8 @@ function getSchoolSettings() {
     schoolEmail: settings.schoolEmail || "",
     principal: settings.principal || "",
     academicSession: settings.academicSession || "",
-    currentTerm: settings.currentTerm || ""
+    currentTerm: settings.currentTerm || "",
+schoolLogo: settings.schoolLogo || ""
   };
 }
 function printStudentReport() {
@@ -1057,7 +1058,22 @@ subjects.forEach(subject => {
   border-radius:10px;
   text-align:center;
 ">
-
+${schoolSettings.schoolLogo
+  ? `
+    <div style="margin-bottom:10px;">
+      <img
+        src="${schoolSettings.schoolLogo}"
+        alt="School Logo"
+        style="
+          max-width:100px;
+          max-height:100px;
+          object-fit:contain;
+        "
+      >
+    </div>
+  `
+  : ""
+}
   <h2 style="margin:0 0 6px 0;">
     ${esc(schoolSettings.schoolName || "School")}
   </h2>
@@ -1726,7 +1742,20 @@ if (table === "attendance") {
                 "
               >
             </label>
-
+            <label>
+              <strong>School Logo</strong>
+              <input
+                type="file"
+                id="schoolSettingLogo"
+                accept="image/*"
+                style="
+                  width:100%;
+                  box-sizing:border-box;
+                  padding:10px;
+                  margin-top:6px;
+                "
+              >
+            </label>
             <label>
               <strong>School Address</strong>
               <input
@@ -1871,8 +1900,29 @@ if (table === "attendance") {
       const message = $("settingsMessage");
 
       if (saveBtn) {
-        saveBtn.addEventListener("click", () => {
+        saveBtn.addEventListener("click", async () => {
+           
+          const logoInput = $("schoolSettingLogo");
+          const logoFile = logoInput?.files?.[0];
 
+          let schoolLogo = saved.schoolLogo || "";
+
+          if (logoFile) {
+            if (logoFile.size > 1024 * 1024) {
+              throw new Error("School logo must be 1MB or smaller.");
+            }
+
+            schoolLogo = await new Promise((resolve, reject) => {
+              const reader = new FileReader();
+
+              reader.onload = () => resolve(reader.result);
+              reader.onerror = () => reject(
+                new Error("Unable to read school logo.")
+              );
+
+              reader.readAsDataURL(logoFile);
+            });
+          }
           const settings = {
             schoolName: $("schoolSettingName")?.value.trim() || "",
             schoolAddress: $("schoolSettingAddress")?.value.trim() || "",
@@ -1880,7 +1930,8 @@ if (table === "attendance") {
             schoolEmail: $("schoolSettingEmail")?.value.trim() || "",
             principal: $("schoolSettingPrincipal")?.value.trim() || "",
             academicSession: $("schoolSettingSession")?.value.trim() || "",
-            currentTerm: $("schoolSettingTerm")?.value || ""
+            currentTerm: $("schoolSettingTerm")?.value || "",
+schoolLogo: schoolLogo
           };
 
           try {

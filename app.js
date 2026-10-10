@@ -3135,7 +3135,28 @@ async function viewRow(index) {
     tableLabel(currentTable) + " — View Record";
 
   let displayRow = { ...row };
+  let viewColumns = [...columns];
 
+  if (currentTable === "fee_payments" && db) {
+    const { data: student } = await db
+      .from("students")
+      .select("id, student_id, first_name, last_name")
+      .eq("id", row.student_id)
+      .maybeSingle();
+
+    if (student) {
+      displayRow.student_id = student.student_id || row.student_id;
+
+      displayRow.student_name =
+        `${student.first_name || ""} ${student.last_name || ""}`.trim();
+
+      viewColumns = [
+        "student_id",
+        "student_name",
+        ...columns.filter(column => column !== "student_id")
+      ];
+    }
+  }
   if (currentTable === "timetable" && db) {
     const [
       { data: classData },
@@ -3183,7 +3204,7 @@ async function viewRow(index) {
       : row.teacher_id;
   }
 
-    $("viewFields").innerHTML = columns
+    $("viewFields").innerHTML = viewcolumns
     .filter(field =>
       field !== "created_at" &&
       field !== "updated_at" &&

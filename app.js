@@ -425,68 +425,119 @@ function closeMobileMenu() {
    Startup
    ========================================================= */
 
-function init() {
+async function init() {
   setupNavigation();
   setupControls();
   setupSupabase();
 
   const authScreen = document.getElementById("authScreen");
+  const resetScreen = document.getElementById("resetPasswordScreen");
   const sidebar = document.getElementById("sidebar");
   const main = document.querySelector("main.main");
+
   const loginForm = document.getElementById("loginForm");
+  const loginEmail = document.getElementById("loginEmail");
+  const loginPassword = document.getElementById("loginPassword");
   const authMessage = document.getElementById("authMessage");
 
-  if (!db) {
-    if (authScreen) authScreen.style.display = "block";
-    if (sidebar) sidebar.style.display = "none";
-    if (main) main.style.display = "none";
+  const resetForm = document.getElementById("resetPasswordForm");
+  const newPassword = document.getElementById("newPassword");
+  const confirmPassword = document.getElementById("confirmPassword");
+  const resetMessage = document.getElementById("resetPasswordMessage");
 
-    if (authMessage) {
-      authMessage.textContent =
-        "Supabase is not configured. Please check the connection.";
-    }
+  function showLogin() {
+    authScreen.style.display = "block";
+    resetScreen.style.display = "none";
+    sidebar.style.display = "none";
+    main.style.display = "none";
+  }
+
+  function showReset() {
+    authScreen.style.display = "none";
+    resetScreen.style.display = "block";
+    sidebar.style.display = "none";
+    main.style.display = "none";
+  }
+
+  function showApp() {
+    authScreen.style.display = "none";
+    resetScreen.style.display = "none";
+    sidebar.style.display = "";
+    main.style.display = "";
+    showDashboard();
+  }
+
+  if (!db) {
+    showLogin();
+    authMessage.textContent =
+      "Supabase connection is unavailable. Check your configuration.";
     return;
   }
 
-  if (authScreen) authScreen.style.display = "block";
-  if (sidebar) sidebar.style.display = "none";
-  if (main) main.style.display = "none";
+  showLogin();
 
-  if (loginForm) {
-    loginForm.addEventListener("submit", async function (event) {
-      event.preventDefault();
+  db.auth.onAuthStateChange(function (event, session) {
+    if (event === "PASSWORD_RECOVERY") {
+      showReset();
+      return;
+    }
 
-      const email = document.getElementById("loginEmail").value.trim();
-      const password = document.getElementById("loginPassword").value;
+    if (event === "SIGNED_OUT") {
+      showLogin();
+      return;
+    }
 
-      if (authMessage) authMessage.textContent = "Signing in...";
+    if (event === "INITIAL_SESSION" && session) {
+      showApp();
+    }
+  });
 
-      const { data, error } = await db.auth.signInWithPassword({
-        email,
-        password
-      });
+  loginForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+    authMessage.textContent = "Signing in...";
 
-      if (error) {
-        if (authMessage) authMessage.textContent = error.message;
-        return;
-      }
-
-      if (!data.session) {
-        if (authMessage) {
-          authMessage.textContent = "Login failed. Please try again.";
-        }
-        return;
-      }
-
-      if (authScreen) authScreen.style.display = "none";
-      if (sidebar) sidebar.style.display = "";
-      if (main) main.style.display = "";
-
-      showDashboard();
+    const { data, error } = await db.auth.signInWithPassword({
+      email: loginEmail.value.trim(),
+      password: loginPassword.value
     });
-  }
-}
 
+    if (error) {
+      authMessage.textContent = error.message;
+      return;
+    }
+
+    if (data.session) {
+      showApp();
+    }
+  });
+
+  resetForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    if (newPassword.value !== confirmPassword.value) {
+      resetMessage.textContent = "The passwords do not match.";
+      return;
+    }
+
+    resetMessage.textContent = "Updating password...";
+
+    const { error } = await db.auth.updateUser({
+      password: newPassword.value
+    });
+
+    if (error) {
+      resetMessage.textContent = error.message;
+      return;
+    }
+
+    resetMessage.textContent =
+      "Password updated successfully. Please sign in with your new password.";
+
+    await db.auth.signOut();
+    resetForm.reset();
+    showLogin();
+  });
+}
 
 function setupNavigation() {
   const nav = document.getElementById("nav");

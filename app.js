@@ -3309,8 +3309,13 @@ if (currentTable === "results") {
     throw new Error(
       "No record was updated. Check the UPDATE RLS policy and record ID."
     );
+  } else {
+  if (
+    ["results", "examinations"].includes(currentTable)
+  ) {
+    data.school_id = 1;
   }
-} else {
+
   result = await db
     .from(currentTable)
     .insert(data);

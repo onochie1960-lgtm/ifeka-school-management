@@ -1630,8 +1630,8 @@ ${
     Print / Save as PDF
   </button>
 </div>
-      <div style="overflow-x:auto;">
-        <table style="width:100%; border-collapse:collapse;">
+            <div style="width:100%; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch;">
+        <table style="width:100%; min-width:700px; border-collapse:collapse; table-layout:auto;">
 
           <thead>
             <tr>

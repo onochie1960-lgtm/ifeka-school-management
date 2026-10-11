@@ -42,6 +42,42 @@
 
     <p id="authMessage" role="status"></p>
   </form>
+</section><!-- PASSWORD RESET SCREEN -->
+<section id="resetPasswordScreen"
+         style="display:none; padding:30px; max-width:420px; margin:50px auto;">
+
+  <h2>Set a New Password</h2>
+  <p>Enter your new password below.</p>
+
+  <form id="resetPasswordForm">
+    <label for="newPassword">New Password</label>
+    <input
+      type="password"
+      id="newPassword"
+      required
+      minlength="8"
+      autocomplete="new-password"
+      placeholder="Enter new password"
+      style="display:block;width:100%;padding:12px;margin:8px 0 16px;box-sizing:border-box;"
+    >
+
+    <label for="confirmPassword">Confirm New Password</label>
+    <input
+      type="password"
+      id="confirmPassword"
+      required
+      minlength="8"
+      autocomplete="new-password"
+      placeholder="Confirm new password"
+      style="display:block;width:100%;padding:12px;margin:8px 0 16px;box-sizing:border-box;"
+    >
+
+    <button type="submit" style="width:100%;padding:12px;">
+      Update Password
+    </button>
+
+    <p id="resetPasswordMessage" role="status"></p>
+  </form>
 </section>
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">

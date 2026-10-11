@@ -3292,38 +3292,37 @@ if (currentTable === "results") {
       data.photo_url = publicUrl.data.publicUrl;
     }
 
-    let result;
+        let result;
 
     if (editingKey !== null) {
-  result = await db
-    .from(currentTable)
-    .update(data)
-    .eq(key, editingKey)
-    .select();
+      result = await db
+        .from(currentTable)
+        .update(data)
+        .eq(key, editingKey)
+        .select();
 
-  if (result.error) {
-    throw result.error;
-  }
+      if (result.error) {
+        throw result.error;
+      }
 
-  if (!result.data || result.data.length === 0) {
-    throw new Error(
-      "No record was updated. Check the UPDATE RLS policy and record ID."
-    );
-  } else {
-  if (
-    ["results", "examinations"].includes(currentTable)
-  ) {
-    data.school_id = 1;
-  }
+      if (!result.data || result.data.length === 0) {
+        throw new Error(
+          "No record was updated. Check the UPDATE RLS policy and record ID."
+        );
+      }
+    } else {
+      if (["results", "examinations"].includes(currentTable)) {
+        data.school_id = 1;
+      }
 
-  result = await db
-    .from(currentTable)
-    .insert(data);
+      result = await db
+        .from(currentTable)
+        .insert(data);
 
-  if (result.error) {
-    throw result.error;
-  }
-}
+      if (result.error) {
+        throw result.error;
+      }
+    }
 
     if (result.error) {
       throw result.error;

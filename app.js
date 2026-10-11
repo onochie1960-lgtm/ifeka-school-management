@@ -430,7 +430,61 @@ function init() {
   setupControls();
   setupSupabase();
 
-  showDashboard();
+  const authScreen = document.getElementById("authScreen");
+  const sidebar = document.getElementById("sidebar");
+  const main = document.querySelector("main.main");
+  const loginForm = document.getElementById("loginForm");
+  const authMessage = document.getElementById("authMessage");
+
+  if (!db) {
+    if (authScreen) authScreen.style.display = "block";
+    if (sidebar) sidebar.style.display = "none";
+    if (main) main.style.display = "none";
+
+    if (authMessage) {
+      authMessage.textContent =
+        "Supabase is not configured. Please check the connection.";
+    }
+    return;
+  }
+
+  if (authScreen) authScreen.style.display = "block";
+  if (sidebar) sidebar.style.display = "none";
+  if (main) main.style.display = "none";
+
+  if (loginForm) {
+    loginForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value;
+
+      if (authMessage) authMessage.textContent = "Signing in...";
+
+      const { data, error } = await db.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        if (authMessage) authMessage.textContent = error.message;
+        return;
+      }
+
+      if (!data.session) {
+        if (authMessage) {
+          authMessage.textContent = "Login failed. Please try again.";
+        }
+        return;
+      }
+
+      if (authScreen) authScreen.style.display = "none";
+      if (sidebar) sidebar.style.display = "";
+      if (main) main.style.display = "";
+
+      showDashboard();
+    });
+  }
 }
 
 

@@ -10,7 +10,39 @@
 </head>
 
 <body>
+<!-- LOGIN SCREEN -->
+<section id="authScreen" style="display:none; padding:30px; max-width:420px; margin:50px auto;">
+  <h2>Ifeka School Management</h2>
+  <p>Sign in to your school account</p>
 
+  <form id="loginForm">
+    <label for="loginEmail">Email Address</label>
+    <input
+      type="email"
+      id="loginEmail"
+      required
+      autocomplete="username"
+      placeholder="Enter your email"
+      style="display:block;width:100%;padding:12px;margin:8px 0 16px;box-sizing:border-box;"
+    >
+
+    <label for="loginPassword">Password</label>
+    <input
+      type="password"
+      id="loginPassword"
+      required
+      autocomplete="current-password"
+      placeholder="Enter your password"
+      style="display:block;width:100%;padding:12px;margin:8px 0 16px;box-sizing:border-box;"
+    >
+
+    <button type="submit" style="width:100%;padding:12px;">
+      Sign In
+    </button>
+
+    <p id="authMessage" role="status"></p>
+  </form>
+</section>
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div class="brand">

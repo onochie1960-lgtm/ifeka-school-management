@@ -477,21 +477,38 @@ async function init() {
   showLogin();
 
   db.auth.onAuthStateChange(function (event, session) {
-    if (event === "PASSWORD_RECOVERY") {
-      showReset();
-      return;
-    }
+  if (event === "PASSWORD_RECOVERY") {
+    showReset();
+    return;
+  }
 
-    if (event === "SIGNED_OUT") {
-      showLogin();
-      return;
-    }
+  if (event === "SIGNED_OUT") {
+    showLogin();
+  }
+});
 
-    if (event === "INITIAL_SESSION" && session) {
-      showApp();
-    }
-  });
+try {
+  const { data, error } = await db.auth.getSession();
 
+  if (error) {
+    console.error("Session restoration error:", error);
+    showLogin();
+    authMessage.textContent =
+      "Unable to restore your login session. Please sign in again.";
+    return;
+  }
+
+  if (data.session) {
+    showApp();
+  } else {
+    showLogin();
+  }
+} catch (error) {
+  console.error("Session check failed:", error);
+  showLogin();
+  authMessage.textContent =
+    "Unable to check your login session. Please sign in again.";
+}
   loginForm.addEventListener("submit", async function (event) {
     event.preventDefault();
     authMessage.textContent = "Signing in...";

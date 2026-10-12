@@ -2348,7 +2348,8 @@ async function loadTable(table) {
       .from(table)
       .select("*")
       .limit(200);
-
+console.log("Loading table:", table);
+console.log("Supabase result:", result);
     if (result.error) {
       console.error("Supabase table error:", table, result.error);
 

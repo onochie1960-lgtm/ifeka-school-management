@@ -3323,7 +3323,9 @@ if (currentTable === "results") {
         data.school_id = 1;
     }
 
-    result = await db
+    console.log("Saving record:", currentTable, data);
+
+result = await db
     .from(currentTable)
     .insert(data)
     .select("*");

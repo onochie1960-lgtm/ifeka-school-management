@@ -3324,9 +3324,20 @@ if (currentTable === "results") {
     }
 
     result = await db
-        .from(currentTable)
-        .insert(data)
-        .select();
+    .from(currentTable)
+    .insert(data)
+    .select("*");
+
+if (result.error) {
+    console.error("Insert failed:", currentTable, data, result.error);
+    throw result.error;
+}
+
+if (!result.data || result.data.length === 0) {
+    throw new Error(
+        "No record returned after saving. Check the INSERT policy."
+    );
+}
 
       if (result.error) {
         throw result.error;

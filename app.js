@@ -3311,14 +3311,22 @@ if (currentTable === "results") {
           "No record was updated. Check the UPDATE RLS policy and record ID."
         );
       }
-    } else {
-      if (["results", "examinations"].includes(currentTable)) {
-        data.school_id = 1;
-      }
+} else {
+    const tablesWithSchoolId = [
+        "results",
+        "examinations",
+        "transport",
+        "attendance"
+    ];
 
-      result = await db
+    if (tablesWithSchoolId.includes(currentTable)) {
+        data.school_id = 1;
+    }
+
+    result = await db
         .from(currentTable)
-        .insert(data);
+        .insert(data)
+        .select();
 
       if (result.error) {
         throw result.error;

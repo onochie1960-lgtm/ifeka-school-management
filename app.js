@@ -3514,7 +3514,7 @@ async function viewRow(index) {
     ];
   }
 }
-}
+
   if (currentTable === "timetable" && db) {
     const [
       { data: classData },

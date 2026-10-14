@@ -3492,6 +3492,24 @@ async function viewRow(index) {
       ];
     }
   }
+   if (currentTable === "attendance" && db) {
+  const { data: student, error } = await db
+    .from("students")
+    .select("student_id, first_name, last_name")
+    .eq("student_id", row.student_id)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Could not load attendance student:", error);
+  }
+
+  if (student) {
+    displayRow.student_name =
+      `${student.first_name || ""} ${student.last_name || ""}`.trim();
+
+    viewColumns.push("student_name");
+  }
+}
   if (currentTable === "timetable" && db) {
     const [
       { data: classData },

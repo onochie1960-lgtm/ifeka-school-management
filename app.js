@@ -3507,8 +3507,13 @@ async function viewRow(index) {
     displayRow.student_name =
       `${student.first_name || ""} ${student.last_name || ""}`.trim();
 
-    viewColumns.push("student_name");
+    viewColumns = [
+      "student_id",
+      "student_name",
+      ...columns.filter(column => column !== "student_id")
+    ];
   }
+}
 }
   if (currentTable === "timetable" && db) {
     const [

@@ -2738,18 +2738,20 @@ function getFieldControl(field, value, attendanceStudents = []) {
        ========================================================= */
       // Attendance controls
   if (field === "student_id" && currentTable === "attendance") {
-    return `
-      <select name="${esc(field)}" required>
-        <option value="">Select student</option>
-        ${attendanceStudents.map(s => `
-          <option value="${esc(s.student_id)}"
-            ${String(value ?? "") === String(s.student_id ?? "") ? "selected" : ""}>
-            ${esc(s.student_id)}
-          </option>
-        `).join("")}
-      </select>
-    `;
-  }
+  return `
+    <select name="${esc(field)}" required>
+      <option value="">Select student</option>
+      ${attendanceStudents.map(s => `
+        <option value="${esc(s.student_id)}"
+          ${String(value ?? "") === String(s.student_id ?? "") ? "selected" : ""}>
+          ${esc(
+            `${s.first_name || ""} ${s.last_name || ""}`.trim()
+          )} - ${esc(s.student_id)}
+        </option>
+      `).join("")}
+    </select>
+  `;
+}
 
   if (field === "date" || field === "attendance_date") {
     let dateValue = value;

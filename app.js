@@ -3496,7 +3496,7 @@ async function viewRow(index) {
   const { data: student, error } = await db
     .from("students")
     .select("student_id, first_name, last_name")
-    .eq("student_id", row.student_id)
+    .eq("student_id", String(row.student_id).trim())
     .maybeSingle();
 
   if (error) {

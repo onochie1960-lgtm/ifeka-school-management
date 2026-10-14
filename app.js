@@ -1575,19 +1575,52 @@ if (table === "attendance") {
   });
 
   output.innerHTML = `
-  <div style="text-align:center; margin-bottom:20px;">
-
   ${
-    getSchoolSettings().schoolLogo
-      ? `<img
-          src="${getSchoolSettings().schoolLogo}"
-          alt="School Logo"
-          style="max-width:120px; max-height:120px; object-fit:contain;"
-        ><br>`
-      : ""
-  }
+    (() => {
+      const school = getSchoolSettings();
 
-  <h2 style="margin:8px 0;">
+      return `
+        <div style="text-align:center; margin-bottom:20px;">
+
+          ${
+            school.schoolLogo
+              ? `<img
+                  src="${school.schoolLogo}"
+                  alt="School Logo"
+                  style="max-width:120px; max-height:120px; object-fit:contain;"
+                >`
+              : ""
+          }
+
+          <h2 style="margin:8px 0;">
+            ${esc(school.schoolName || "")}
+          </h2>
+
+          <p style="margin:5px 0;">
+            ${esc(school.schoolAddress || "")}
+          </p>
+
+          <p style="margin:5px 0;">
+            ${esc(school.schoolPhone || "")}
+            ${school.schoolPhone && school.schoolEmail ? " | " : ""}
+            ${esc(school.schoolEmail || "")}
+          </p>
+
+          <h3 style="margin:12px 0;">
+            ${esc(school.academicSession || "")}
+            ${school.academicSession && school.currentTerm ? " | " : ""}
+            ${esc(school.currentTerm || "")}
+          </h3>
+
+          <hr>
+          <h2>RESULTS REPORT</h2>
+          <hr>
+
+        </div>
+      `;
+    })()
+  }
+    <div style="padding:15px; border:1px solid #ddd; border-radius:10px;">
     ${esc(getSchoolSettings().schoolName || "School Name Not Set")}
   </h2>
 

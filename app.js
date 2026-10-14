@@ -3562,7 +3562,7 @@ async function viewRow(index) {
       : row.teacher_id;
   }
 
-    $("viewFields").innerHTML = columns
+    $("viewFields").innerHTML = viewColumns
     .filter(field =>
       field !== "created_at" &&
       field !== "updated_at" &&
@@ -3603,9 +3603,9 @@ if (currentTable === "timetable" && field === "day") {
   </div>
 
   ${
-    currentTable === "fee_payments" &&
-    field === "student_id" &&
-    displayRow.student_name
+    ["fee_payments", "attendance"].includes(currentTable) &&
+field === "student_id" &&
+displayRow.student_name
       ? `
         <div class="field">
           <label>Student Name</label>

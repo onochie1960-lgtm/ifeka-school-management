@@ -3603,7 +3603,7 @@ if (currentTable === "timetable" && field === "day") {
   </div>
 
   
-    })
+    
     .join("");
 
   const dialog = $("viewDialog");

@@ -3507,7 +3507,7 @@ async function viewRow(index) {
     displayRow.student_name =
       `${student.first_name || ""} ${student.last_name || ""}`.trim();
 
-    viewColumns = [
+    viewColumns = columns;
       "student_id",
       "student_name",
       ...columns.filter(column => column !== "student_id")

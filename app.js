@@ -3508,10 +3508,6 @@ async function viewRow(index) {
       `${student.first_name || ""} ${student.last_name || ""}`.trim();
 
     viewColumns = columns;
-      "student_id",
-      "student_name",
-      ...columns.filter(column => column !== "student_id")
-    ];
   }
 }
 

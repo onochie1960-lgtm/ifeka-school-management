@@ -3602,9 +3602,21 @@ if (currentTable === "timetable" && field === "day") {
     <div class="view-value">${display}</div>
   </div>
 
-  
-    
-    .join("");
+${
+  ["fee_payments", "attendance"].includes(currentTable) &&
+  field === "student_id" &&
+  displayRow.student_name
+    ? `
+      <div class="field">
+        <label>Student Name</label>
+        <div class="view-value">${esc(displayRow.student_name)}</div>
+      </div>
+    `
+    : ""
+}
+`;
+})
+.join("");
 
   const dialog = $("viewDialog");
 

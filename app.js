@@ -3603,7 +3603,7 @@ if (currentTable === "timetable" && field === "day") {
   </div>
 
   ${
-    currentTable === "fee_payments" &&
+    ["fee_payments", "attendance"].includes(currentTable) &&
 field === "student_id" &&
 displayRow.student_name
       ? `

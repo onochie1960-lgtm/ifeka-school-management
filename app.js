@@ -3602,11 +3602,7 @@ if (currentTable === "timetable" && field === "day") {
     <div class="view-value">${display}</div>
   </div>
 
-  ${
-  ["fee_payments", "attendance"].includes(currentTable) &&
-  field === "student_id" &&
-  displayRow.student_name
-`;
+  
     })
     .join("");
 

@@ -3375,18 +3375,34 @@ if (currentTable === "results") {
       }
 } else {
     const tablesWithSchoolId = [
-        "results",
-        "examinations",
-        "transport",
-        "attendance"
-    ];
+    "announcements",
+    "attendance",
+    "examinations",
+    "fee_payments",
+    "parents",
+    "results",
+    "school_classes",
+    "student_parents",
+    "students",
+    "subjects",
+    "teachers",
+    "timetable",
+    "transport"
+];
 
-    if (tablesWithSchoolId.includes(currentTable)) {
-        data.school_id = 1;
+if (tablesWithSchoolId.includes(currentTable)) {
+    const schoolId = await db.rpc("get_my_school_id");
+
+    if (schoolId.error) {
+        throw schoolId.error;
     }
 
-    console.log("Saving record:", currentTable, data);
+    if (!schoolId.data) {
+        throw new Error("No school is linked to this account.");
+    }
 
+    data.school_id = schoolId.data;
+}
 result = await db
     .from(currentTable)
     .insert(data)

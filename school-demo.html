@@ -138,6 +138,29 @@ footer{text-align:center;padding:20px;color:var(--muted);font-size:12px}
     overflow-wrap:anywhere;
   }
 }
+ @media (max-width: 600px) {
+  .layout {
+    display: block;
+    width: 100%;
+  }
+
+  nav {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  main {
+    width: 100%;
+    min-width: 0;
+    padding: 14px 10px;
+  }
+
+  .cards,
+  .pricegrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 </style>
 </head>
 <body>

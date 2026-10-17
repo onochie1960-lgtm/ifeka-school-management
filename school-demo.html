@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ifeka School Management — Interactive Demo</title>
+<style>
+:root{--navy:#102b50;--blue:#1769aa;--green:#16845b;--bg:#f3f6fb;--white:#fff;--text:#243247;--muted:#718096}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{background:var(--navy);color:white;padding:20px}
+header h1{margin:0;font-size:23px}
+header p{margin:7px 0 0;color:#d7e7fa;font-size:14px}
+.badge{display:inline-block;background:#dff8e9;color:#146c43;padding:6px 10px;border-radius:20px;font-size:12px;font-weight:bold;margin-top:12px}
+.layout{display:flex;min-height:calc(100vh - 110px)}
+nav{width:220px;background:#fff;padding:16px;border-right:1px solid #e0e6ef}
+nav button{display:block;width:100%;text-align:left;padding:12px;margin-bottom:5px;border:0;border-radius:7px;background:white;color:var(--text);font-size:14px;cursor:pointer}
+nav button:hover,nav button.active{background:#e8f2ff;color:#135da0;font-weight:bold}
+main{padding:22px;flex:1;min-width:0}
+h2{margin-top:0;font-size:22px}
+.muted{color:var(--muted);font-size:14px}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0}
+.card,.panel{background:white;padding:18px;border-radius:10px;box-shadow:0 2px 8px #102b500b;margin-bottom:15px}
+.card span{display:block;color:var(--muted);font-size:13px}
+.card strong{display:block;font-size:25px;margin-top:9px;color:var(--navy)}
+.tablewrap{overflow-x:auto;background:white;border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:13px;border-bottom:1px solid #edf0f5;white-space:nowrap}
+th{background:#f8fafc;color:#53657c}
+.status{padding:5px 8px;border-radius:15px;background:#e2f7ea;color:#177447;font-size:12px}
+.btn{background:var(--blue);color:white;padding:11px 15px;border:0;border-radius:7px;cursor:pointer;font-weight:bold}
+.btn.green{background:var(--green)}
+.btn.light{background:#e8f2ff;color:#155c99}
+input,select,textarea{width:100%;padding:11px;border:1px solid #d5deea;border-radius:7px;margin:7px 0 14px;font:inherit}
+label{font-size:13px;font-weight:bold}
+.pricegrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.price{border:1px solid #dce5ef}
+.price h3{margin-top:0}
+.price strong{font-size:24px;color:var(--navy)}
+.notice{background:#fff8dc;border:1px solid #f0dfa0;border-radius:8px;padding:12px;font-size:13px;line-height:1.5}
+footer{text-align:center;padding:20px;color:var(--muted);font-size:12px}
+@media(max-width:750px){
+.layout{display:block}
+nav{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;border-right:0;border-bottom:1px solid #ddd}
+nav button{margin:0;padding:10px;font-size:13px}
+main{padding:14px}
+.cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+.pricegrid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Ifeka School Management</h1>
+  <p>A simple way to manage school records, attendance, results and fees.</p>
+  <span class="badge">INTERACTIVE DEMO · SAMPLE DATA ONLY</span>
+</header>
+
+<div class="layout">
+<nav id="menu">
+<button class="active" data-page="dashboard">🏠 Dashboard</button>
+<button data-page="students">👨‍🎓 Students</button>
+<button data-page="teachers">👩‍🏫 Teachers</button>
+<button data-page="attendance">📋 Attendance</button>
+<button data-page="results">📝 Results</button>
+<button data-page="fees">💳 Fees & Payments</button>
+<button data-page="pricing">💰 Packages & Pricing</button>
+<button data-page="request">✉️ Request a Demo</button>
+</nav>
+
+<main id="content"></main>
+</div>
+
+<footer>© <span id="year"></span> Ifeka School Management · Demonstration only. All displayed records are fictional.</footer>
+
+<script>
+const students=[
+{id:"DEMO001",name:"Adaobi Okafor",class:"Primary 5",attendance:"Present",score:85,fee:47000,paid:30000},
+{id:"DEMO002",name:"Chinedu Eze",class:"Primary 4",attendance:"Present",score:78,fee:47000,paid:47000},
+{id:"DEMO003",name:"Amara Nwankwo",class:"JSS 1",attendance:"Absent",score:91,fee:65000,paid:40000},
+{id:"DEMO004",name:"Obinna Okeke",class:"JSS 2",attendance:"Present",score:67,fee:65000,paid:25000},
+{id:"DEMO005",name:"Ngozi Umeh",class:"SS 1",attendance:"Present",score:88,fee:130000,paid:130000}
+];
+const teachers=[
+{name:"Mrs. Grace Okafor",subject:"Mathematics",class:"Primary 4–6"},
+{name:"Mr. Peter Eze",subject:"English Language",class:"JSS 1–3"},
+{name:"Mrs. Ada Nwosu",subject:"Basic Science",class:"Primary 1–3"},
+{name:"Mr. Emeka Obi",subject:"Computer Studies",class:"JSS & SS"}
+];
+const money=n=>"₦"+Number(n).toLocaleString("en-NG");
+const content=document.getElementById("content");
+
+function table(headers,rows){
+return '<div class="tablewrap"><table><thead><tr>'+headers.map(h=>'<th>'+h+'</th>').join("")+'</tr></thead><tbody>'+
+rows.map(row=>'<tr>'+row.map(v=>'<td>'+v+'</td>').join("")+'</tr>').join("")+
+'</tbody></table></div>';
+}
+function show(page){
+document.querySelectorAll("#menu button").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+let html="";
+if(page==="dashboard"){
+html=`<h2>School Dashboard</h2>
+<p class="muted">Welcome to the interactive sample dashboard.</p>
+<div class="cards">
+<div class="card"><span>Total Students</span><strong>${students.length}</strong></div>
+<div class="card"><span>Total Teachers</span><strong>${teachers.length}</strong></div>
+<div class="card"><span>Present Today</span><strong>${students.filter(s=>s.attendance==="Present").length}</strong></div>
+<div class="card"><span>Fees Outstanding</span><strong>${money(students.reduce((a,s)=>a+s.fee-s.paid,0))}</strong></div>
+</div>
+<div class="panel"><h3>Explore the demo</h3><p>Use the menu to view fictional student records, teachers, attendance, examination results and fee balances.</p><button class="btn" onclick="show('students')">View Students</button></div>
+<div class="notice">This demonstration does not save real records or connect to a school's database.</div>`;
+}
+if(page==="students"){
+html=`<h2>Student Records</h2><p class="muted">Fictional students for demonstration purposes.</p>
+${table(["Student ID","Student Name","Class"],students.map(s=>[s.id,s.name,s.class]))}`;
+}
+if(page==="teachers"){
+html=`<h2>Teacher Records</h2><p class="muted">Example staff list.</p>
+${table(["Teacher Name","Subject","Classes"],teachers.map(t=>[t.name,t.subject,t.class]))}`;
+}
+if(page==="attendance"){
+html=`<h2>Attendance Report</h2><p class="muted">Sample attendance for today.</p>
+${table(["Student Name","Class","Attendance"],students.map(s=>[s.name,s.class,`<span class="status" style="${s.attendance==="Absent"?"background:#ffe5e5;color:#a22":""}">${s.attendance}</span>`]))}`;
+}
+if(page==="results"){
+html=`<h2>Examination Results</h2><p class="muted">Example examination scores out of 100.</p>
+${table(["Student Name","Class","Score","Grade"],students.map(s=>[s.name,s.class,s.score,s.score>=80?"A":s.score>=70?"B":s.score>=60?"C":"D"]))}`;
+}
+if(page==="fees"){
+html=`<h2>Fees & Payments</h2><p class="muted">Sample fee calculations.</p>
+${table(["Student Name","Total Fee","Amount Paid","Balance","Payment Status"],students.map(s=>[s.name,money(s.fee),money(s.paid),money(s.fee-s.paid),s.paid===0?"Unpaid":s.paid>=s.fee?"Fully Paid":"Part Payment"]))}
+<div class="notice">Amounts are examples only. They are not invoices or payment requests.</div>`;
+}
+if(page==="pricing"){
+html=`<h2>School Packages & Pricing</h2><p class="muted">Proposed subscription prices per term.</p>
+<div class="pricegrid">
+<div class="panel price"><h3>Basic</h3><strong>₦47,000</strong><p class="muted">per term</p><hr><p>Student and teacher records</p><p>Classes and subjects</p><p>Attendance and results</p><p>Basic reports</p><button class="btn light" onclick="show('request')">Enquire</button></div>
+<div class="panel price"><h3>Mid-Level</h3><strong>₦65,000</strong><p class="muted">per term</p><hr><p>Basic package features</p><p>Fees and payments</p><p>Parents and guardians</p><p>Timetable and announcements</p><button class="btn light" onclick="show('request')">Enquire</button></div>
+<div class="panel price"><h3>Premium</h3><strong>₦130,000</strong><p class="muted">per term</p><hr><p>Mid-Level package features</p><p>Transport management</p><p>Expanded reports</p><p>Priority support proposed</p><button class="btn light" onclick="show('request')">Enquire</button></div>
+</div>
+<div class="notice">Package features and availability must be confirmed before purchase. These are displayed prices per term; no payment is collected on this page.</div>`;
+}
+if(page==="request"){
+html=`<h2>Request a Demo</h2><p class="muted">Interested in Ifeka School Management? Prepare an enquiry below.</p>
+<div class="panel">
+<div class="notice">Demo form preview only: this page has no submission server yet. Your details will not be sent or stored. Do not enter confidential information.</div>
+<form id="requestForm">
+<label>School name</label><input name="school" required placeholder="Enter school name">
+<label>Your name</label><input name="name" required placeholder="Enter your name">
+<label>Email or phone number</label><input name="contact" required placeholder="Email address or phone number">
+<label>School type</label><select name="type"><option>Nursery and Primary</option><option>Secondary</option><option>Nursery, Primary and Secondary</option><option>Other</option></select>
+<label>Package of interest</label><select name="package"><option>Basic — ₦47,000 per term</option><option>Mid-Level — ₦65,000 per term</option><option>Premium — ₦130,000 per term</option><option>Not sure yet</option></select>
+<button class="btn green" type="submit">Preview Enquiry</button>
+<p id="formMessage" role="status"></p>
+</form></div>`;
+}
+content.innerHTML=html;
+const form=document.getElementById("requestForm");
+if(form)form.addEventListener("submit",e=>{
+e.preventDefault();
+document.getElementById("formMessage").textContent="Preview created. Nothing has been sent. Contact and submission delivery will be configured before this form goes live.";
+});
+}
+document.querySelectorAll("#menu button").forEach(b=>b.addEventListener("click",()=>show(b.dataset.page)));
+document.getElementById("year").textContent=new Date().getFullYear();
+show("dashboard");
+</script>
+</body>
+</html>

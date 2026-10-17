@@ -2191,10 +2191,35 @@ schoolLogo: schoolLogo
           };
 
           try {
-            localStorage.setItem(
-              "ifekaSchoolSettings",
-              JSON.stringify(settings)
-            );
+            const { data: schoolId, error: idError } =
+  await db.rpc("get_my_school_id");
+
+if (idError) throw idError;
+
+if (!schoolId) {
+  throw new Error("No school is linked to this account.");
+}
+
+const { error: updateError } = await db
+  .from("schools")
+  .update({
+    school_name: settings.schoolName,
+    school_address: settings.schoolAddress,
+    school_phone: settings.schoolPhone,
+    school_email: settings.schoolEmail,
+    principal: settings.principal,
+    academic_session: settings.academicSession,
+    current_term: settings.currentTerm,
+    school_logo: settings.schoolLogo
+  })
+  .eq("id", schoolId);
+
+if (updateError) throw updateError;
+
+localStorage.setItem(
+  "ifekaSchoolSettings",
+  JSON.stringify(settings)
+);
 
             if (message) {
               message.innerHTML = `

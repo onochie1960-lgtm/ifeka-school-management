@@ -2121,7 +2121,47 @@ ${
       const saveBtn = $("saveSettingsBtn");
       const printBtn = $("printSettingsBtn");
       const message = $("settingsMessage");
+// Load school settings from Supabase
+(async function loadSchoolSettingsFromSupabase() {
+  try {
+    const { data: schoolId, error: idError } =
+      await db.rpc("get_my_school_id");
 
+    if (idError) throw idError;
+
+    if (!schoolId) {
+      throw new Error("No school is linked to this account.");
+    }
+
+    const { data: school, error: schoolError } = await db
+      .from("schools")
+      .select("*")
+      .eq("id", schoolId)
+      .single();
+
+    if (schoolError) throw schoolError;
+
+    $("schoolSettingName").value = school.school_name || "";
+    $("schoolSettingAddress").value = school.school_address || "";
+    $("schoolSettingPhone").value = school.school_phone || "";
+    $("schoolSettingEmail").value = school.school_email || "";
+    $("schoolSettingPrincipal").value = school.principal || "";
+    $("schoolSettingSession").value = school.academic_session || "";
+    $("schoolSettingTerm").value = school.current_term || "";
+
+    saved.schoolLogo = school.school_logo || "";
+
+    if (message) {
+      message.innerHTML =
+        '<span style="color:green;">School settings loaded from Supabase.</span>';
+    }
+  } catch (error) {
+    if (message) {
+      message.innerHTML =
+        `<span style="color:#b00020;">Unable to load settings: ${esc(error.message)}</span>`;
+    }
+  }
+})();
       if (saveBtn) {
         saveBtn.addEventListener("click", async () => {
            

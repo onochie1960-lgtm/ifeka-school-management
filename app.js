@@ -472,6 +472,18 @@ async function init() {
   const loginForm = document.getElementById("loginForm");
   const loginEmail = document.getElementById("loginEmail");
   const loginPassword = document.getElementById("loginPassword");
+   const toggleLoginPassword = document.getElementById("toggleLoginPassword");
+
+if (toggleLoginPassword) {
+  toggleLoginPassword.addEventListener("click", function () {
+    const isHidden = loginPassword.type === "password";
+
+    loginPassword.type = isHidden ? "text" : "password";
+    toggleLoginPassword.textContent = isHidden
+      ? "🙈 Hide Password"
+      : "👁️ Show Password";
+  });
+}
   const authMessage = document.getElementById("authMessage");
 
   const resetForm = document.getElementById("resetPasswordForm");

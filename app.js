@@ -659,7 +659,50 @@ if (page === "schools") {
   document.getElementById("pageTitle").textContent = "Schools Management";
   document.getElementById("moduleInfoTitle").textContent = "Schools Management";
   document.getElementById("moduleInfoText").innerHTML =
-    "<p>Schools Management page is ready for setup.</p>";
+    document.getElementById("moduleInfoText").innerHTML = `
+  <div style="margin-top:15px;">
+    <button id="loadSchoolsBtn" class="btn" type="button">Refresh Schools</button>
+    <button id="addSchoolBtn" class="btn" type="button">+ Add School</button>
+
+    <p id="schoolsStatus">Loading schools...</p>
+
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>School Name</th>
+            <th>Address</th>
+            <th>Phone</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody id="schoolsTableBody"></tbody>
+      </table>
+    </div>
+
+    <div id="addSchoolForm" hidden style="margin-top:20px;padding:15px;border:1px solid #ddd;">
+      <h3>Add New School</h3>
+      <form id="newSchoolForm">
+        <p><input name="school_name" placeholder="School Name" required></p>
+        <p><input name="school_address" placeholder="School Address"></p>
+        <p><input name="school_phone" placeholder="School Phone"></p>
+        <p><input name="school_email" type="email" placeholder="School Email"></p>
+        <p><input name="principal" placeholder="Principal"></p>
+        <p><input name="academic_session" placeholder="Academic Session, e.g. 2026/2027"></p>
+        <p>
+          <select name="current_term">
+            <option>First Term</option>
+            <option>Second Term</option>
+            <option>Third Term</option>
+          </select>
+        </p>
+        <button class="btn" type="submit">Save School</button>
+        <button class="btn" id="cancelAddSchoolBtn" type="button">Cancel</button>
+      </form>
+    </div>
+  </div>
+`;
 
   return;
 }

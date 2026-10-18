@@ -500,6 +500,11 @@ async function init() {
   main.style.display = "";
 
   await checkSuperAdmin();
+     const schoolsNavBtn = document.getElementById("schoolsNavBtn");
+
+if (schoolsNavBtn) {
+  schoolsNavBtn.hidden = !isSuperAdmin;
+}
 
   console.log("Super Admin:", isSuperAdmin);
 

@@ -645,7 +645,25 @@ function setupNavigation() {
         return;
       }
 
-      // Database/table modules
+      // Schools Management
+if (page === "schools") {
+  if (!isSuperAdmin) {
+    setStatus("Access denied: Super Admin only.");
+    return;
+  }
+
+  currentTable = null;
+  editingKey = null;
+  showOnly("moduleInfo");
+
+  document.getElementById("pageTitle").textContent = "Schools Management";
+  document.getElementById("moduleInfoTitle").textContent = "Schools Management";
+  document.getElementById("moduleInfoText").innerHTML =
+    "<p>Schools Management page is ready for setup.</p>";
+
+  return;
+}
+       // Database/table modules
       if (MODULE_MAP && MODULE_MAP[page]) {
         console.log(
           "Opening table:",

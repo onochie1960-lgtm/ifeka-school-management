@@ -188,25 +188,37 @@ function esc(value) {
   });
 }
 async function checkSuperAdmin() {
-  if (!db) {
-    isSuperAdmin = false;
-    return false;
-  }
+  isSuperAdmin = false;
+
+  if (!db) return false;
 
   try {
-    const { data, error } = await db.rpc("is_super_admin");
+    const { data: sessionData, error: sessionError } =
+      await db.auth.getSession();
 
-    if (error) {
-      console.error("Super Admin check failed:", error);
-      isSuperAdmin = false;
+    if (sessionError || !sessionData.session) {
+      console.error("No authenticated session for role check.");
       return false;
     }
 
-    isSuperAdmin = data === true;
+    const { data, error } = await db
+      .from("school_users")
+      .select("role")
+      .eq("user_id", sessionData.session.user.id)
+      .eq("role", "super_admin")
+      .maybeSingle();
+
+    if (error) {
+      console.error("Super Admin check failed:", error);
+      return false;
+    }
+
+    isSuperAdmin = data?.role === "super_admin";
+    console.log("Super Admin:", isSuperAdmin);
+
     return isSuperAdmin;
   } catch (error) {
     console.error("Super Admin check error:", error);
-    isSuperAdmin = false;
     return false;
   }
 }

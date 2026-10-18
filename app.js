@@ -481,13 +481,18 @@ async function init() {
     main.style.display = "none";
   }
 
-  function showApp() {
-    authScreen.style.display = "none";
-    resetScreen.style.display = "none";
-    sidebar.style.display = "";
-    main.style.display = "";
-    showDashboard();
-  }
+  async function showApp() {
+  authScreen.style.display = "none";
+  resetScreen.style.display = "none";
+  sidebar.style.display = "";
+  main.style.display = "";
+
+  await checkSuperAdmin();
+
+  console.log("Super Admin:", isSuperAdmin);
+
+  showDashboard();
+}
 
   if (!db) {
     showLogin();

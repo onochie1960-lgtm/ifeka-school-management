@@ -703,7 +703,101 @@ if (page === "schools") {
     </div>
   </div>
 `;
+// Load and display all schools
+async function loadSchools() {
+  const status = document.getElementById("schoolsStatus");
+  const tbody = document.getElementById("schoolsTableBody");
 
+  status.textContent = "Loading schools...";
+  tbody.innerHTML = "";
+
+  try {
+    const { data, error } = await db
+      .from("schools")
+      .select("id, school_name, school_address, school_phone, school_email")
+      .order("id");
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      status.textContent = "No schools found.";
+      return;
+    }
+
+    data.forEach(function (school) {
+      const row = document.createElement("tr");
+
+      [
+        school.id,
+        school.school_name,
+        school.school_address,
+        school.school_phone,
+        school.school_email
+      ].forEach(function (value) {
+        const cell = document.createElement("td");
+        cell.textContent = value || "";
+        cell.style.padding = "8px";
+        row.appendChild(cell);
+      });
+
+      tbody.appendChild(row);
+    });
+
+    status.textContent = "Schools loaded: " + data.length;
+  } catch (error) {
+    console.error("Loading schools failed:", error);
+    status.textContent = "Could not load schools: " + error.message;
+  }
+}
+
+// Refresh Schools button
+document.getElementById("loadSchoolsBtn")
+  .addEventListener("click", loadSchools);
+
+// Add School button
+document.getElementById("addSchoolBtn")
+  .addEventListener("click", function () {
+    document.getElementById("addSchoolForm").hidden = false;
+  });
+
+// Cancel Add School
+document.getElementById("cancelAddSchoolBtn")
+  .addEventListener("click", function () {
+    document.getElementById("addSchoolForm").hidden = true;
+    document.getElementById("newSchoolForm").reset();
+  });
+
+// Save a new school
+document.getElementById("newSchoolForm")
+  .addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+    const status = document.getElementById("schoolsStatus");
+    const values = Object.fromEntries(new FormData(form).entries());
+
+    status.textContent = "Saving school...";
+
+    try {
+      const { error } = await db
+        .from("schools")
+        .insert([values]);
+
+      if (error) throw error;
+
+      status.textContent = "School added successfully.";
+      form.reset();
+      document.getElementById("addSchoolForm").hidden = true;
+
+      await loadSchools();
+    } catch (error) {
+      console.error("Saving school failed:", error);
+      status.textContent = "Could not save school: " + error.message;
+    }
+  });
+
+// Load schools when the page opens
+loadSchools();
   return;
 }
        // Database/table modules

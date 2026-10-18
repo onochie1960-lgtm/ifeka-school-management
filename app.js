@@ -187,7 +187,29 @@ function esc(value) {
     }[c];
   });
 }
+async function checkSuperAdmin() {
+  if (!db) {
+    isSuperAdmin = false;
+    return false;
+  }
 
+  try {
+    const { data, error } = await db.rpc("is_super_admin");
+
+    if (error) {
+      console.error("Super Admin check failed:", error);
+      isSuperAdmin = false;
+      return false;
+    }
+
+    isSuperAdmin = data === true;
+    return isSuperAdmin;
+  } catch (error) {
+    console.error("Super Admin check error:", error);
+    isSuperAdmin = false;
+    return false;
+  }
+}
 function getSchoolSettings() {
   let settings = {};
 

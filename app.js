@@ -167,7 +167,7 @@ let currentTable = null;
 let rows = [];
 let columns = [];
 let editingKey = null;
-
+let isSuperAdmin = false;
 /* =========================================================
    Helpers
    ========================================================= */

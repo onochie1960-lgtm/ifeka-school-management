@@ -3682,15 +3682,27 @@ if (currentTable === "students" && !data.student_id) {
   }
 
   const numbers = (studentIdsResult.data || [])
-    .map(row => String(row.student_id || "").match(/^STU(\d+)$/i))
-    .filter(match => match)
-    .map(match => Number(match[1]));
+  .map(row => String(row.student_id || "").trim().match(/^STU(\d+)$/i))
+  .filter(match => match)
+  .map(match => Number(match[1]));
 
-  const nextNumber = numbers.length
-    ? Math.max(...numbers) + 1
-    : 1;
+let nextNumber = numbers.length
+  ? Math.max(...numbers) + 1
+  : 1;
 
-  data.student_id = "STU" + String(nextNumber).padStart(3, "0");
+let newStudentId = "STU" + String(nextNumber).padStart(3, "0");
+
+while (
+  (studentIdsResult.data || []).some(
+    row => String(row.student_id || "").trim().toUpperCase() === newStudentId
+  )
+) {
+  nextNumber++;
+  newStudentId = "STU" + String(nextNumber).padStart(3, "0");
+}
+
+data.student_id = newStudentId;
+ 
 }
 // Automatically calculate Total for Results
 if (currentTable === "results") {

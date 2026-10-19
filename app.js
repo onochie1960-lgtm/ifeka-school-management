@@ -787,7 +787,14 @@ document.getElementById("newSchoolForm")
     const form = event.currentTarget;
     const status = document.getElementById("schoolsStatus");
     const values = Object.fromEntries(new FormData(form).entries());
+const demoStart = new Date();
+const demoExpiry = new Date(demoStart);
+demoExpiry.setDate(demoExpiry.getDate() + 14);
 
+values.demo_started_at = demoStart.toISOString();
+values.demo_expires_at = demoExpiry.toISOString();
+values.access_status = "active";
+values.payment_status = "pending";
     status.textContent = "Saving school...";
 
     try {

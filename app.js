@@ -3704,6 +3704,38 @@ while (
 data.student_id = newStudentId;
  
 }
+   // Automatically generate Teacher ID
+if (currentTable === "teachers" && !data.teacher_id) {
+  const teacherIdsResult = await db
+    .from("teachers")
+    .select("teacher_id");
+
+  if (teacherIdsResult.error) {
+    throw teacherIdsResult.error;
+  }
+
+  const numbers = (teacherIdsResult.data || [])
+    .map(row => String(row.teacher_id || "").trim().match(/^TEA(\d+)$/i))
+    .filter(match => match)
+    .map(match => Number(match[1]));
+
+  let nextNumber = numbers.length
+    ? Math.max(...numbers) + 1
+    : 1;
+
+  let newTeacherId = "TEA" + String(nextNumber).padStart(3, "0");
+
+  while (
+    (teacherIdsResult.data || []).some(
+      row => String(row.teacher_id || "").trim().toUpperCase() === newTeacherId
+    )
+  ) {
+    nextNumber++;
+    newTeacherId = "TEA" + String(nextNumber).padStart(3, "0");
+  }
+
+  data.teacher_id = newTeacherId;
+}
 // Automatically calculate Total for Results
 if (currentTable === "results") {
   const caScore = Number(data.ca_score || 0);

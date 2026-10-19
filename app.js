@@ -2798,9 +2798,19 @@ async function loadTable(table) {
 
   try {
     const result = await db
-      .from(table)
-      .select("*")
-      .limit(200);
+  .from(table)
+  .select("*")
+  .limit(200);
+
+if (table === "teachers") {
+  result.data?.sort((a, b) =>
+    String(a.teacher_id || "").localeCompare(
+      String(b.teacher_id || ""),
+      undefined,
+      { numeric: true, sensitivity: "base" }
+    )
+  );
+}
 console.log("Loading table:", table);
 console.log("Supabase result:", result);
     if (result.error) {

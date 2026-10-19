@@ -222,6 +222,107 @@ async function checkSuperAdmin() {
     return false;
   }
 }
+async function checkSchoolAccess() {
+  if (!db) {
+    return {
+      allowed: false,
+      message: "Database connection is unavailable."
+    };
+  }
+
+  // Super Admin must always retain access.
+  if (isSuperAdmin) {
+    return { allowed: true };
+  }
+
+  try {
+    const { data: sessionData, error: sessionError } =
+      await db.auth.getSession();
+
+    if (sessionError || !sessionData.session) {
+      return {
+        allowed: false,
+        message: "Please sign in again."
+      };
+    }
+
+    const userId = sessionData.session.user.id;
+
+    const { data: userSchool, error: userError } = await db
+      .from("school_users")
+      .select("school_id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (userError) throw userError;
+
+    if (!userSchool) {
+      return {
+        allowed: false,
+        message: "No school is linked to this account."
+      };
+    }
+
+    const { data: school, error: schoolError } = await db
+      .from("schools")
+      .select(
+        "access_status, demo_started_at, demo_expires_at, payment_status, subscription_expires_at"
+      )
+      .eq("id", userSchool.school_id)
+      .single();
+
+    if (schoolError) throw schoolError;
+
+    if (school.access_status === "suspended") {
+      return {
+        allowed: false,
+        message: "This school's access has been suspended. Please contact the administrator."
+      };
+    }
+
+    const now = new Date();
+
+    // Allow a valid paid subscription.
+    if (
+      school.payment_status === "paid" &&
+      school.subscription_expires_at &&
+      new Date(school.subscription_expires_at) > now &&
+      school.access_status === "active"
+    ) {
+      return { allowed: true };
+    }
+
+    // Allow a demo only while its expiry date is in the future.
+    if (
+      school.demo_expires_at &&
+      new Date(school.demo_expires_at) > now &&
+      school.access_status === "active"
+    ) {
+      return { allowed: true };
+    }
+
+    // Preserve access for existing schools without subscription dates.
+    if (
+      !school.demo_expires_at &&
+      !school.subscription_expires_at &&
+      !school.payment_status
+    ) {
+      return { allowed: true };
+    }
+
+    return {
+      allowed: false,
+      message: "Your free demo has expired. Please contact Ifeka School Management to activate your subscription."
+    };
+  } catch (error) {
+    console.error("School access check failed:", error);
+
+    return {
+      allowed: false,
+      message: "Unable to verify school access. Please try again."
+    };
+  }
+}
 function getSchoolSettings() {
   let settings = {};
 
@@ -506,17 +607,26 @@ if (toggleLoginPassword) {
   }
 
   async function showApp() {
+  await checkSuperAdmin();
+
+  const access = await checkSchoolAccess();
+
+  if (!access.allowed) {
+    showLogin();
+    authMessage.textContent = access.message;
+    return;
+  }
+
   authScreen.style.display = "none";
   resetScreen.style.display = "none";
   sidebar.style.display = "";
   main.style.display = "";
 
-  await checkSuperAdmin();
-     const schoolsNavBtn = document.getElementById("schoolsNavBtn");
+  const schoolsNavBtn = document.getElementById("schoolsNavBtn");
 
-if (schoolsNavBtn) {
-  schoolsNavBtn.hidden = !isSuperAdmin;
-}
+  if (schoolsNavBtn) {
+    schoolsNavBtn.hidden = !isSuperAdmin;
+  }
 
   console.log("Super Admin:", isSuperAdmin);
 

@@ -247,7 +247,11 @@ tr:hover td {
 dialog {
   border: 0;
   border-radius: 14px;
-  width: min(620px, 92vw);
+  width: 95vw;
+max-width: 95vw;
+max-height: 85vh;
+overflow-y: auto;
+box-sizing: border-box;
   padding: 0;
   box-shadow: 0 20px 70px #0003;
 }

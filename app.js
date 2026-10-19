@@ -3704,7 +3704,8 @@ while (
 data.student_id = newStudentId;
  
 }
-   // Automatically generate Teacher ID
+   
+// Automatically generate Teacher ID serially
 if (currentTable === "teachers" && !data.teacher_id) {
   const teacherIdsResult = await db
     .from("teachers")
@@ -3715,23 +3716,31 @@ if (currentTable === "teachers" && !data.teacher_id) {
   }
 
   const numbers = (teacherIdsResult.data || [])
-    .map(row => String(row.teacher_id || "").trim().match(/^TEA(\d+)$/i))
-    .filter(match => match)
-    .map(match => Number(match[1]));
+    .map(row => {
+      const match = String(row.teacher_id || "")
+        .trim()
+        .match(/^TEA(\d+)$/i);
+      return match ? Number(match[1]) : null;
+    })
+    .filter(number => number !== null);
 
   let nextNumber = numbers.length
     ? Math.max(...numbers) + 1
     : 1;
 
-  let newTeacherId = "TEA" + String(nextNumber).padStart(3, "0");
+  let newTeacherId =
+    "TEA" + String(nextNumber).padStart(3, "0");
 
   while (
     (teacherIdsResult.data || []).some(
-      row => String(row.teacher_id || "").trim().toUpperCase() === newTeacherId
+      row =>
+        String(row.teacher_id || "").trim().toUpperCase()
+        === newTeacherId
     )
   ) {
     nextNumber++;
-    newTeacherId = "TEA" + String(nextNumber).padStart(3, "0");
+    newTeacherId =
+      "TEA" + String(nextNumber).padStart(3, "0");
   }
 
   data.teacher_id = newTeacherId;

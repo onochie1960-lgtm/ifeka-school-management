@@ -797,6 +797,8 @@ if (page === "schools") {
             <th>Address</th>
             <th>Phone</th>
             <th>Email</th>
+            <th>Payment Status</th>
+<th>Actions</th>
           </tr>
         </thead>
         <tbody id="schoolsTableBody"></tbody>

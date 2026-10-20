@@ -920,7 +920,10 @@ activateBtn.addEventListener("click", async function () {
 actionCell.appendChild(activateBtn);
 row.appendChild(actionCell);
 
-    status.textContent = "Schools loaded: " + data.length;
+tbody.appendChild(row);
+});
+
+status.textContent = "Schools loaded: " + data.length;
   } catch (error) {
     console.error("Loading schools failed:", error);
     status.textContent = "Could not load schools: " + error.message;

@@ -271,8 +271,31 @@ html=`<h2>Request a Demo</h2><p class="muted">Interested in Ifeka School Managem
 content.innerHTML=html;
 const form=document.getElementById("requestForm");
 if(form)form.addEventListener("submit",e=>{
-e.preventDefault();
-document.getElementById("formMessage").textContent="Preview created. Nothing has been sent. Contact and submission delivery will be configured before this form goes live.";
+ e.preventDefault();
+
+ const data = new FormData(form);
+
+ const message = [
+   "IFEKA SCHOOL MANAGEMENT - DEMO REQUEST",
+   "",
+   "School name: " + data.get("school"),
+   "Contact person: " + data.get("name"),
+   "Email or phone: " + data.get("contact"),
+   "School type: " + data.get("type"),
+   "Package of interest: " + data.get("package"),
+   "",
+   "I am interested in the 14-day free trial."
+ ].join("\n");
+
+ const whatsappNumber = "2347061010933";
+
+ document.getElementById("formMessage").textContent =
+   "WhatsApp is opening. Review your enquiry and press Send.";
+
+ window.open(
+   "https://wa.me/" + whatsappNumber + "?text=" + encodeURIComponent(message),
+   "_blank"
+ );
 });
 }
 document.querySelectorAll("#menu button").forEach(b=>b.addEventListener("click",()=>show(b.dataset.page)));

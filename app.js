@@ -838,7 +838,7 @@ async function loadSchools() {
   try {
     const { data, error } = await db
       .from("schools")
-      .select("id, school_name, school_address, school_phone, school_email")
+      .select("id, school_name, school_address, school_phone, school_email, payment_status, subscription_plan, subscription_expires_at, access_status, amount_paid")
       .order("id");
 
     if (error) throw error;
@@ -852,20 +852,73 @@ async function loadSchools() {
       const row = document.createElement("tr");
 
       [
-        school.id,
-        school.school_name,
-        school.school_address,
-        school.school_phone,
-        school.school_email
-      ].forEach(function (value) {
-        const cell = document.createElement("td");
-        cell.textContent = value || "";
-        cell.style.padding = "8px";
-        row.appendChild(cell);
-      });
+  school.id,
+  school.school_name,
+  school.school_address,
+  school.school_phone,
+  school.school_email,
+  school.payment_status || "pending"
+].forEach(function (value) {
+  const cell = document.createElement("td");
+  cell.textContent = value || "";
+  cell.style.padding = "8px";
+  row.appendChild(cell);
+});
 
-      tbody.appendChild(row);
-    });
+// Subscription action
+const actionCell = document.createElement("td");
+actionCell.style.padding = "8px";
+
+const activateBtn = document.createElement("button");
+activateBtn.textContent = "Activate Subscription";
+activateBtn.className = "btn";
+
+activateBtn.addEventListener("click", async function () {
+  const plan = prompt(
+    "Enter subscription plan: Basic, Mid-Level, or Premium"
+  );
+
+  if (!plan) return;
+
+  const validPlans = ["Basic", "Mid-Level", "Premium"];
+
+  if (!validPlans.includes(plan)) {
+    alert("Please enter Basic, Mid-Level, or Premium exactly.");
+    return;
+  }
+
+  const amount = {
+    "Basic": 47000,
+    "Mid-Level": 65000,
+    "Premium": 130000
+  }[plan];
+
+  const months = prompt(
+    "Enter subscription duration in months:"
+  );
+
+  if (!months || !Number.isInteger(Number(months)) ||
+      Number(months) < 1) {
+    alert("Enter a valid number of months.");
+    return;
+  }
+
+  const confirmActivation = confirm(
+    "Activate " + plan + " for " + school.school_name +
+    " for ₦" + amount.toLocaleString() +
+    " per term? Confirm only after verifying payment."
+  );
+
+  if (!confirmActivation) return;
+
+  alert(
+    "Payment verification and secure activation must be implemented " +
+    "before this button can activate a subscription."
+  );
+});
+
+actionCell.appendChild(activateBtn);
+row.appendChild(actionCell);
 
     status.textContent = "Schools loaded: " + data.length;
   } catch (error) {

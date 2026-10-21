@@ -969,6 +969,111 @@ activateBtn.addEventListener("click", async function () {
 });
 
 actionCell.appendChild(activateBtn);
+       // Super Admin: confirm bank transfer and activate subscription
+if (isSuperAdmin) {
+  const confirmPaymentBtn = document.createElement("button");
+
+  confirmPaymentBtn.textContent = "Confirm Bank Transfer";
+  confirmPaymentBtn.className = "btn";
+  confirmPaymentBtn.style.marginTop = "8px";
+  confirmPaymentBtn.style.marginLeft = "5px";
+
+  confirmPaymentBtn.addEventListener("click", async function () {
+    const plans = {
+      "Basic": { key: "basic", amount: 47000 },
+      "Mid-Level": { key: "mid_level", amount: 65000 },
+      "Premium": { key: "premium", amount: 130000 }
+    };
+
+    const planName = prompt(
+      "Select the plan paid for:\nBasic\nMid-Level\nPremium"
+    );
+
+    if (!planName) return;
+
+    const selectedPlan = plans[planName.trim()];
+
+    if (!selectedPlan) {
+      alert("Enter Basic, Mid-Level, or Premium exactly.");
+      return;
+    }
+
+    const reference = prompt(
+      "Enter the UBA bank transfer reference for " +
+      school.school_name + ":"
+    );
+
+    if (!reference || reference.trim().length < 4) {
+      alert("Enter a valid bank transfer reference.");
+      return;
+    }
+
+    const confirmed = confirm(
+      "IMPORTANT: Verify the transfer in your bank account first.\n\n" +
+      "School: " + school.school_name + "\n" +
+      "Plan: " + planName + "\n" +
+      "Amount: ₦" + selectedPlan.amount.toLocaleString() + "\n" +
+      "Reference: " + reference.trim() + "\n" +
+      "Duration: 98 days\n\n" +
+      "Have you confirmed that the money was received?"
+    );
+
+    if (!confirmed) return;
+
+    confirmPaymentBtn.disabled = true;
+    confirmPaymentBtn.textContent = "Activating...";
+
+    try {
+      const { data, error } = await db.functions.invoke(
+        "school-subscription",
+        {
+          body: {
+            action: "activate_manual",
+            school_id: Number(school.id),
+            plan: selectedPlan.key,
+            reference: reference.trim(),
+            confirmed_received: true
+          }
+        }
+      );
+
+      if (error) throw error;
+
+      if (!data || !data.success) {
+        throw new Error(
+          data?.error || "Subscription activation failed."
+        );
+      }
+
+      alert(
+        "Subscription activation successful!\n\n" +
+        "School: " + school.school_name + "\n" +
+        "Plan: " + planName + "\n" +
+        "Amount: ₦" + selectedPlan.amount.toLocaleString() + "\n" +
+        "Expiry: " +
+        (data.subscription_expires_at
+          ? new Date(data.subscription_expires_at).toLocaleString()
+          : "Check the school record") +
+        "\n\nReference: " + reference.trim()
+      );
+
+      await loadSchools();
+
+    } catch (error) {
+      console.error("Subscription activation failed:", error);
+
+      alert(
+        "Activation failed.\n\n" +
+        (error?.message || "Please try again.")
+      );
+    } finally {
+      confirmPaymentBtn.disabled = false;
+      confirmPaymentBtn.textContent = "Confirm Bank Transfer";
+    }
+  });
+
+  actionCell.appendChild(confirmPaymentBtn);
+}
 row.appendChild(actionCell);
 
 tbody.appendChild(row);

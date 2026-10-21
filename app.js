@@ -874,47 +874,86 @@ activateBtn.textContent = "Activate Subscription";
 activateBtn.className = "btn";
 
 activateBtn.addEventListener("click", async function () {
-  const plan = prompt(
-    "Enter subscription plan: Basic, Mid-Level, or Premium"
+  const plans = {
+    "Basic": { key: "basic", amount: 47000 },
+    "Mid-Level": { key: "mid_level", amount: 65000 },
+    "Premium": { key: "premium", amount: 130000 }
+  };
+
+  const planName = prompt(
+    "Choose subscription plan: Basic, Mid-Level, or Premium"
   );
 
-  if (!plan) return;
+  if (!planName) return;
 
-  const validPlans = ["Basic", "Mid-Level", "Premium"];
+  const selectedPlan = plans[planName.trim()];
 
-  if (!validPlans.includes(plan)) {
+  if (!selectedPlan) {
     alert("Please enter Basic, Mid-Level, or Premium exactly.");
     return;
   }
 
-  const amount = {
-    "Basic": 47000,
-    "Mid-Level": 65000,
-    "Premium": 130000
-  }[plan];
+  const schoolId = Number(school.id);
 
-  const months = prompt(
-    "Enter subscription duration in months:"
-  );
-
-  if (!months || !Number.isInteger(Number(months)) ||
-      Number(months) < 1) {
-    alert("Enter a valid number of months.");
+  if (!Number.isSafeInteger(schoolId) || schoolId <= 0) {
+    alert("Invalid school ID. Please refresh Schools Management.");
     return;
   }
 
-  const confirmActivation = confirm(
-    "Activate " + plan + " for " + school.school_name +
-    " for ₦" + amount.toLocaleString() +
-    " per term? Confirm only after verifying payment."
+  const confirmed = confirm(
+    "Start " + planName + " subscription for " +
+    school.school_name + "?\n\n" +
+    "Amount: ₦" + selectedPlan.amount.toLocaleString() +
+    "\nDuration: 4 months"
   );
 
-  if (!confirmActivation) return;
+  if (!confirmed) return;
 
-  alert(
-    "Payment verification and secure activation must be implemented " +
-    "before this button can activate a subscription."
-  );
+  try {
+    activateBtn.disabled = true;
+    activateBtn.textContent = "Connecting to Paystack...";
+
+    const { data: result, error } = await db.functions.invoke(
+      "school-subscription",
+      {
+        body: {
+          action: "initialize",
+          school_id: schoolId,
+          plan: selectedPlan.key,
+          callback_url: window.location.origin +
+            window.location.pathname +
+            "?payment=school_subscription"
+        }
+      }
+    );
+
+    if (error) {
+      throw new Error(
+        result?.error ||
+        error.message ||
+        "Could not connect to the payment service."
+      );
+    }
+
+    if (!result || !result.authorization_url) {
+      throw new Error(
+        result?.error || "Paystack did not return a payment link."
+      );
+    }
+
+    window.location.href = result.authorization_url;
+
+  } catch (error) {
+    console.error("Subscription initialization failed:", error);
+
+    alert(
+      "Could not start payment.\n\n" +
+      (error.message || "Please try again.")
+    );
+
+    activateBtn.disabled = false;
+    activateBtn.textContent = "Activate Subscription";
+  }
 });
 
 actionCell.appendChild(activateBtn);

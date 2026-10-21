@@ -901,56 +901,68 @@ activateBtn.addEventListener("click", async function () {
   }
 
   const confirmed = confirm(
-    "Start " + planName + " subscription for " +
+    "Request " + planName + " subscription for " +
     school.school_name + "?\n\n" +
-    "Amount: ₦" + selectedPlan.amount.toLocaleString() +
-    "\nDuration: 4 months"
+    "Amount: ₦" + selectedPlan.amount.toLocaleString() + "\n" +
+    "Duration: 98 days\n\n" +
+    "You will receive bank-transfer instructions."
   );
 
   if (!confirmed) return;
 
-  try {
-    activateBtn.disabled = true;
-    activateBtn.textContent = "Connecting to Paystack...";
+  activateBtn.disabled = true;
+  activateBtn.textContent = "Loading payment details...";
 
-    const { data: result, error } = await db.functions.invoke(
+  try {
+    const { data: sessionData, error: sessionError } =
+      await db.auth.getSession();
+
+    if (sessionError) throw sessionError;
+
+    const token = sessionData?.session?.access_token;
+
+    if (!token) {
+      throw new Error("Please sign in again.");
+    }
+
+    const { data, error } = await db.functions.invoke(
       "school-subscription",
       {
         body: {
-          action: "initialize",
+          action: "manual_details",
           school_id: schoolId,
-          plan: selectedPlan.key,
-          callback_url: window.location.origin +
-            window.location.pathname +
-            "?payment=school_subscription"
+          plan: selectedPlan.key
         }
       }
     );
 
-    if (error) {
-      throw new Error(
-        result?.error ||
-        error.message ||
-        "Could not connect to the payment service."
-      );
+    if (error) throw error;
+    if (!data || !data.success) {
+      throw new Error(data?.error || "Could not load bank details.");
     }
 
-    if (!result || !result.authorization_url) {
-      throw new Error(
-        result?.error || "Paystack did not return a payment link."
-      );
-    }
-
-    window.location.href = result.authorization_url;
-
-  } catch (error) {
-    console.error("Subscription initialization failed:", error);
+    const bank = data.bank_details;
 
     alert(
-      "Could not start payment.\n\n" +
-      (error.message || "Please try again.")
+      "UBA BANK TRANSFER\n\n" +
+      "School: " + data.school_name + "\n" +
+      "Plan: " + planName + "\n" +
+      "Amount: ₦" + Number(data.amount).toLocaleString() + "\n\n" +
+      "Bank: " + bank.bank_name + "\n" +
+      "Account Number: " + bank.account_number + "\n" +
+      "Account Name: " + bank.account_name + "\n\n" +
+      "Duration: 98 days\n\n" +
+      "After transferring, send your receipt or reference " +
+      "to the Ifeka Super Admin. Your subscription will " +
+      "be activated after the transfer is verified."
     );
-
+  } catch (error) {
+    console.error("Bank transfer instructions failed:", error);
+    alert(
+      "Could not load bank details.\n\n" +
+      (error?.message || "Please try again.")
+    );
+  } finally {
     activateBtn.disabled = false;
     activateBtn.textContent = "Activate Subscription";
   }

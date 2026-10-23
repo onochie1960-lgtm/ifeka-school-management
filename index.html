@@ -49,6 +49,70 @@
     <p id="authMessage" role="status"></p>
   </form>
 </section><!-- PASSWORD RESET SCREEN -->
+  <!-- SCHOOL REGISTRATION -->
+<div id="registerSection" hidden style="margin-top:20px;">
+  <h3>Register Your School</h3>
+  <p>Create your school account and start your 14-day free trial.</p>
+
+  <form id="registerForm">
+    <label for="registerSchoolName">School Name</label>
+    <input
+      type="text"
+      id="registerSchoolName"
+      required
+      placeholder="Enter your school name"
+      style="display:block;width:100%;padding:12px;margin:8px 0;"
+    >
+
+    <label for="registerEmail">Email Address</label>
+    <input
+      type="email"
+      id="registerEmail"
+      required
+      autocomplete="email"
+      placeholder="Enter your email"
+      style="display:block;width:100%;padding:12px;margin:8px 0;"
+    >
+
+    <label for="registerPassword">Password</label>
+    <input
+      type="password"
+      id="registerPassword"
+      required
+      minlength="8"
+      autocomplete="new-password"
+      placeholder="At least 8 characters"
+      style="display:block;width:100%;padding:12px;margin:8px 0;"
+    >
+
+    <label for="registerPasswordConfirm">Confirm Password</label>
+    <input
+      type="password"
+      id="registerPasswordConfirm"
+      required
+      minlength="8"
+      autocomplete="new-password"
+      placeholder="Confirm your password"
+      style="display:block;width:100%;padding:12px;margin:8px 0;"
+    >
+
+    <button
+      id="registerSubmitBtn"
+      type="submit"
+      style="width:100%;padding:12px;margin-top:10px;"
+    >Register School</button>
+
+    <p id="registerMessage" role="status"></p>
+  </form>
+
+  <button id="backToLoginBtn" type="button" style="padding:10px;">
+    Back to Sign In
+  </button>
+</div>
+
+<button id="showRegisterBtn" type="button" style="margin-top:12px;padding:10px;">
+  Register Your School — Free 14-Day Trial
+</button>
 <section id="resetPasswordScreen"
          style="display:none; padding:30px; max-width:420px; margin:50px auto;">
 

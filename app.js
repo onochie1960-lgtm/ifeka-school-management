@@ -598,7 +598,103 @@ if (toggleLoginPassword) {
     sidebar.style.display = "none";
     main.style.display = "none";
   }
+// =========================================================
+// SCHOOL REGISTRATION — AUTOMATIC 14-DAY FREE TRIAL
+// Uses the existing Supabase signup trigger.
+// =========================================================
 
+const registerForm = document.getElementById("registerForm");
+const showRegisterBtn = document.getElementById("showRegisterBtn");
+const registerSection = document.getElementById("registerSection");
+const backToLoginBtn = document.getElementById("backToLoginBtn");
+const registerMessage = document.getElementById("registerMessage");
+
+if (showRegisterBtn && registerSection) {
+  showRegisterBtn.addEventListener("click", function () {
+    registerSection.hidden = false;
+    showRegisterBtn.hidden = true;
+    if (registerMessage) registerMessage.textContent = "";
+  });
+}
+
+if (backToLoginBtn && registerSection) {
+  backToLoginBtn.addEventListener("click", function () {
+    registerSection.hidden = true;
+    if (showRegisterBtn) showRegisterBtn.hidden = false;
+    if (registerMessage) registerMessage.textContent = "";
+  });
+}
+
+if (registerForm) {
+  registerForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const schoolName =
+      document.getElementById("registerSchoolName").value.trim();
+    const email =
+      document.getElementById("registerEmail").value.trim();
+    const password =
+      document.getElementById("registerPassword").value;
+    const confirmPassword =
+      document.getElementById("registerPasswordConfirm").value;
+    const submitButton =
+      document.getElementById("registerSubmitBtn");
+
+    if (!schoolName || !email || !password) {
+      registerMessage.textContent =
+        "Please complete all required fields.";
+      return;
+    }
+
+    if (password.length < 8) {
+      registerMessage.textContent =
+        "Your password must contain at least 8 characters.";
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      registerMessage.textContent =
+        "Your passwords do not match.";
+      return;
+    }
+
+    if (!db || !db.auth) {
+      registerMessage.textContent =
+        "The registration service is unavailable. Please refresh and try again.";
+      return;
+    }
+
+    if (submitButton) submitButton.disabled = true;
+    registerMessage.textContent = "Creating your school account...";
+
+    try {
+      const { data, error } = await db.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            school_name: schoolName
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      registerMessage.textContent = data.session
+        ? "Your account has been created. Your school registration is being completed. Please sign in."
+        : "Registration submitted. Please check your email to confirm your account before signing in.";
+
+      registerForm.reset();
+    } catch (error) {
+      console.error("School registration error:", error);
+      registerMessage.textContent =
+        error.message ||
+        "Registration failed. Please check your details and try again.";
+    } finally {
+      if (submitButton) submitButton.disabled = false;
+    }
+  });
+}
   function showReset() {
     authScreen.style.display = "none";
     resetScreen.style.display = "block";

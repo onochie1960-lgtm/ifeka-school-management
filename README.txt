@@ -29,4 +29,6 @@ The next development stage is to add:
 - role-based permissions
 - dashboard charts and school settings
 
+Configuration deployment check.
+
 The generic editor is deliberately conservative because some tables are empty and their exact column constraints should be configured before writing data into them.

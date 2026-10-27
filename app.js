@@ -1518,7 +1518,145 @@ async function showDashboard(button) {
 
   await loadDashboard();
 }
+async function updateDashboardTrialStatus() {
+  const dashboard = document.getElementById("dashboard");
+  if (!dashboard || !db) return;
 
+  let card = document.getElementById("dashboardTrialStatus");
+
+  if (!card) {
+    card = document.createElement("section");
+    card.id = "dashboardTrialStatus";
+
+    card.style.cssText =
+      "margin:0 0 18px;padding:16px;border:1px solid #d8dee8;border-radius:12px;background:#f0f8f2;color:#172033;font-size:16px;";
+
+    dashboard.prepend(card);
+  }
+
+  if (isSuperAdmin) {
+    card.hidden = true;
+    return;
+  }
+
+  card.hidden = false;
+  card.textContent = "Checking your free trial status...";
+
+  try {
+    const { data: sessionData, error: sessionError } =
+      await db.auth.getSession();
+
+    if (sessionError) throw sessionError;
+
+    const userId = sessionData?.session?.user?.id;
+
+    if (!userId) {
+      card.textContent = "Please sign in to view your free trial.";
+      return;
+    }
+
+    const { data: userSchool, error: userError } = await db
+      .from("school_users")
+      .select("school_id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (userError) throw userError;
+
+    if (!userSchool?.school_id) {
+      card.textContent =
+        "Your school information could not be found.";
+      return;
+    }
+
+    const { data: school, error: schoolError } = await db
+      .from("schools")
+      .select(
+        "school_name, demo_expires_at, payment_status, subscription_expires_at, access_status"
+      )
+      .eq("id", userSchool.school_id)
+      .single();
+
+    if (schoolError) throw schoolError;
+
+    const schoolName = school.school_name || "Your school";
+
+    if (school.access_status === "suspended") {
+      card.textContent =
+        schoolName + ": Access is suspended. Please contact Ifeka.";
+      return;
+    }
+
+    const now = new Date();
+
+    if (
+      school.payment_status === "paid" &&
+      school.subscription_expires_at &&
+      new Date(school.subscription_expires_at) > now
+    ) {
+      card.textContent =
+        schoolName +
+        ": Your subscription is active until " +
+        new Date(
+          school.subscription_expires_at
+        ).toLocaleDateString() +
+        ".";
+
+      return;
+    }
+
+    if (!school.demo_expires_at) {
+      card.textContent =
+        schoolName +
+        ": No trial expiry date was found. Please contact Ifeka.";
+      return;
+    }
+
+    const expiryDate = new Date(school.demo_expires_at);
+
+    if (!Number.isFinite(expiryDate.getTime())) {
+      card.textContent =
+        "Your trial expiry date is invalid. Please contact Ifeka.";
+      return;
+    }
+
+    const remaining =
+      expiryDate.getTime() - now.getTime();
+
+    if (remaining <= 0) {
+      card.textContent =
+        schoolName +
+        ": Your 14-day free trial has expired. Please contact Ifeka to activate your subscription.";
+
+      card.style.background = "#fff1f0";
+      card.style.borderColor = "#e6a09a";
+    } else {
+      const days = Math.ceil(
+        remaining / (1000 * 60 * 60 * 24)
+      );
+
+      card.textContent =
+        schoolName +
+        ": " +
+        days +
+        (days === 1 ? " day" : " days") +
+        " remaining in your 14-day free trial. Expiry date: " +
+        expiryDate.toLocaleDateString() +
+        ".";
+
+      card.style.background =
+        days <= 3 ? "#fff8e6" : "#f0f8f2";
+
+      card.style.borderColor =
+        days <= 3 ? "#e6c36a" : "#a9d8b4";
+    }
+  } catch (error) {
+    console.error("Trial countdown error:", error);
+
+    card.textContent =
+      "Unable to load your trial status. Please refresh the page.";
+  }
+}
 async function loadDashboard() {
   if (!db) {
     setDashboardCount("studentCount", "—");
@@ -1528,7 +1666,7 @@ async function loadDashboard() {
     setStatus("Supabase is not connected.");
     return;
   }
-
+  await updateDashboardTrialStatus();
   setStatus("Loading school records...");
 
   const wanted = [

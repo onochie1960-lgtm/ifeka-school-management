@@ -557,6 +557,169 @@ function closeMobileMenu() {
 }
 
 /* =========================================================
+   School administrator manual subscription payment panel
+   ========================================================= */
+function ensureSchoolPaymentPanel() {
+  const dashboard = document.getElementById("dashboard");
+  if (!dashboard || isSuperAdmin) return;
+
+  let panel = document.getElementById("schoolManualPaymentPanel");
+
+  if (!panel) {
+    panel = document.createElement("section");
+    panel.id = "schoolManualPaymentPanel";
+    panel.style.cssText =
+      "margin:18px 0;padding:18px;border:1px solid #d8dee8;border-radius:12px;background:#fff;color:#172033;";
+
+    panel.innerHTML = `
+      <h2 style="margin:0 0 8px;font-size:20px;">
+        Subscription & Payment
+      </h2>
+
+      <p style="margin:0 0 14px;">
+        Choose a plan to view the UBA bank-transfer details.
+        Your subscription is activated only after the Ifeka Super Admin
+        verifies the payment.
+      </p>
+
+      <label for="schoolPaymentPlan"
+        style="display:block;margin-bottom:6px;font-weight:600;">
+        Subscription plan
+      </label>
+
+      <select id="schoolPaymentPlan"
+        style="display:block;width:100%;max-width:360px;padding:10px;margin-bottom:12px;border:1px solid #cbd5e1;border-radius:8px;">
+        <option value="">Choose a plan</option>
+        <option value="basic">Basic — ₦47,000 / 98 days</option>
+        <option value="mid_level">Mid-Level — ₦65,000 / 98 days</option>
+        <option value="premium">Premium — ₦130,000 / 98 days</option>
+      </select>
+
+      <button id="schoolGetBankDetailsBtn" class="btn" type="button">
+        View Bank Details
+      </button>
+
+      <div id="schoolPaymentDetails"
+        role="status" aria-live="polite"
+        style="margin-top:14px;white-space:pre-line;">
+      </div>
+    `;
+
+    dashboard.appendChild(panel);
+  }
+
+  const button = document.getElementById("schoolGetBankDetailsBtn");
+
+  if (!button || button.dataset.bound === "true") return;
+  button.dataset.bound = "true";
+
+  button.addEventListener("click", async function () {
+    const planSelect = document.getElementById("schoolPaymentPlan");
+    const output = document.getElementById("schoolPaymentDetails");
+
+    const plans = {
+      basic: { label: "Basic", amount: 47000 },
+      mid_level: { label: "Mid-Level", amount: 65000 },
+      premium: { label: "Premium", amount: 130000 }
+    };
+
+    const selected = plans[planSelect?.value];
+
+    if (!selected) {
+      output.textContent = "Please select a subscription plan first.";
+      return;
+    }
+
+    if (!db) {
+      output.textContent =
+        "The database connection is unavailable. Please refresh and try again.";
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent = "Loading bank details…";
+    output.textContent = "Retrieving bank-transfer details…";
+
+    try {
+      const { data: sessionData, error: sessionError } =
+        await db.auth.getSession();
+
+      if (sessionError) throw sessionError;
+
+      const user = sessionData?.session?.user;
+
+      if (!user) {
+        throw new Error("Your session has expired. Please sign in again.");
+      }
+
+      const { data: schoolUser, error: schoolUserError } = await db
+        .from("school_users")
+        .select("school_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (schoolUserError) throw schoolUserError;
+
+      const schoolId = Number(schoolUser?.school_id);
+
+      if (!Number.isSafeInteger(schoolId) || schoolId <= 0) {
+        throw new Error(
+          "No school is linked to this account. Please contact the Ifeka Super Admin."
+        );
+      }
+
+      const { data, error } = await db.functions.invoke(
+        "school-subscription",
+        {
+          body: {
+            action: "manual_details",
+            school_id: schoolId,
+            plan: planSelect.value
+          }
+        }
+      );
+
+      if (error) throw error;
+
+      if (!data?.success || !data?.bank_details) {
+        throw new Error(
+          data?.error || "Bank details could not be loaded. Please try again."
+        );
+      }
+
+      const bank = data.bank_details;
+
+      output.textContent =
+        "UBA BANK TRANSFER DETAILS\n" +
+        "School: " + (data.school_name || "Your school") + "\n" +
+        "Plan: " + selected.label + "\n" +
+        "Amount: ₦" +
+        Number(data.amount ?? selected.amount).toLocaleString("en-NG") +
+        "\n" +
+        "Duration: 98 days\n\n" +
+        "Bank: " + (bank.bank_name || "UBA") + "\n" +
+        "Account number: " + (bank.account_number || "Not provided") + "\n" +
+        "Account name: " + (bank.account_name || "Not provided") + "\n\n" +
+        "After making the transfer, send your payment receipt or transfer " +
+        "reference to the Ifeka Super Admin. Your subscription will remain " +
+        "pending until payment is verified and confirmed. Do not transfer " +
+        "if the account details above are incomplete; contact the Super Admin first.";
+
+    } catch (error) {
+      console.error("School payment details error:", error);
+
+      output.textContent =
+        "Could not load bank details. " +
+        (error?.message ||
+          "Please try again or contact the Ifeka Super Admin.");
+
+    } finally {
+      button.disabled = false;
+      button.textContent = "View Bank Details";
+    }
+  });
+}
+/* =========================================================
    Startup
    ========================================================= */
 
@@ -725,7 +888,7 @@ if (registerForm) {
   }
 
   console.log("Super Admin:", isSuperAdmin);
-
+ensureSchoolPaymentPanel();
   showDashboard();
 }
 
